@@ -23,7 +23,9 @@ namespace MVCVentas.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.VMUser != null ? 
-                          View(await _context.VMUser.ToListAsync()) :
+                          View(await _context.VMUser
+                          .Include(u => u.Categoria)
+                          .ToListAsync()) :
                           Problem("Entity set 'MVCVentasContext.VMUser'  is null.");
         }
 
@@ -36,6 +38,7 @@ namespace MVCVentas.Controllers
             }
 
             var vMUser = await _context.VMUser
+                .Include(u => u.Categoria)
                 .FirstOrDefaultAsync(m => m.Id_Usuario == id);
             if (vMUser == null)
             {
@@ -48,6 +51,7 @@ namespace MVCVentas.Controllers
         // GET: Users/Create
         public IActionResult Create()
         {
+            ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
             return View();
         }
 
@@ -64,6 +68,7 @@ namespace MVCVentas.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
             return View(vMUser);
         }
 
@@ -75,11 +80,16 @@ namespace MVCVentas.Controllers
                 return NotFound();
             }
 
-            var vMUser = await _context.VMUser.FindAsync(id);
+            var vMUser = await _context.VMUser
+                .Include(u => u.Categoria)
+                .FirstOrDefaultAsync(m => m.Id_Usuario == id);
+
             if (vMUser == null)
             {
                 return NotFound();
             }
+
+            ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
             return View(vMUser);
         }
 
@@ -115,6 +125,7 @@ namespace MVCVentas.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
             return View(vMUser);
         }
 
@@ -128,6 +139,7 @@ namespace MVCVentas.Controllers
 
             var vMUser = await _context.VMUser
                 .FirstOrDefaultAsync(m => m.Id_Usuario == id);
+
             if (vMUser == null)
             {
                 return NotFound();

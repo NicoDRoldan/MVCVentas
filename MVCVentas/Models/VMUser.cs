@@ -18,6 +18,6 @@ namespace MVCVentas.Models
         
         public int Id_Categoria { get; set; }
         [ForeignKey("Id_Categoria")]
-        public virtual VMCategory Categoria { get; set; }
+        public virtual VMCategory? Categoria { get; set; }
     }
 }
