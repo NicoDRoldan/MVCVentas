@@ -5,19 +5,14 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<br>
+<h2>Nuevo Usuario</h2>
 
-<h4>VMUser</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Id_Categoria" class="control-label"></label>
-                <select asp-for="Id_Categoria" class="form-control" asp-items="ViewBag.Categorias"></select>
-                <span asp-validation-for="Id_Categoria" class="text-danger"></span>
-            </div>
             <div class="form-group">
                 <label asp-for="Usuario" class="control-label"></label>
                 <input asp-for="Usuario" class="form-control" />
@@ -25,18 +20,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
+                <input asp-for="Password" type="password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Estado" /> @Html.DisplayNameFor(model => model.Estado)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="Fecha" class="control-label"></label>
-                <input asp-for="Fecha" class="form-control" />
-                <span asp-validation-for="Fecha" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Nombre" class="control-label"></label>
@@ -49,14 +34,19 @@
                 <span asp-validation-for="Apellido" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <label asp-for="Categoria" class="control-label"></label>
+                <select asp-for="Id_Categoria" class="form-control" asp-items="ViewBag.Categorias"></select>
+                <span asp-validation-for="Id_Categoria" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Crear Usuario" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Volver</a>
 </div>
 
 @section Scripts {

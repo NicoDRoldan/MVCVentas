@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MVCVentas.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MVCVentas.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -18,9 +22,10 @@ namespace MVCVentas.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> LogOut()
         {
-            return View();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login","Access");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

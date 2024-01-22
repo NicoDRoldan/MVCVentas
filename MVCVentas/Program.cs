@@ -1,8 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MVCVentas.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
 //using MVCVentas.Data;
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddDbContext<MVCVentasContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MVCVentasContext") ?? throw new InvalidOperationException("Connection string 'MVCVentasContext' not found.")));
 
@@ -11,6 +14,13 @@ builder.Services.AddDbContext<MVCVentasContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(option =>
+    {
+        option.LoginPath = "/Access/Login";
+        option.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+    });
 
 var app = builder.Build();
 
@@ -27,10 +37,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Access}/{action=Login}/{id?}");
 
 app.Run();

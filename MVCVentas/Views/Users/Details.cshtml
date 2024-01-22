@@ -12,7 +12,7 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Id_Categoria)
+            Categoría
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Categoria.Nombre)
@@ -24,19 +24,13 @@
             @Html.DisplayFor(model => model.Usuario)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Password)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Password)
-        </dd>
-        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Estado)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
+            @(Model.Estado ? "Activo" : "Desactivado")
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Fecha)
+            Fecha de Creación
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Fecha)
@@ -56,6 +50,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id_Usuario">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a class='btn btn-primary btn-sm' asp-action="Editar" asp-route-id="@Model?.Id_Usuario">Edit</a> |
+    <a asp-action="Index">Volver</a>
 </div>
