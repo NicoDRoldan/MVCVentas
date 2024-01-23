@@ -30,14 +30,12 @@
 </head>
 
 <body class="bg-gradient-primary">
+
     <form asp-controller="Access" asp-action="Login" method="post">
         <div class="container">
-
             <!-- Outer Row -->
             <div class="row justify-content-center">
-
                 <div class="col-xl-10 col-lg-12 col-md-9">
-
                     <div class="card o-hidden border-0 shadow-lg my-5">
                         <div class="card-body p-0">
                             <!-- Nested Row within Card Body -->
@@ -50,11 +48,13 @@
                                         <form class="user">
                                             <div class="form-group">
                                                 <input asp-for="User"
-                                                       placeholder="Ingresar Usuario">
+                                                       placeholder="Ingresar Usuario" style="width: 100%;">
+                                                <span asp-validation-for="User" class="text-danger"></span>
                                             </div>
                                             <div class="form-group">
-                                                <input type="password" asp-for="Password"
-                                                       placeholder="Contraseña">
+                                                <input type="password" asp-for="Password" 
+                                                       placeholder="Contraseña" style="width: 100%;">
+                                                <span asp-validation-for="Password" class="text-danger"></span>
                                             </div>
                                             <div class="form-group">
                                                 <div class="custom-control custom-checkbox small">
@@ -64,6 +64,7 @@
                                                     </label>
                                                 </div>
                                             </div>
+                                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                             <button type="submit" class="btn btn-primary btn-user btn-block">
                                                 Ingresar
                                             </button>
@@ -77,11 +78,8 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     </form>
 
