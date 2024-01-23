@@ -31,10 +31,13 @@ namespace MVCVentas.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(VMLogin modelLogin)
         {
-            var userDb = _context.VMUser
-                                .SingleOrDefault(u => u.Usuario == modelLogin.User);
+            var user = _context.VMUser
+                .Where(u => u.Usuario == modelLogin.User && u.Password == modelLogin.Password)
+                .SingleOrDefault();
 
+            if (user != null)
             {
+
                 List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.NameIdentifier, modelLogin.User),
@@ -54,9 +57,10 @@ namespace MVCVentas.Controllers
                     new ClaimsPrincipal(claimsIdentity), properties);
 
                 return RedirectToAction("Index", "Home");
+
             }
 
-            ViewData["ValidateMessage"] = "User not Found";
+            ModelState.AddModelError(string.Empty, "Por favor, corroborar los datos ingresados.");
             return View();
         }
     }

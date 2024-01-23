@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MVCVentas.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using MVCVentas.Services;
 
 //using MVCVentas.Data;
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         option.LoginPath = "/Access/Login";
         option.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     });
+
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+builder.Services.AddScoped<ILoginService, LoginService>();
 
 var app = builder.Build();
 
