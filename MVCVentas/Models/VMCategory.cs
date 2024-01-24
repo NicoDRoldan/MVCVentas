@@ -10,6 +10,8 @@ namespace MVCVentas.Models
         [Key]
         public int Id_Categoria { get; set; }
 
+        [Required]
+        [RegularExpression(@"^[a-zA-Z]*$", ErrorMessage = "Solo se aceptan letras, y no puede contener espacios.")]
         public string Nombre { get; set; }
     }
 }
