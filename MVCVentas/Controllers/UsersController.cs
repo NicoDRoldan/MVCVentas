@@ -69,7 +69,9 @@ namespace MVCVentas.Controllers
             vMUser.Fecha = DateTime.Now;
             vMUser.Estado = true;
 
-            bool usuarioExiste = _context.VMUser.Any(u => u.Usuario == vMUser.Usuario);
+            bool usuarioExiste = _context.VMUser
+                                    .Include (u => u.Categoria)
+                                    .Any(u => u.Usuario == vMUser.Usuario);
 
             if (usuarioExiste)
             {
@@ -162,6 +164,7 @@ namespace MVCVentas.Controllers
         }
 
         // GET: Users/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.VMUser == null)
@@ -186,6 +189,7 @@ namespace MVCVentas.Controllers
         // POST: Users/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (_context.VMUser == null)
