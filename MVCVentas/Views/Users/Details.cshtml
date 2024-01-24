@@ -5,18 +5,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<h1>Detalles del usuario</h1>
 
 <div>
-    <h4>VMUser</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            Categoría
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categoria.Nombre)
-        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Usuario)
         </dt>
@@ -30,12 +23,6 @@
             @(Model.Estado ? "Activo" : "Desactivado")
         </dd>
         <dt class = "col-sm-2">
-            Fecha de Creación
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Fecha)
-        </dd>
-        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Nombre)
         </dt>
         <dd class = "col-sm-10">
@@ -47,9 +34,21 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Apellido)
         </dd>
+        <dt class="col-sm-2">
+            Categoría
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Categoria.Nombre)
+        </dd>
+        <dt class="col-sm-2">
+            Fecha de Creación
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Fecha)
+        </dd>
     </dl>
 </div>
 <div>
-    <a class='btn btn-primary btn-sm' asp-action="Editar" asp-route-id="@Model?.Id_Usuario">Edit</a> |
+    <a class='btn btn-primary btn-sm' asp-action="Editar" asp-route-id="@Model?.Id_Usuario">Editar</a> |
     <a asp-action="Index">Volver</a>
 </div>

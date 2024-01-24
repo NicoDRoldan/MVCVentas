@@ -170,12 +170,15 @@ namespace MVCVentas.Controllers
             }
 
             var vMUser = await _context.VMUser
+                .Include(u => u.Categoria)
                 .FirstOrDefaultAsync(m => m.Id_Usuario == id);
 
             if (vMUser == null)
             {
                 return NotFound();
             }
+
+            ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
 
             return View(vMUser);
         }
