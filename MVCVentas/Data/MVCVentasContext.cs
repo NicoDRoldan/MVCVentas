@@ -17,5 +17,9 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMUser> VMUser { get; set; } = default!;
 
         public DbSet<MVCVentas.Models.VMCategory> VMCategory { get; set; } = default!;
+
+        public DbSet<MVCVentas.Models.VMArticle> VMArticle { get; set; } = default!;
+
+        public DbSet<MVCVentas.Models.VMPrice> VMPrice { get; set; } = default!;
     }
 }
