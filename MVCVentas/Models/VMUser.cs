@@ -25,10 +25,10 @@ namespace MVCVentas.Models
 
         [RegularExpression(@"^[a-zA-Z]*$", ErrorMessage = "Solo se aceptan letras, y no puede contener espacios.")]
         public string Apellido { get; set; }
-
         
         public int Id_Categoria { get; set; }
+
         [ForeignKey("Id_Categoria")]
-        public virtual VMCategory? Categoria { get; set; }
+        public virtual VMCategory Categoria { get; set; }
     }
 }

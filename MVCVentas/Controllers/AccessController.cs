@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MVCVentas.Data;
 using MVCVentas.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MVCVentas.Controllers
 {
@@ -32,16 +33,16 @@ namespace MVCVentas.Controllers
         public async Task<IActionResult> Login(VMLogin modelLogin)
         {
             var user = _context.VMUser
+                .Include(u => u.Categoria)
                 .Where(u => u.Usuario == modelLogin.User && u.Password == modelLogin.Password)
                 .SingleOrDefault();
 
             if (user != null)
             {
-
                 List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.NameIdentifier, modelLogin.User),
-                    new Claim("OtherProperties", "Example Role")
+                    new Claim(ClaimTypes.Role, user.Categoria.Nombre)
                 };
 
                 ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims,
