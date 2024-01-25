@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -97,7 +100,7 @@ namespace MVCVentas.Controllers
             {
                 return NotFound();
             }
-
+            
             var vMUser = await _context.VMUser
                 .Include(u => u.Categoria)
                 .FirstOrDefaultAsync(m => m.Id_Usuario == id);
@@ -107,13 +110,18 @@ namespace MVCVentas.Controllers
                 return NotFound();
             }
 
-            ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
+            if (User.IsInRole("Admin"))
+            {
+                ViewBag.Categorias = new SelectList(_context.VMCategory.ToList(), "Id_Categoria", "Nombre");
+            }
+            else if (User.IsInRole("Supervisor"))
+            {
+                ViewBag.Categorias = new SelectList(_context.VMCategory.ToList().Where(c => c.Nombre != "Admin"), "Id_Categoria", "Nombre");
+            }
+
             return View(vMUser);
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id_Usuario,Id_Categoria,Usuario,Password,Estado,Fecha,Nombre,Apellido")] VMUser vMUser)
@@ -145,6 +153,26 @@ namespace MVCVentas.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                var user = await _context.VMUser
+                    .Include(u => u.Categoria)
+                    .FirstOrDefaultAsync(m => m.Id_Usuario == id);
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Role, user.Categoria.Nombre)
+                };
+
+                var claimsIdentify = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var authenticationProperties = new AuthenticationProperties
+                {
+                    AllowRefresh = true,
+                    IsPersistent = true,
+                };
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentify), authenticationProperties);
+
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -160,7 +188,6 @@ namespace MVCVentas.Controllers
                 }
             }
             return RedirectToAction(nameof(Index));
-
         }
 
         // GET: Users/Delete/5

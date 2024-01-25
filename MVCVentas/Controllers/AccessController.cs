@@ -39,11 +39,9 @@ namespace MVCVentas.Controllers
 
             if (user != null)
             {
-
                 List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.NameIdentifier, modelLogin.User),
-                    new Claim("OtherProperties", "Example Role"),
                     new Claim(ClaimTypes.Role, user.Categoria.Nombre)
                 };
 
