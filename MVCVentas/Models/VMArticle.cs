@@ -11,13 +11,18 @@ namespace MVCVentas.Models
 
         public string Nombre { get; set; }
 
-        public string Rubro { get; set; }
+        public int Id_Rubro { get; set; }
 
         public bool Activo { get; set; }
 
         public string Descripcion { get; set; }
 
-        public DateTime Fecha { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? Fecha { get; set; }
 
+        public virtual VMPrice? Precio { get; set; }
+
+        [ForeignKey("Id_Rubro")]
+        public virtual VMRubro Rubro { get; set; }
     }
 }

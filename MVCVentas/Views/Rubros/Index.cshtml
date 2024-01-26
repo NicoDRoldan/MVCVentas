@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MVCVentas.Models.VMPrice>
+﻿@model IEnumerable<MVCVentas.Models.VMRubro>
 
 @{
     ViewData["Title"] = "Index";
@@ -7,20 +7,24 @@
 
 <style>
     .custom-card {
-        width: 80%; /* Puedes ajustar el porcentaje según tus necesidades */
+        width: 60%; /* Puedes ajustar el porcentaje según tus necesidades */
         margin: 10px auto; /* Ajusta el margen según tus necesidades */
+    }
+    .custom-column {
+        width: 50%;
     }
 </style>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Precios</title>
+    <title>Rubros</title>
 </head>
 <body>
     <div class="card shadow mb-4 custom-card">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Precios</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Rubros</h6>
+            <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Rubro</a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -28,15 +32,11 @@
                     <thead>
                         <tr>
                             <th>
-                                @Html.DisplayNameFor(model => model.Precio)
+                                @Html.DisplayNameFor(model => model.Nombre)
                             </th>
-                            <th>
-                                Fecha de creación
+                            <th class="custom-column">
+                                Acción
                             </th>
-                            <th>
-                                Artículo
-                            </th>
-                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,23 +44,17 @@
                         {
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Precio)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Fecha)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Articulo.Nombre)
+                                    @Html.DisplayFor(modelItem => item.Nombre)
                                 </td>
                                 <td class="text-center">
-                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Articulo">Editar</a>
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Rubro">Editar</a>
                                     <label>|</label>
-                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Articulo">Detalles</a>
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Rubro">Detalles</a>
 
                                     @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
-                                                        {
+                                    {
                                         <label>|</label>
-                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Articulo">Eliminar</a>
+                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Rubro">Eliminar</a>
                                     }
                                 </td>
                             </tr>

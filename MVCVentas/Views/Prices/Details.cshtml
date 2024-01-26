@@ -5,10 +5,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<h1>Detalles de precios</h1>
 
 <div>
-    <h4>VMPrice</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -18,14 +17,20 @@
             @Html.DisplayFor(model => model.Precio)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Fecha)
+            Fecha de creación
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Fecha)
         </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Articulo)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Articulo.Nombre)
+        </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id_Articulo">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.Id_Articulo">Editar</a> |
+    <a asp-action="Index">Volver</a>
 </div>

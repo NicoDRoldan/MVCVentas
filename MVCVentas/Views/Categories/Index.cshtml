@@ -5,6 +5,17 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .custom-card {
+        width: 60%; /* Puedes ajustar el porcentaje según tus necesidades */
+        margin: 10px auto; /* Ajusta el margen según tus necesidades */
+    }
+
+    .custom-column {
+        width: 50%;
+    }
+</style>
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -12,7 +23,7 @@
 </head>
 
 <body>
-    <div class="card shadow mb-4">
+    <div class="card shadow mb-4 custom-card">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Lista de Categorías</h6>
             <a class='btn btn-primary btn-sm' asp-action="Create">Nueva Categoría</a>
@@ -25,7 +36,7 @@
                             <th>
                                 @Html.DisplayNameFor(model => model.Nombre)
                             </th>
-                            <th>
+                            <th class="custom-column">
                                 Acción
                             </th>
                         </tr>
@@ -37,10 +48,16 @@
                                 <td>
                                     @Html.DisplayFor(modelItem => item.Nombre)
                                 </td>
-                                <td>
-                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Categoria">Editar</a> |
-                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Categoria">Detalles</a> |
-                                    <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Categoria">Eliminar</a>
+                                <td class="text-center">
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Categoria">Editar</a>
+                                    <label>|</label>
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Categoria">Detalles</a>
+
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    {
+                                        <label>|</label>
+                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Categoria">Eliminar</a>
+                                    }
                                 </td>
                             </tr>
                         }

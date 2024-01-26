@@ -22,11 +22,8 @@ namespace MVCVentas.Controllers
         // GET: Prices
         public async Task<IActionResult> Index()
         {
-              return _context.VMPrice != null ? 
-                          View(await _context.VMPrice
-                          .Include(p => p.Articulo)
-                          .ToListAsync()) :
-                          Problem("Entity set 'MVCVentasContext.VMPrice'  is null.");
+            var mVCVentasContext = _context.VMPrice.Include(v => v.Articulo);
+            return View(await mVCVentasContext.ToListAsync());
         }
 
         // GET: Prices/Details/5
@@ -38,7 +35,7 @@ namespace MVCVentas.Controllers
             }
 
             var vMPrice = await _context.VMPrice
-                .Include(p => p.Articulo)
+                .Include(v => v.Articulo)
                 .FirstOrDefaultAsync(m => m.Id_Articulo == id);
             if (vMPrice == null)
             {
@@ -49,33 +46,28 @@ namespace MVCVentas.Controllers
         }
 
         // GET: Prices/Create
-        public IActionResult Create()
-        {
-            ViewBag.Articulos = new SelectList(_context.VMArticle.ToList(), "Id_Articulo", "Nombre");
-
-            return View();
-        }
+        //public IActionResult Create()
+        //{
+        //    ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo");
+        //    return View();
+        //}
 
         // POST: Prices/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
-        {
-            vMPrice.Fecha = DateTime.Now;
-
-            if (ModelState.IsValid)
-            {
-                _context.Add(vMPrice);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewBag.Articulos = new SelectList(_context.VMArticle.ToList(), "Id_Articulo", "Nombre");
-
-            return View(vMPrice);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(vMPrice);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
+        //    return View(vMPrice);
+        //}
 
         // GET: Prices/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -85,17 +77,12 @@ namespace MVCVentas.Controllers
                 return NotFound();
             }
 
-            var vMPrice = await _context.VMPrice
-                .Include(u => u.Articulo)
-                .FirstOrDefaultAsync(m => m.Id_Articulo == id);
-
+            var vMPrice = await _context.VMPrice.FindAsync(id);
             if (vMPrice == null)
             {
                 return NotFound();
             }
-
-            ViewBag.Articulos = new SelectList(_context.VMArticle.ToList(), "Id_Articulo", "Nombre");
-
+            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
             return View(vMPrice);
         }
 
@@ -104,7 +91,7 @@ namespace MVCVentas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Precio")] VMPrice vMPrice)
         {
             if (id != vMPrice.Id_Articulo)
             {
@@ -131,6 +118,7 @@ namespace MVCVentas.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
             return View(vMPrice);
         }
 
@@ -143,6 +131,7 @@ namespace MVCVentas.Controllers
             }
 
             var vMPrice = await _context.VMPrice
+                .Include(v => v.Articulo)
                 .FirstOrDefaultAsync(m => m.Id_Articulo == id);
             if (vMPrice == null)
             {
@@ -173,7 +162,7 @@ namespace MVCVentas.Controllers
 
         private bool VMPriceExists(int id)
         {
-          return (_context.VMPrice?.Any(e => e.Id_Articulo == id)).GetValueOrDefault();
+          return _context.VMPrice.Any(e => e.Id_Articulo == id);
         }
     }
 }

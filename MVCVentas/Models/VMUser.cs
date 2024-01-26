@@ -18,6 +18,8 @@ namespace MVCVentas.Models
         [MaxLength(20, ErrorMessage = "La longitud máxima es 20 caracteres.")]
         public string Password { get; set; }
         public bool Estado { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? Fecha { get; set; }
 
         [RegularExpression(@"^[a-zA-Z]*$", ErrorMessage = "Solo se aceptan letras, y no puede contener espacios.")]

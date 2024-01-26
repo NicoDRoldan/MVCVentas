@@ -18,8 +18,10 @@ namespace MVCVentas.Data
 
         public DbSet<MVCVentas.Models.VMCategory> VMCategory { get; set; } = default!;
 
-        public DbSet<MVCVentas.Models.VMArticle> VMArticle { get; set; } = default!;
+        public DbSet<MVCVentas.Models.VMArticle> VMArticle { get; set; }
 
-        public DbSet<MVCVentas.Models.VMPrice> VMPrice { get; set; } = default!;
+        public DbSet<MVCVentas.Models.VMRubro> VMRubro { get; set; }
+
+        public DbSet<MVCVentas.Models.VMPrice> VMPrice { get; set; }
     }
 }
