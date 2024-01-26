@@ -91,7 +91,7 @@ namespace MVCVentas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Precio")] VMPrice vMPrice)
         {
             if (id != vMPrice.Id_Articulo)
             {
