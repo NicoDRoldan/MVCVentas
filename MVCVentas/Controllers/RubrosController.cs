@@ -10,90 +10,85 @@ using MVCVentas.Models;
 
 namespace MVCVentas.Controllers
 {
-    public class PricesController : Controller
+    public class RubrosController : Controller
     {
         private readonly MVCVentasContext _context;
 
-        public PricesController(MVCVentasContext context)
+        public RubrosController(MVCVentasContext context)
         {
             _context = context;
         }
 
-        // GET: Prices
+        // GET: Rubros
         public async Task<IActionResult> Index()
         {
-            var mVCVentasContext = _context.VMPrice.Include(v => v.Articulo);
-            return View(await mVCVentasContext.ToListAsync());
+              return View(await _context.VMRubro.ToListAsync());
         }
 
-        // GET: Prices/Details/5
+        // GET: Rubros/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.VMPrice == null)
+            if (id == null || _context.VMRubro == null)
             {
                 return NotFound();
             }
 
-            var vMPrice = await _context.VMPrice
-                .Include(v => v.Articulo)
-                .FirstOrDefaultAsync(m => m.Id_Articulo == id);
-            if (vMPrice == null)
+            var vMRubro = await _context.VMRubro
+                .FirstOrDefaultAsync(m => m.Id_Rubro == id);
+            if (vMRubro == null)
             {
                 return NotFound();
             }
 
-            return View(vMPrice);
+            return View(vMRubro);
         }
 
-        // GET: Prices/Create
+        // GET: Rubros/Create
         public IActionResult Create()
         {
-            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo");
             return View();
         }
 
-        // POST: Prices/Create
+        // POST: Rubros/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
+        public async Task<IActionResult> Create([Bind("Id_Rubro,Nombre")] VMRubro vMRubro)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(vMPrice);
+                _context.Add(vMRubro);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
-            return View(vMPrice);
+            return View(vMRubro);
         }
 
-        // GET: Prices/Edit/5
+        // GET: Rubros/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.VMPrice == null)
+            if (id == null || _context.VMRubro == null)
             {
                 return NotFound();
             }
 
-            var vMPrice = await _context.VMPrice.FindAsync(id);
-            if (vMPrice == null)
+            var vMRubro = await _context.VMRubro.FindAsync(id);
+            if (vMRubro == null)
             {
                 return NotFound();
             }
-            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
-            return View(vMPrice);
+            return View(vMRubro);
         }
 
-        // POST: Prices/Edit/5
+        // POST: Rubros/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Rubro,Nombre")] VMRubro vMRubro)
         {
-            if (id != vMPrice.Id_Articulo)
+            if (id != vMRubro.Id_Rubro)
             {
                 return NotFound();
             }
@@ -102,12 +97,12 @@ namespace MVCVentas.Controllers
             {
                 try
                 {
-                    _context.Update(vMPrice);
+                    _context.Update(vMRubro);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VMPriceExists(vMPrice.Id_Articulo))
+                    if (!VMRubroExists(vMRubro.Id_Rubro))
                     {
                         return NotFound();
                     }
@@ -118,51 +113,49 @@ namespace MVCVentas.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
-            return View(vMPrice);
+            return View(vMRubro);
         }
 
-        // GET: Prices/Delete/5
+        // GET: Rubros/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.VMPrice == null)
+            if (id == null || _context.VMRubro == null)
             {
                 return NotFound();
             }
 
-            var vMPrice = await _context.VMPrice
-                .Include(v => v.Articulo)
-                .FirstOrDefaultAsync(m => m.Id_Articulo == id);
-            if (vMPrice == null)
+            var vMRubro = await _context.VMRubro
+                .FirstOrDefaultAsync(m => m.Id_Rubro == id);
+            if (vMRubro == null)
             {
                 return NotFound();
             }
 
-            return View(vMPrice);
+            return View(vMRubro);
         }
 
-        // POST: Prices/Delete/5
+        // POST: Rubros/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.VMPrice == null)
+            if (_context.VMRubro == null)
             {
-                return Problem("Entity set 'MVCVentasContext.VMPrice'  is null.");
+                return Problem("Entity set 'MVCVentasContext.VMRubro'  is null.");
             }
-            var vMPrice = await _context.VMPrice.FindAsync(id);
-            if (vMPrice != null)
+            var vMRubro = await _context.VMRubro.FindAsync(id);
+            if (vMRubro != null)
             {
-                _context.VMPrice.Remove(vMPrice);
+                _context.VMRubro.Remove(vMRubro);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VMPriceExists(int id)
+        private bool VMRubroExists(int id)
         {
-          return _context.VMPrice.Any(e => e.Id_Articulo == id);
+          return _context.VMRubro.Any(e => e.Id_Rubro == id);
         }
     }
 }

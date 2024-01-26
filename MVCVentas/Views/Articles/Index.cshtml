@@ -14,7 +14,13 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.Id_Articulo)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Precio.Precio)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Rubro)
@@ -32,29 +38,36 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rubro)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Activo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id_Articulo">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id_Articulo">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id_Articulo">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id_Articulo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Precio.Precio)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Rubro.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Activo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Descripcion)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fecha)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id_Articulo">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id_Articulo">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id_Articulo">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
