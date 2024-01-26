@@ -5,9 +5,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<br>
+<h2>Nuevo Artículo</h2>
 
-<h4>VMArticle</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -19,7 +19,7 @@
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Id_Rubro" class="control-label"></label>
+                <label asp-for="Rubro" class="control-label"></label>
                 <select asp-for="Id_Rubro" class ="form-control" asp-items="ViewBag.Id_Rubro"></select>
             </div>
             <div class="form-group form-check">
@@ -38,14 +38,14 @@
                 <span asp-validation-for="Precio.Precio" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Volver</a>
 </div>
 
 @section Scripts {
