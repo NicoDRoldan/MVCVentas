@@ -17,6 +17,7 @@ namespace MVCVentas.Models
 
         public string Descripcion { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? Fecha { get; set; }
 
         public virtual VMPrice? Precio { get; set; }

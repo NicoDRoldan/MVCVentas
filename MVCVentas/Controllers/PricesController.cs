@@ -46,28 +46,28 @@ namespace MVCVentas.Controllers
         }
 
         // GET: Prices/Create
-        public IActionResult Create()
-        {
-            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo");
-            return View();
-        }
+        //public IActionResult Create()
+        //{
+        //    ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo");
+        //    return View();
+        //}
 
         // POST: Prices/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(vMPrice);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
-            return View(vMPrice);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("Id_Articulo,Precio,Fecha")] VMPrice vMPrice)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(vMPrice);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["Id_Articulo"] = new SelectList(_context.VMArticle, "Id_Articulo", "Id_Articulo", vMPrice.Id_Articulo);
+        //    return View(vMPrice);
+        //}
 
         // GET: Prices/Edit/5
         public async Task<IActionResult> Edit(int? id)

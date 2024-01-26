@@ -10,9 +10,12 @@ namespace MVCVentas.Models
         [Key]
         public int Id_Articulo { get; set; }
 
-        public decimal Precio { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
+        [DataType(DataType.Currency)]
+        public decimal? Precio { get; set; }
 
-        public DateTime Fecha { get; set; }
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        public DateTime? Fecha { get; set; }
 
         [ForeignKey("Id_Articulo")]
         public virtual VMArticle Articulo { get; set; }

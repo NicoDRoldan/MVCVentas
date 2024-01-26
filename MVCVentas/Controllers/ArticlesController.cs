@@ -64,7 +64,13 @@ namespace MVCVentas.Controllers
         public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Fecha,Precio")] VMArticle vMArticle)
         {
             vMArticle.Fecha = DateTime.Now;
+
             vMArticle.Precio.Fecha = DateTime.Now;
+            // Verifica si el campo Precio.Precio es null antes de agregarlo al contexto
+            if (vMArticle.Precio != null && vMArticle.Precio.Precio == null)
+            {
+                vMArticle.Precio = null; // Setea a null para evitar la inserción en la tabla de precios
+            }
 
             if (ModelState.IsValid)
             {
@@ -89,7 +95,7 @@ namespace MVCVentas.Controllers
             {
                 return NotFound();
             }
-            ViewData["Id_Rubro"] = new SelectList(_context.Set<VMRubro>(), "Id_Rubro", "Id_Rubro", vMArticle.Id_Rubro);
+            ViewData["Id_Rubro"] = new SelectList(_context.Set<VMRubro>(), "Id_Rubro", "Nombre", vMArticle.Id_Rubro);
             return View(vMArticle);
         }
 
