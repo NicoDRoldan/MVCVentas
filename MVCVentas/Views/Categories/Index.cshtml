@@ -49,11 +49,13 @@
                                     @Html.DisplayFor(modelItem => item.Nombre)
                                 </td>
                                 <td class="text-center">
+                                    @if (User.IsInRole("Admin"))
+                                    {
                                     <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Categoria">Editar</a>
-                                    <label>|</label>
+                                        <label>|</label>
+                                    }
                                     <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Categoria">Detalles</a>
-
-                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    @if (User.IsInRole("Admin"))
                                     {
                                         <label>|</label>
                                         <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Categoria">Eliminar</a>
