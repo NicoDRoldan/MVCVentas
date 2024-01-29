@@ -22,10 +22,16 @@
                 <label asp-for="Rubro" class="control-label"></label>
                 <select asp-for="Id_Rubro" class ="form-control" asp-items="ViewBag.Id_Rubro"></select>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Activo" /> @Html.DisplayNameFor(model => model.Activo)
-                </label>
+            <div class="form-group">
+                <label>Estado de Artículo</label>
+                <div class="form-check">
+                    <input type="radio" id="activoOption" class="form-check-input" asp-for="Activo" value="true" />
+                    <label for="activoOption" class="form-check-label">Activado</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" id="inactivoOption" class="form-check-input" asp-for="Activo" value="false" />
+                    <label for="inactivoOption" class="form-check-label">Desactivado</label>
+                </div>
             </div>
             <div class="form-group">
                 <label asp-for="Descripcion" class="control-label"></label>
@@ -37,6 +43,32 @@
                 <input asp-for="Precio.Precio" class="form-control" data-val="false" />
                 <span asp-validation-for="Precio.Precio" class="text-danger"></span>
             </div>
+
+            @* Formulario para Stock: *@
+
+            <div class="form-group">
+                <label>¿El artículo usa stock?</label>
+                <div class="form-check">
+                    <input type="radio" id="siOption" class="form-check-input" asp-for="UsaStock" value="true" />
+                    <label for="siOption" class="form-check-label">Sí</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" id="noOption" class="form-check-input" asp-for="UsaStock" value="false" />
+                    <label for="noOption" class="form-check-label">No</label>
+                </div>
+            </div>
+
+            <div id="divStockForm" style="display:none">
+                <h4>Control de Stock</h4>
+                <div class="form-group">
+                    <label class="control-label">Cantidad de Artículos</label>
+                    <input asp-for="Stock.Cantidad" class="form-control" />
+                    <span asp-validation-for="Stock.Cantidad" class="text-danger"></span>
+                </div>
+            </div>
+
+            @* Fin formulario para Stock *@
+
             <div class="form-group">
                 <input type="submit" value="Crear" class="btn btn-primary" />
             </div>
@@ -50,4 +82,24 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            // Manejo del cambio en el radio
+            $('input[name="UsaStock"]').change(function () {
+                if ($(this).val() == "true") {
+                    // Si UsaStock es true, muestra el formulario de stock
+                    $('#divStockForm').show();
+                } else {
+                    // Si UsaStock es false, oculta el formulario de stock
+                    $('#divStockForm').hide();
+                }
+            });
+
+            // Al cargar la pag, verifica el valor inicial de UsaStock
+            if ($('input[name="UsaStock"]:checked').val() === "true") {
+                $('#divStockForm').show();
+            }
+        });
+    </script>
 }

@@ -20,7 +20,11 @@ namespace MVCVentas.Models
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? Fecha { get; set; }
 
+        public bool UsaStock { get; set; }
+
         public virtual VMPrice? Precio { get; set; }
+
+        public virtual VMStock? Stock { get; set; }
 
         [ForeignKey("Id_Rubro")]
         public virtual VMRubro Rubro { get; set; }

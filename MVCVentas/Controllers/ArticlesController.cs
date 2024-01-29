@@ -65,7 +65,7 @@ namespace MVCVentas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Fecha,Precio")] VMArticle vMArticle)
+        public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Fecha,UsaStock,Precio,Stock")] VMArticle vMArticle)
         {
             vMArticle.Fecha = DateTime.Now;
             vMArticle.Precio.Fecha = DateTime.Now;
@@ -75,6 +75,14 @@ namespace MVCVentas.Controllers
             {
                 vMArticle.Precio = null; // Setea a null para evitar la inserción en la tabla de precios
             }
+
+            if (!vMArticle.UsaStock)
+            {
+                vMArticle.Stock = null; // Setea a null para evitar la inserción en la tabla de stock
+            }
+
+            ModelState.Clear();
+            TryValidateModel(vMArticle);
 
             if (ModelState.IsValid)
             {
@@ -97,6 +105,7 @@ namespace MVCVentas.Controllers
             // Relación de Precios con Artículos para mostrar el precio actual del artículo en la vista.
             var vMArticle = await _context.VMArticle
                 .Include(a => a.Precio)
+                .Include(a => a.Stock)
                 .FirstOrDefaultAsync(p => p.Id_Articulo == id);
 
             //Guarda el valor de fecha en memoria cache en un campo llamado "FechaEdicion".
@@ -120,56 +129,103 @@ namespace MVCVentas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Precio")] VMArticle vMArticle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,UsaStock,Precio,Stock")] VMArticle vMArticle)
         {
             if (id != vMArticle.Id_Articulo)
             {
                 return NotFound();
             }
 
-            var fechaArt = await _context.VMArticle
-                .Where(a => a.Id_Articulo == id)
-                .Select(a => a.Fecha)
-                .FirstOrDefaultAsync();
+            vMArticle.Stock.Id_Articulo = id;
 
+            ModelState.Clear();
+            TryValidateModel(vMArticle);
+
+            // Verificar si el modelo es valido.
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Traer el artículo existente
                     var artExistente = await _context.VMArticle
                         .Include(a => a.Precio)
+                        .Include(a => a.Stock)
                         .FirstOrDefaultAsync(a => a.Id_Articulo == vMArticle.Id_Articulo);
 
+                    // Si el artículo no existe devuelve NotFound().
                     if(artExistente == null)
                     {
                         return NotFound();
                     }
 
+                    #region Inicio lógica de Precio
+
+                    // Si el precio del artículo existente, existe, actualizar todos los campos al valor que le pasamos por la vista.
                     if (artExistente.Precio != null)
                     {
-                        artExistente.Nombre = vMArticle.Nombre;
-                        artExistente.Id_Rubro = vMArticle.Id_Rubro;
-                        artExistente.Activo = vMArticle.Activo;
-                        artExistente.Descripcion = vMArticle.Descripcion;
-
+                        // Si el precio de la vista es diferente a null, se le asigna el precio pasado por la vista.
                         if (vMArticle.Precio != null)
                         {
                             artExistente.Precio.Precio = vMArticle.Precio.Precio;
 
+                            //Se trae por memoria cache la fecha guardada en el GET del EDIT (Fecha de creación de artículo).
                             if(_memoryCache.TryGetValue("FechaEdicion", out DateTime fechaEdicion))
                             {
                                 artExistente.Precio.Fecha = fechaEdicion;
                             }
                         }
                     }
-                    else
+                    // Si el precio no existe, se creará un nuevo objeto y se insertará en la tabla correspondiente con los datos pasados en la vista y un dato predeterminado (fecha).
+                    else if (artExistente.Precio == null && vMArticle.Precio.Precio != null)
                     {
                         artExistente.Precio = new VMPrice
                         {
                             Precio = vMArticle.Precio.Precio,
-                            Fecha = fechaArt
+                            Fecha = DateTime.Now
                         };
                     }
+                    else if(vMArticle.Precio.Precio == null)
+                    {
+                        vMArticle.Precio = null;
+                    }
+
+                    #endregion Fin Lógica de Precio
+
+                    if (artExistente.UsaStock)
+                    {
+                        // Sigue usando Stock?
+                        if (vMArticle.UsaStock)
+                        {
+                            artExistente.Stock.Cantidad = vMArticle.Stock.Cantidad;
+                        }
+                        else
+                        {
+                            var stockPorId = await _context.VMStock.FindAsync(artExistente.Id_Articulo);
+
+                            if(stockPorId != null)
+                            {
+                                _context.Remove(stockPorId);
+                                artExistente.Stock = null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // No tiene Stock y quiere empezar a usarlo en el artículo.
+                        if(vMArticle.UsaStock)
+                        {
+                            artExistente.Stock = new VMStock
+                            {
+                                Cantidad = vMArticle.Stock.Cantidad
+                            };
+                        }
+                    }
+
+                    artExistente.Nombre = vMArticle.Nombre;
+                    artExistente.Id_Rubro = vMArticle.Id_Rubro;
+                    artExistente.Activo = vMArticle.Activo;
+                    artExistente.Descripcion = vMArticle.Descripcion;
+                    artExistente.UsaStock = vMArticle.UsaStock;
 
                     await _context.SaveChangesAsync();
                 }
