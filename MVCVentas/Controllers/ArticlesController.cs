@@ -65,7 +65,7 @@ namespace MVCVentas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Fecha,Precio")] VMArticle vMArticle)
+        public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Fecha,UsaStock,Precio,Stock")] VMArticle vMArticle)
         {
             vMArticle.Fecha = DateTime.Now;
             vMArticle.Precio.Fecha = DateTime.Now;
@@ -75,6 +75,14 @@ namespace MVCVentas.Controllers
             {
                 vMArticle.Precio = null; // Setea a null para evitar la inserción en la tabla de precios
             }
+
+            if (!vMArticle.UsaStock)
+            {
+                vMArticle.Stock = null; // Setea a null para evitar la inserción en la tabla de stock
+            }
+
+            ModelState.Clear();
+            TryValidateModel(vMArticle);
 
             if (ModelState.IsValid)
             {

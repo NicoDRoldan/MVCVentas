@@ -23,5 +23,7 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMRubro> VMRubro { get; set; }
 
         public DbSet<MVCVentas.Models.VMPrice> VMPrice { get; set; }
+
+        public DbSet<MVCVentas.Models.VMStock> VMStock { get; set; }
     }
 }
