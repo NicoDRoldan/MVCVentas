@@ -43,6 +43,9 @@
                 <input asp-for="Precio.Precio" class="form-control" data-val="false" />
                 <span asp-validation-for="Precio.Precio" class="text-danger"></span>
             </div>
+
+            @* Formulario para Stock: *@
+
             <div class="form-group">
                 <label>¿El artículo usa stock?</label>
                 <div class="form-check">
@@ -63,6 +66,8 @@
                     <span asp-validation-for="Stock.Cantidad" class="text-danger"></span>
                 </div>
             </div>
+
+            @* Fin formulario para Stock *@
 
             <div class="form-group">
                 <input type="submit" value="Crear" class="btn btn-primary" />

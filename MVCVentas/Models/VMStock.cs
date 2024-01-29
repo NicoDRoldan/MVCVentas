@@ -12,6 +12,6 @@ namespace MVCVentas.Models
         public int Cantidad { get; set; }
 
         [ForeignKey("Id_Articulo")]
-        public virtual VMArticle Articulo {  get; set; }
+        public virtual VMArticle? Articulo {  get; set; }
     }
 }
