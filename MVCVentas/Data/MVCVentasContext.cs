@@ -25,5 +25,19 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMPrice> VMPrice { get; set; }
 
         public DbSet<MVCVentas.Models.VMStock> VMStock { get; set; }
+
+        public DbSet<MVCVentas.Models.VMPromoDescuento_E> VMPromoDescuento_E { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<VMPromoDescuento_D>()
+                .HasKey(pd => new { pd.Id_Promocion, pd.Id_Articulo });
+
+            base.OnModelCreating(modelBuilder);
+        }
+
+        public DbSet<MVCVentas.Models.VMPromoDescuento_D> VMPromoDescuento_D { get; set; }
+
+        public DbSet<MVCVentas.Models.VMTipoPromoDescuento> VMTipoPromoDescuento { get; set; }
     }
 }

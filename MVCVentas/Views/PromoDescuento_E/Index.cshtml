@@ -1,0 +1,60 @@
+﻿@model IEnumerable<MVCVentas.Models.VMPromoDescuento_E>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Porcentaje)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaInicio)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaFin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TipoPromoDescuento)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Porcentaje)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaInicio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaFin)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TipoPromoDescuento.Id_Tipo)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id_Promocion">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id_Promocion">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id_Promocion">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
