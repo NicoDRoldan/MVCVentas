@@ -29,6 +29,7 @@ namespace MVCVentas.Models
         [NotMapped]
         public List<SelectListItem> ListaArticulos { get; set; }
 
+
         public VMPromoDescuento_E()
         {
             ArticulosSeleccionados = new List<int>();

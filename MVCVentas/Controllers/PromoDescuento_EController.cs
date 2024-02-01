@@ -37,6 +37,7 @@ namespace MVCVentas.Controllers
             var vMPromoDescuento_E = await _context.VMPromoDescuento_E
                 .Include(v => v.TipoPromoDescuento)
                 .FirstOrDefaultAsync(m => m.Id_Promocion == id);
+
             if (vMPromoDescuento_E == null)
             {
                 return NotFound();
@@ -48,6 +49,9 @@ namespace MVCVentas.Controllers
         // GET: PromoDescuento_E/Create
         public IActionResult Create()
         {
+            /* Se guardan los artículos existentes en ListaArticulos perteneciente al modelo PromoDescuento_E,
+            dicha lista es mostrada en el Create correspondiente*/
+
             var model = new VMPromoDescuento_E
             {
                 ListaArticulos = _context.VMArticle
@@ -59,9 +63,6 @@ namespace MVCVentas.Controllers
             return View(model);
         }
 
-        // POST: PromoDescuento_E/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id_Promocion,Nombre,Porcentaje,FechaInicio,FechaFin,Id_Tipo,ArticulosSeleccionados")] 
@@ -71,26 +72,36 @@ namespace MVCVentas.Controllers
             {
                 try
                 {
+                    // Se inserta antes la promoción, para así poder asignarle un ID a PromosDescuentos_D.
+
                     _context.Add(vMPromoDescuento_E);
 
                     await _context.SaveChangesAsync();
+
+                    // Si la lista de artículos seleccionados no está vacía, se recorre el foreach.
 
                     if (vMPromoDescuento_E.ArticulosSeleccionados != null && vMPromoDescuento_E.ArticulosSeleccionados.Any())
                     {
                         foreach (int idArticulo in vMPromoDescuento_E.ArticulosSeleccionados)
                         {
+                            /* Recorre el primer artícuulo, crea una nueva instancia de VMPromoDescuento_D y se le asigna el 
+                            ID de la promoción creada anteriormente y el id del artículo recorrido. */
+
                             VMPromoDescuento_D vMPromoDescuento_D = new VMPromoDescuento_D
                             {
                                 Id_Promocion = vMPromoDescuento_E.Id_Promocion,
                                 Id_Articulo = idArticulo
                             };
 
+                            // Se inserta en la base el objeto instanciado.
+
                             _context.Add(vMPromoDescuento_D);
                         }
 
+                        // Se guardan los cambios en la base.
+
                         await _context.SaveChangesAsync();
                     }
-
                     return RedirectToAction(nameof(Index));
                 }
                 catch

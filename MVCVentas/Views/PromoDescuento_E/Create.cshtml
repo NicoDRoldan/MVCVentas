@@ -18,7 +18,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" onsubmit="return onSubmitForm()">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Nombre" class="control-label"></label>
@@ -45,15 +45,51 @@
                 <select asp-for="Id_Tipo" class ="form-control" asp-items="ViewBag.Id_Tipo"></select>
             </div>
 
-            <label asp-for="ArticulosSeleccionados">Artículos de promoción:</label>
-            <div id="articulos-container">
-                <div class="articulo-item">
-                    @Html.DropDownListFor(model => model.ArticulosSeleccionados, Model.ListaArticulos, new { @class = "form-control", Name = "ArticulosSeleccionados[0]" })
+            <!-- Botón para abrir la ventana emergente -->
+            <div class="form-group">
+                <button type="button" class="btn btn-primary boton-add-articulos" data-toggle="modal" data-target="#articulosModal">
+                    Agregar Artículos
+                </button>
+            </div>
 
-                    <div class="boton-add-articulos">
-                        <!-- Botones para agregar o quitar artículos -->
-                        <button type="button" class="btn btn-success" onclick="agregarArticulo()">+</button>
-                        <button type="button" class="btn btn-danger" onclick="eliminarArticulo(this)">-</button>
+            <!-- Código para la ventana emergente -->
+            <div class="modal fade" id="articulosModal" tabindex="-1" role="dialog" aria-labelledby="articulosModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="articulosModalLabel">Seleccionar Artículos</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table" id="articulosTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Artículo</th>
+                                        <th>Seleccionar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!--  Recorrer la lista de artículos -->
+                                    @foreach (var articulo in Model.ListaArticulos)
+                                    {
+                                        <tr>
+                                            <td>@articulo.Value</td>
+                                            <td>@articulo.Text</td>
+                                            <td>
+                                                <input type="checkbox" id="@articulo.Value" name="ArticulosSeleccionados" value="@articulo.Value">
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" onclick="agregarArticulos()">Agregar</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -72,26 +108,37 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
+    <script src="~/theme/vendor/datatables/jquery.datatables.min.js"></script>
+
     <script>
-        var contadorArticulos = 1;
+        $(document).ready(function () {
+            // Inicializar la tabla con DataTables
+            $('#articulosTable').DataTable({
+                "paging": false,          // Desactivar paginación
+                "scrollY": "400px",       // Altura fija con barra de desplazamiento si es necesario
+                "scrollCollapse": true,   // Colapsar la tabla si la altura es menor que el contenido
+                "searching": true         // Habilitar la función de búsqueda
+            });
+        });
 
-        function agregarArticulo() {
+        function agregarArticulos() {
+            // Limpiar el filtro de búsqueda
+            $('#articulosTable').DataTable().search('').draw();
 
-            var nuevoArticulo = $("#articulos-container .articulo-item:first").clone();
+            // Obtener el modelo y los checkboxes seleccionados
+            var model = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+            var checkboxes = document.querySelectorAll('input[name="ArticulosSeleccionados"]:checked');
 
-            nuevoArticulo.find("select").attr("name", "ArticulosSeleccionados[" + contadorArticulos + "]");
+            // Limpiar la lista actual
+            model.ArticulosSeleccionados = [];
 
-            nuevoArticulo.appendTo("#articulos-container");
-            contadorArticulos++;
-        }
+            // Agregar los artículos seleccionados a la lista
+            checkboxes.forEach(function (checkbox) {
+                model.ArticulosSeleccionados.push(parseInt(checkbox.value));
+            });
 
-        function eliminarArticulo(button) {
-            // Verifica si es el primer formulario antes de eliminar
-            if ($("#articulos-container .articulo-item").length > 1) {
-
-                $(button).closest(".articulo-item").remove();
-            }
+            // Cerrar la ventana emergente
+            $('#articulosModal').modal('hide');
         }
     </script>
-
 }
