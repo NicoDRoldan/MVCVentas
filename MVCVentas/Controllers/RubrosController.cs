@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using MVCVentas.Models;
 
 namespace MVCVentas.Controllers
 {
+    [Authorize]
     public class RubrosController : Controller
     {
         private readonly MVCVentasContext _context;
@@ -143,7 +145,18 @@ namespace MVCVentas.Controllers
             {
                 return Problem("Entity set 'MVCVentasContext.VMRubro'  is null.");
             }
+
             var vMRubro = await _context.VMRubro.FindAsync(id);
+            var rubArt = await _context.VMRubro
+                .Include(a => a.Articulos)
+                .FirstOrDefaultAsync(r => r.Id_Rubro == id);
+
+            if (rubArt.Articulos != null && rubArt.Articulos.Any())
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("No se puede eliminar el rubro ya que el mismo tiene artículos asociados.");
+                return RedirectToAction("Delete");
+            }
+
             if (vMRubro != null)
             {
                 _context.VMRubro.Remove(vMRubro);
