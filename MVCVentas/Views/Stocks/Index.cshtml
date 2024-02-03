@@ -5,38 +5,68 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<style>
+    .custom-card {
+        width: 60%;
+        margin: 10px auto;
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Cantidad)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Articulo)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cantidad)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Articulo.Id_Articulo)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id_Articulo">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id_Articulo">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id_Articulo">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    .custom-column {
+        width: 50%;
+    }
+</style>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Control de Stock</title>
+</head>
+<body>
+    <div class="card shadow mb-4 custom-card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Control de Stock</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Cantidad)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Articulo)
+                            </th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Cantidad)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Articulo.Nombre)
+                                </td>
+                                <td class="text-center">
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Articulo">Editar</a>
+                                    <label>|</label>
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Articulo">Detalles</a>
+
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    {
+                                        <label>|</label>
+                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Articulo">Eliminar</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

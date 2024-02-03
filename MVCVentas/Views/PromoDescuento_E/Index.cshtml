@@ -5,56 +5,83 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<style>
+    .custom-card {
+        width: 110%;
+        margin: 10px auto;
+    }
+</style>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Porcentaje)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaInicio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaFin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TipoPromoDescuento)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Porcentaje)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaInicio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaFin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoPromoDescuento.Id_Tipo)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id_Promocion">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id_Promocion">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id_Promocion">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Promociones</title>
+</head>
+<body>
+    <div class="card shadow mb-4 custom-card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Promociones</h6>
+            <a class='btn btn-primary btn-sm' asp-action="Create">Nueva Promoción</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                Nombre de Promoción
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Porcentaje)
+                            </th>
+                            <th>
+                                Inicio de Promoción
+                            </th>
+                            <th>
+                                Fin de Promoción
+                            </th>
+                            <th>
+                                Tipo
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Porcentaje)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FechaInicio)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FechaFin)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.TipoPromoDescuento.Descripcion)
+                                </td>
+                                <td class="text-center">
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Promocion">Editar</a>
+                                    <label>|</label>
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Promocion">Detalles</a>
+
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    {
+                                        <label>|</label>
+                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Promocion">Eliminar</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

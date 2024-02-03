@@ -12,36 +12,36 @@
     }
 </style>
 
-<h1>Create</h1>
+<br>
+<h2>Nueva Promoción</h2>
 
-<h4>VMPromoDescuento_E</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create" onsubmit="return onSubmitForm()">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
+                <label class="control-label">Nombre de Promoción</label>
                 <input asp-for="Nombre" class="form-control" />
                 <span asp-validation-for="Nombre" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Porcentaje" class="control-label"></label>
-                <input asp-for="Porcentaje" class="form-control" />
+                <label class="control-label">Porcentaje de Descuento</label>
+                <input asp-for="Porcentaje" class="form-control" data-val="false" />
                 <span asp-validation-for="Porcentaje" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="FechaInicio" class="control-label"></label>
-                <input asp-for="FechaInicio" class="form-control" />
+                <label class="control-label">Inicio de Promoción</label>
+                <input asp-for="FechaInicio" class="form-control" type="date" />
                 <span asp-validation-for="FechaInicio" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="FechaFin" class="control-label"></label>
-                <input asp-for="FechaFin" class="form-control" />
+                <label class="control-label">Fin de Promoción</label>
+                <input asp-for="FechaFin" class="form-control" type="date" />
                 <span asp-validation-for="FechaFin" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Id_Tipo" class="control-label"></label>
+                <label class="control-label">Tipo de Promoción</label>
                 <select asp-for="Id_Tipo" class ="form-control" asp-items="ViewBag.Id_Tipo"></select>
             </div>
 
@@ -95,14 +95,14 @@
             </div>
 
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Crear" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Volver</a>
 </div>
 
 @section Scripts {
