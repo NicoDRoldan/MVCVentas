@@ -55,11 +55,11 @@
                                     <label>|</label>
                                     <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Articulo">Detalles</a>
 
-                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+@*                                     @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
                                     {
                                         <label>|</label>
                                         <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Articulo">Eliminar</a>
-                                    }
+                                    } *@
                                 </td>
                             </tr>
                         }

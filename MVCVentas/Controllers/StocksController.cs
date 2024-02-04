@@ -79,7 +79,10 @@ namespace MVCVentas.Controllers
                 return NotFound();
             }
 
-            var vMStock = await _context.VMStock.FindAsync(id);
+            var vMStock = await _context.VMStock
+                .Include(v => v.Articulo)
+                .FirstOrDefaultAsync(m => m.Id_Articulo == id);
+
             if (vMStock == null)
             {
                 return NotFound();
