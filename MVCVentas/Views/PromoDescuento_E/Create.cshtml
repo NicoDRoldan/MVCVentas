@@ -1,0 +1,144 @@
+﻿@model MVCVentas.Models.VMPromoDescuento_E
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .boton-add-articulos {
+        margin-top: 10px;
+        margin-bottom:10px
+    }
+</style>
+
+<br>
+<h2>Nueva Promoción</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" onsubmit="return onSubmitForm()">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label class="control-label">Nombre de Promoción</label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Porcentaje de Descuento</label>
+                <input asp-for="Porcentaje" class="form-control" data-val="false" />
+                <span asp-validation-for="Porcentaje" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Inicio de Promoción</label>
+                <input asp-for="FechaInicio" class="form-control" type="date" />
+                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Fin de Promoción</label>
+                <input asp-for="FechaFin" class="form-control" type="date" />
+                <span asp-validation-for="FechaFin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Tipo de Promoción</label>
+                <select asp-for="Id_Tipo" class ="form-control" asp-items="ViewBag.Id_Tipo"></select>
+            </div>
+
+            <!-- Botón para abrir la ventana emergente -->
+            <div class="form-group">
+                <button type="button" class="btn btn-primary boton-add-articulos" data-toggle="modal" data-target="#articulosModal">
+                    Agregar Artículos
+                </button>
+            </div>
+
+            <!-- Código para la ventana emergente -->
+            <div class="modal fade" id="articulosModal" tabindex="-1" role="dialog" aria-labelledby="articulosModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="articulosModalLabel">Seleccionar Artículos</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table" id="articulosTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Artículo</th>
+                                        <th>Seleccionar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!--  Recorrer la lista de artículos -->
+                                    @foreach (var articulo in Model.ListaArticulos)
+                                    {
+                                        <tr>
+                                            <td>@articulo.Value</td>
+                                            <td>@articulo.Text</td>
+                                            <td>
+                                                <input type="checkbox" id="@articulo.Value" name="ArticulosSeleccionados" value="@articulo.Value">
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" onclick="agregarArticulos()">Agregar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Volver</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script src="~/theme/vendor/datatables/jquery.datatables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Inicializar la tabla con DataTables
+            $('#articulosTable').DataTable({
+                "paging": false,          // Desactivar paginación
+                "scrollY": "400px",       // Altura fija con barra de desplazamiento si es necesario
+                "scrollCollapse": true,   // Colapsar la tabla si la altura es menor que el contenido
+                "searching": true         // Habilitar la función de búsqueda
+            });
+        });
+
+        function agregarArticulos() {
+            // Limpiar el filtro de búsqueda
+            $('#articulosTable').DataTable().search('').draw();
+
+            // Obtener el modelo y los checkboxes seleccionados
+            var model = JSON.parse('@Html.Raw(Json.Serialize(Model))');
+            var checkboxes = document.querySelectorAll('input[name="ArticulosSeleccionados"]:checked');
+
+            // Limpiar la lista actual
+            model.ArticulosSeleccionados = [];
+
+            // Agregar los artículos seleccionados a la lista
+            checkboxes.forEach(function (checkbox) {
+                model.ArticulosSeleccionados.push(parseInt(checkbox.value));
+            });
+
+            // Cerrar la ventana emergente
+            $('#articulosModal').modal('hide');
+        }
+    </script>
+}

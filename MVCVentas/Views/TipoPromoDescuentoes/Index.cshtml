@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MVCVentas.Models.VMStock>
+﻿@model IEnumerable<MVCVentas.Models.VMTipoPromoDescuento>
 
 @{
     ViewData["Title"] = "Index";
@@ -7,8 +7,8 @@
 
 <style>
     .custom-card {
-        width: 60%;
-        margin: 10px auto;
+        width: 60%; /* Puedes ajustar el porcentaje según tus necesidades */
+        margin: 10px auto; /* Ajusta el margen según tus necesidades */
     }
 
     .custom-column {
@@ -19,25 +19,24 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Control de Stock</title>
+    <title>Tipos de Promociones</title>
 </head>
+
 <body>
     <div class="card shadow mb-4 custom-card">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Control de Stock</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Tipos de Promociones</h6>
+            <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo tipo de promoción</a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>
-                                @Html.DisplayNameFor(model => model.Cantidad)
+                                @Html.DisplayNameFor(model => model.Descripcion)
                             </th>
-                            <th>
-                                @Html.DisplayNameFor(model => model.Articulo)
-                            </th>
-                            <th>Acción</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -45,20 +44,17 @@
                         {
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.Cantidad)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Articulo.Nombre)
+                                    @Html.DisplayFor(modelItem => item.Descripcion)
                                 </td>
                                 <td class="text-center">
-                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Articulo">Editar</a>
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Tipo">Editar</a>
                                     <label>|</label>
-                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Articulo">Detalles</a>
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Tipo">Detalles</a>
 
                                     @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
                                     {
                                         <label>|</label>
-                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Articulo">Eliminar</a>
+                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Tipo">Eliminar</a>
                                     }
                                 </td>
                             </tr>
