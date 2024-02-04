@@ -16,10 +16,10 @@ namespace MVCVentas.Models
         [DataType(DataType.Currency)]
         public decimal Porcentaje { get; set; }
 
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime FechaInicio { get; set; }
 
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime FechaFin { get; set; }
 
         public int Id_Tipo { get; set; }
@@ -33,6 +33,7 @@ namespace MVCVentas.Models
         [NotMapped]
         public List<SelectListItem> ListaArticulos { get; set; }
 
+        public virtual ICollection<VMPromoDescuento_D> ListPromoDescuento_D { get; set; }
 
         public VMPromoDescuento_E()
         {

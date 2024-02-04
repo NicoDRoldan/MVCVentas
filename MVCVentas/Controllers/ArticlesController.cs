@@ -113,7 +113,7 @@ namespace MVCVentas.Controllers
             //Guarda el valor de fecha en memoria cache en un campo llamado "FechaEdicion".
             _memoryCache.Set("FechaEdicion", vMArticle.Fecha, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
 
             if (vMArticle == null)
