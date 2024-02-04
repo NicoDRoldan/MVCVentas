@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using MVCVentas.Models;
 
 namespace MVCVentas.Controllers
 {
+    [Authorize]
     public class ArticlesController : Controller
     {
         private readonly MVCVentasContext _context;
@@ -191,6 +193,7 @@ namespace MVCVentas.Controllers
 
                     #endregion Fin Lógica de Precio
 
+                    #region Inicio lógica de Stock
                     if (artExistente.UsaStock)
                     {
                         // Sigue usando Stock?
@@ -220,6 +223,7 @@ namespace MVCVentas.Controllers
                             };
                         }
                     }
+                    #endregion
 
                     artExistente.Nombre = vMArticle.Nombre;
                     artExistente.Id_Rubro = vMArticle.Id_Rubro;
@@ -257,6 +261,7 @@ namespace MVCVentas.Controllers
             var vMArticle = await _context.VMArticle
                 .Include(v => v.Rubro)
                 .FirstOrDefaultAsync(m => m.Id_Articulo == id);
+
             if (vMArticle == null)
             {
                 return NotFound();
@@ -274,10 +279,32 @@ namespace MVCVentas.Controllers
             {
                 return Problem("Entity set 'MVCVentasContext.VMArticle'  is null.");
             }
+
             var vMArticle = await _context.VMArticle.FindAsync(id);
+            var artPrecio = await _context.VMArticle
+                .Include(p => p.Precio)
+                .Include(s => s.Stock)
+                .FirstOrDefaultAsync(a => a.Id_Articulo == id);
+
             if (vMArticle != null)
             {
                 _context.VMArticle.Remove(vMArticle);
+            }
+
+            if(artPrecio.Precio != null && artPrecio.Stock != null)
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("No se puede eliminar el artículo ya que el mismo tiene precio y stock asociado.");
+                return RedirectToAction("Delete");
+            }
+            else if(artPrecio.Stock != null)
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("No se puede eliminar el artículo ya que el mismo tiene stock asociado.");
+                return RedirectToAction("Delete");
+            }
+            else if(artPrecio.Precio != null)
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("No se puede eliminar el artículo ya que el mismo tiene un precio asociado.");
+                return RedirectToAction("Delete");
             }
             
             await _context.SaveChangesAsync();

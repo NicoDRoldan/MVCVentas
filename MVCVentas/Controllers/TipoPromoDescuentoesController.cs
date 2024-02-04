@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using MVCVentas.Models;
 
 namespace MVCVentas.Controllers
 {
+    [Authorize]
     public class TipoPromoDescuentoesController : Controller
     {
         private readonly MVCVentasContext _context;
@@ -143,7 +145,18 @@ namespace MVCVentas.Controllers
             {
                 return Problem("Entity set 'MVCVentasContext.VMTipoPromoDescuento'  is null.");
             }
+
             var vMTipoPromoDescuento = await _context.VMTipoPromoDescuento.FindAsync(id);
+            var tiposPromos = await _context.VMTipoPromoDescuento
+                .Include(p => p.PromosDescuentosE)
+                .FirstOrDefaultAsync(t => t.Id_Tipo == id);
+
+            if (tiposPromos.PromosDescuentosE != null && tiposPromos.PromosDescuentosE.Any())
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("El tipo de promoción tiene una o más promociones. Debe eliminarlas para poder eliminar el tipo de promoción.");
+                return RedirectToAction("Delete");
+            }
+
             if (vMTipoPromoDescuento != null)
             {
                 _context.VMTipoPromoDescuento.Remove(vMTipoPromoDescuento);

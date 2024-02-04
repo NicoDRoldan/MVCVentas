@@ -10,5 +10,7 @@ namespace MVCVentas.Models
         public int Id_Tipo { get; set; }
 
         public string Descripcion { get; set; }
+
+        public virtual ICollection<VMPromoDescuento_E> PromosDescuentosE { get; set; }
     }
 }
