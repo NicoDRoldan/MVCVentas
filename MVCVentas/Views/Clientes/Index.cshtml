@@ -1,0 +1,116 @@
+﻿@model IEnumerable<MVCVentas.Models.VMCliente>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .custom-card {
+        width: 100%;
+        margin: 0; /* Eliminar margen si es necesario */
+    }
+
+    .table td {
+        white-space: nowrap;
+    }
+
+</style>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Clientes</title>
+</head>
+<body>
+    <div class="card shadow custom-card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Clientes</h6>
+            <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Cliente</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.CUIT)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.RazonSocial)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Nombre)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Telefono)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Email)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Direccion)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.FechaAlta)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Provincia)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Localidad)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CUIT)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.RazonSocial)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Telefono)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Email)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Direccion)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FechaAlta)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Provincia.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Localidad.Nombre)
+                                </td>
+                                <td class="text-center">
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.CodCliente">Editar</a>
+                                    <label>|</label>
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.CodCliente">Detalles</a>
+
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    {
+                                        <label>|</label>
+                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.CodCliente">Eliminar</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

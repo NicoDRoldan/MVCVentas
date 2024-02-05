@@ -39,5 +39,7 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMPromoDescuento_D> VMPromoDescuento_D { get; set; }
 
         public DbSet<MVCVentas.Models.VMTipoPromoDescuento> VMTipoPromoDescuento { get; set; }
+
+        public DbSet<MVCVentas.Models.VMCliente> VMCliente { get; set; }
     }
 }
