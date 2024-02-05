@@ -28,14 +28,6 @@ namespace MVCVentas.Data
 
         public DbSet<MVCVentas.Models.VMPromoDescuento_E> VMPromoDescuento_E { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<VMPromoDescuento_D>()
-                .HasKey(pd => new { pd.Id_Promocion, pd.Id_Articulo });
-
-            base.OnModelCreating(modelBuilder);
-        }
-
         public DbSet<MVCVentas.Models.VMPromoDescuento_D> VMPromoDescuento_D { get; set; }
 
         public DbSet<MVCVentas.Models.VMTipoPromoDescuento> VMTipoPromoDescuento { get; set; }
@@ -49,5 +41,16 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMConcepto> VMConcepto { get; set; }
 
         public DbSet<MVCVentas.Models.VMComprobante_E> VMComprobante_E { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<VMPromoDescuento_D>()
+                .HasKey(pd => new { pd.Id_Promocion, pd.Id_Articulo });
+
+            modelBuilder.Entity<VMComprobante_E>()
+                .HasKey(ce => new { ce.CodComprobante, ce.CodModulo });
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

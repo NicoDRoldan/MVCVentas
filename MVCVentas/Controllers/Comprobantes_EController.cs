@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -27,16 +28,16 @@ namespace MVCVentas.Controllers
         }
 
         // GET: Comprobantes_E/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details (string codComprobante, string codModulo)
         {
-            if (id == null || _context.VMComprobante_E == null)
+            if ((codComprobante == null && codModulo == null) || (_context.VMComprobante_E == null))
             {
                 return NotFound();
             }
 
             var vMComprobante_E = await _context.VMComprobante_E
                 .Include(v => v.Modulo)
-                .FirstOrDefaultAsync(m => m.CodComprobante == id);
+                .FirstOrDefaultAsync(m => m.CodComprobante == codComprobante && m.CodModulo == codModulo);
             if (vMComprobante_E == null)
             {
                 return NotFound();
@@ -59,6 +60,16 @@ namespace MVCVentas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CodComprobante,Nombre,CodModulo")] VMComprobante_E vMComprobante_E)
         {
+            var CodComprobante = await _context.VMComprobante_E
+                .FirstOrDefaultAsync(m => m.CodComprobante == vMComprobante_E.CodComprobante
+                                            && m.CodModulo == vMComprobante_E.CodModulo);
+
+            if(CodComprobante != null)
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("Error, ya existe un Código de Comprobante para el Módulo indicado.");
+                return RedirectToAction("Create");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(vMComprobante_E);
@@ -70,14 +81,16 @@ namespace MVCVentas.Controllers
         }
 
         // GET: Comprobantes_E/Edit/5
-        public async Task<IActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(string codComprobante, string codModulo)
         {
-            if (id == null || _context.VMComprobante_E == null)
+            if ((codComprobante == null && codModulo == null) || (_context.VMComprobante_E == null))
             {
                 return NotFound();
             }
 
-            var vMComprobante_E = await _context.VMComprobante_E.FindAsync(id);
+            var vMComprobante_E = await _context.VMComprobante_E
+                .Include(v => v.Modulo)
+                .FirstOrDefaultAsync(m => m.CodComprobante == codComprobante && m.CodModulo == codModulo);
             if (vMComprobante_E == null)
             {
                 return NotFound();
@@ -86,14 +99,11 @@ namespace MVCVentas.Controllers
             return View(vMComprobante_E);
         }
 
-        // POST: Comprobantes_E/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("CodComprobante,Nombre,CodModulo")] VMComprobante_E vMComprobante_E)
+        public async Task<IActionResult> Edit(string codComprobante, string codModulo, [Bind("CodComprobante,Nombre,CodModulo")] VMComprobante_E vMComprobante_E)
         {
-            if (id != vMComprobante_E.CodComprobante)
+            if (codComprobante != vMComprobante_E.CodComprobante)
             {
                 return NotFound();
             }
@@ -107,7 +117,7 @@ namespace MVCVentas.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!VMComprobante_EExists(vMComprobante_E.CodComprobante))
+                    if (!VMComprobante_EExists(vMComprobante_E.CodComprobante, vMComprobante_E.CodModulo))
                     {
                         return NotFound();
                     }
@@ -122,17 +132,16 @@ namespace MVCVentas.Controllers
             return View(vMComprobante_E);
         }
 
-        // GET: Comprobantes_E/Delete/5
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string codComprobante, string codModulo)
         {
-            if (id == null || _context.VMComprobante_E == null)
+            if ((codComprobante == null && codModulo == null) || (_context.VMComprobante_E == null))
             {
                 return NotFound();
             }
 
             var vMComprobante_E = await _context.VMComprobante_E
                 .Include(v => v.Modulo)
-                .FirstOrDefaultAsync(m => m.CodComprobante == id);
+                .FirstOrDefaultAsync(m => m.CodComprobante == codComprobante && m.CodModulo == codModulo);
             if (vMComprobante_E == null)
             {
                 return NotFound();
@@ -141,16 +150,15 @@ namespace MVCVentas.Controllers
             return View(vMComprobante_E);
         }
 
-        // POST: Comprobantes_E/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string codComprobante, string codModulo)
         {
             if (_context.VMComprobante_E == null)
             {
                 return Problem("Entity set 'MVCVentasContext.VMComprobante_E'  is null.");
             }
-            var vMComprobante_E = await _context.VMComprobante_E.FindAsync(id);
+            var vMComprobante_E = await _context.VMComprobante_E.FindAsync(codComprobante, codModulo);
             if (vMComprobante_E != null)
             {
                 _context.VMComprobante_E.Remove(vMComprobante_E);
@@ -160,9 +168,9 @@ namespace MVCVentas.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool VMComprobante_EExists(string id)
+        private bool VMComprobante_EExists(string codComprobante, string codModulo)
         {
-          return _context.VMComprobante_E.Any(e => e.CodComprobante == id);
+          return _context.VMComprobante_E.Any(e => e.CodComprobante == codComprobante && e.CodModulo == codModulo);
         }
     }
 }
