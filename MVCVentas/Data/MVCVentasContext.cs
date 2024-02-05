@@ -41,5 +41,13 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMTipoPromoDescuento> VMTipoPromoDescuento { get; set; }
 
         public DbSet<MVCVentas.Models.VMCliente> VMCliente { get; set; }
+
+        public DbSet<MVCVentas.Models.VMFormaPago> VMFormaPago { get; set; }
+
+        public DbSet<MVCVentas.Models.VMModulo> VMModulo { get; set; }
+
+        public DbSet<MVCVentas.Models.VMConcepto> VMConcepto { get; set; }
+
+        public DbSet<MVCVentas.Models.VMComprobante_E> VMComprobante_E { get; set; }
     }
 }
