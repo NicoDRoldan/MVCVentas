@@ -54,7 +54,39 @@
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Menú
+                Ventas
+            </div>
+
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" asp asp-area="" asp-controller="Clientes" asp-action="Index">
+                    <i class="fas fa-fw fa-cash-register"></i>
+                    <span>Sistema de Ventas</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
+                   aria-expanded="true" aria-controls="collapseOne">
+                    <i class="fas fa-fw fa-chart-pie"></i>
+                    <span>Reportes de Ventas</span>
+                </a>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Config. Ventas:</h6>
+                        <a class="collapse-item" asp asp-area="" asp-controller="Ventas" asp-action="Index">Ventas</a>
+                        <a class="collapse-item" asp asp-area="" asp-controller="DetalleVentas" asp-action="Index">Detalle Ventas</a>
+                        <a class="collapse-item" asp asp-area="" asp-controller="FormasPagoes" asp-action="Index">Formas de Pago</a>
+                    </div>
+                </div>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Artículos
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
@@ -91,6 +123,14 @@
                 </div>
             </li>
 
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Usuarios
+            </div>
+
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
@@ -109,7 +149,20 @@
             </li>
 
             <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Clientes
+            </div>
+
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" asp asp-area="" asp-controller="Clientes" asp-action="Index">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
 
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
