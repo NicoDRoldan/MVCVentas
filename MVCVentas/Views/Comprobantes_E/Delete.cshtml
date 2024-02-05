@@ -1,0 +1,40 @@
+﻿@model MVCVentas.Models.VMComprobante_E
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Eliminar Comprobante</h1>
+
+<h3>¿Quiere eliminar este comprobante?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Código de Comprobante
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CodComprobante)
+        </dd>
+        <dt class="col-sm-2">
+            Descripción de Comprobante
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Nombre)
+        </dd>
+        <dt class="col-sm-2">
+            Módulo
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Modulo.CodModulo)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="CodComprobante" />
+        <input type="hidden" asp-for="CodModulo" />
+        <input type="submit" value="Eliminar" class="btn btn-danger" /> |
+        <a asp-action="Index">Volver</a>
+    </form>
+</div>

@@ -1,0 +1,73 @@
+﻿@model IEnumerable<MVCVentas.Models.VMComprobante_E>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .custom-card {
+        width: 65%;
+        margin: 10px auto;
+    }
+
+    .custom-column {
+        width: 50%;
+    }
+</style>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Comprobantes</title>
+</head>
+<body>
+    <div class="card shadow mb-4 custom-card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Comprobantes</h6>
+            <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Comprobante</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                                Comprobante
+                            </th>
+                            <th>
+                                Descripción
+                            </th>
+                            <th>
+                                Módulo
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CodComprobante)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Modulo.CodModulo)
+                                </td>
+                                <td class="text-center">
+                                    @Html.ActionLink("Editar", "Edit", new { codComprobante = item.CodComprobante, codModulo = item.CodModulo }, new { @class = "btn btn-primary btn-sm" }) |
+                                    @Html.ActionLink("Detalles", "Details", new { codComprobante = item.CodComprobante, codModulo = item.CodModulo }, new { @class = "btn btn-primary btn-sm"}) |
+                                    @Html.ActionLink("Eliminar", "Delete", new { codComprobante = item.CodComprobante, codModulo = item.CodModulo }, new { @class = "btn btn-danger btn-sm"})
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
