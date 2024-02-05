@@ -52,5 +52,9 @@ namespace MVCVentas.Data
 
             base.OnModelCreating(modelBuilder);
         }
+
+        public DbSet<MVCVentas.Models.VMSucursal> VMSucursal { get; set; }
+
+        public DbSet<MVCVentas.Models.VMTipoFactura> VMTipoFactura { get; set; }
     }
 }
