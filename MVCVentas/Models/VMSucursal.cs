@@ -13,5 +13,7 @@ namespace MVCVentas.Models
 
         [ForeignKey("Id_TipoFactura")]
         public virtual VMTipoFactura TipoFactura { get; set; }
+
+        public virtual ICollection<VMComprobante_N> Comprobante_N { get; set; }
     }
 }

@@ -48,7 +48,7 @@ namespace MVCVentas.Controllers
         // GET: Sucursales/Create
         public IActionResult Create()
         {
-            ViewData["Id_TipoFactura"] = new SelectList(_context.Set<VMTipoFactura>(), "Id_TipoFactura", "Id_TipoFactura");
+            ViewData["Id_TipoFactura"] = new SelectList(_context.Set<VMTipoFactura>(), "Id_TipoFactura", "Nombre");
             return View();
         }
 
@@ -82,7 +82,7 @@ namespace MVCVentas.Controllers
             {
                 return NotFound();
             }
-            ViewData["Id_TipoFactura"] = new SelectList(_context.Set<VMTipoFactura>(), "Id_TipoFactura", "Id_TipoFactura", vMSucursal.Id_TipoFactura);
+            ViewData["Id_TipoFactura"] = new SelectList(_context.Set<VMTipoFactura>(), "Id_TipoFactura", "Nombre", vMSucursal.Id_TipoFactura);
             return View(vMSucursal);
         }
 

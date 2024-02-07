@@ -1,0 +1,90 @@
+﻿@model IEnumerable<MVCVentas.Models.VMVentas_D>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Renglon)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Cantidad)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Detalle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PrecioUnitario)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PrecioTotal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Articulo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ventas_E)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Comprobante)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Modulo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sucursal)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Renglon)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Cantidad)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Detalle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PrecioUnitario)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PrecioTotal)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Articulo.Id_Articulo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Ventas_E.NumVenta)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Comprobante.CodComprobante)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Modulo.CodModulo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sucursal.NumSucursal)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,0 +1,84 @@
+﻿@model IEnumerable<MVCVentas.Models.VMVentas_E>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Fecha)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Hora)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumCaja)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Comprobante)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Modulo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Sucursal)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FormaPago)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Cliente)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Usuario)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fecha)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Hora)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumCaja)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Comprobante.CodComprobante)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Modulo.CodModulo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sucursal.NumSucursal)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FormaPago.Id_FormaPago)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Cliente.CodCliente)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Usuario.Usuario)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

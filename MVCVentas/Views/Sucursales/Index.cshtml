@@ -14,16 +14,22 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.TipoFactura)
+                Sucursal
+            </th>
+            <th>
+                Tipo de Factura
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumSucursal)
+                </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TipoFactura.Id_TipoFactura)
+                @Html.DisplayFor(modelItem => item.TipoFactura.Nombre)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.NumSucursal">Edit</a> |

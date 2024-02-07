@@ -56,6 +56,15 @@ namespace MVCVentas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CodModulo,Descripcion")] VMModulo vMModulo)
         {
+            var ModuloExiste = await _context.VMModulo
+                                    .FirstOrDefaultAsync(m => m.CodModulo == vMModulo.CodModulo);
+
+            if(ModuloExiste != null)        
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("El código del módulo indicado ya existe.");
+                return RedirectToAction("Create");
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(vMModulo);
@@ -143,7 +152,18 @@ namespace MVCVentas.Controllers
             {
                 return Problem("Entity set 'MVCVentasContext.VMModulo'  is null.");
             }
+            
             var vMModulo = await _context.VMModulo.FindAsync(id);
+            var ModuloExiste = await _context.VMModulo
+                                    .Include(m => m.Comprobantes_N)
+                                    .FirstOrDefaultAsync(m => m.CodModulo == id);
+
+            if(ModuloExiste != null)
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("No se puede eliminar el módulo, ya que tiene comprobantes asociados.");
+                return RedirectToAction("Delete");
+            }
+
             if (vMModulo != null)
             {
                 _context.VMModulo.Remove(vMModulo);

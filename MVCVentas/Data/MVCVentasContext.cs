@@ -42,19 +42,39 @@ namespace MVCVentas.Data
 
         public DbSet<MVCVentas.Models.VMComprobante_E> VMComprobante_E { get; set; }
 
+        public DbSet<MVCVentas.Models.VMSucursal> VMSucursal { get; set; }
+
+        public DbSet<MVCVentas.Models.VMTipoFactura> VMTipoFactura { get; set; }
+
+        public DbSet<MVCVentas.Models.VMComprobante_N> VMComprobante_N { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VMPromoDescuento_D>()
                 .HasKey(pd => new { pd.Id_Promocion, pd.Id_Articulo });
 
+            modelBuilder.Entity<VMComprobante_N>()
+                .HasKey(cn => new { cn.CodComprobante, cn.CodModulo, cn.NumSucursal });
+
             modelBuilder.Entity<VMComprobante_E>()
                 .HasKey(ce => new { ce.CodComprobante, ce.CodModulo });
+
+            modelBuilder.Entity<VMVentas_E>()
+                .HasKey(ve => new { ve.NumVenta, ve.CodComprobante, ve.CodModulo, ve.NumSucursal });
+
+            modelBuilder.Entity<VMVentas_D>()
+                .HasKey(vd => new { vd.NumVenta, vd.CodComprobante, vd.CodModulo, vd.NumSucursal });
+
+            modelBuilder.Entity<VMVentas_I>()
+                .HasKey(vi => new { vi.NumVenta, vi.CodComprobante, vi.CodModulo, vi.NumSucursal });
 
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<MVCVentas.Models.VMSucursal> VMSucursal { get; set; }
+        public DbSet<MVCVentas.Models.VMVentas_E> VMVentas_E { get; set; }
 
-        public DbSet<MVCVentas.Models.VMTipoFactura> VMTipoFactura { get; set; }
+        public DbSet<MVCVentas.Models.VMVentas_D> VMVentas_D { get; set; }
+
+        public DbSet<MVCVentas.Models.VMVentas_I> VMVentas_I { get; set; }
     }
 }
