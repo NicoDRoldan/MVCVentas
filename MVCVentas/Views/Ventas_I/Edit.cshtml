@@ -1,0 +1,48 @@
+﻿@model MVCVentas.Models.VMVentas_I
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>VMVentas_I</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="NumVenta" />
+            <input type="hidden" asp-for="CodComprobante" />
+            <input type="hidden" asp-for="CodModulo" />
+            <input type="hidden" asp-for="NumSucursal" />
+            <div class="form-group">
+                <label asp-for="CodConcepto" class="control-label"></label>
+                <select asp-for="CodConcepto" class="form-control" asp-items="ViewBag.CodConcepto"></select>
+                <span asp-validation-for="CodConcepto" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Importe" class="control-label"></label>
+                <input asp-for="Importe" class="form-control" />
+                <span asp-validation-for="Importe" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Descuento" class="control-label"></label>
+                <input asp-for="Descuento" class="form-control" />
+                <span asp-validation-for="Descuento" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

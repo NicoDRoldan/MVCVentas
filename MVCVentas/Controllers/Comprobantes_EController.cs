@@ -28,7 +28,7 @@ namespace MVCVentas.Controllers
         }
 
         // GET: Comprobantes_E/Details/5
-        public async Task<IActionResult> Details (string codComprobante, string codModulo)
+        public async Task<IActionResult> Details(string codComprobante, string codModulo)
         {
             if ((codComprobante == null && codModulo == null) || (_context.VMComprobante_E == null))
             {
@@ -64,7 +64,7 @@ namespace MVCVentas.Controllers
                 .FirstOrDefaultAsync(m => m.CodComprobante == vMComprobante_E.CodComprobante
                                             && m.CodModulo == vMComprobante_E.CodModulo);
 
-            if(CodComprobante != null)
+            if (CodComprobante != null)
             {
                 TempData["MensajeError"] = Uri.EscapeDataString("Error, ya existe un Código de Comprobante para el Módulo indicado.");
                 return RedirectToAction("Create");
@@ -158,19 +158,32 @@ namespace MVCVentas.Controllers
             {
                 return Problem("Entity set 'MVCVentasContext.VMComprobante_E'  is null.");
             }
+
             var vMComprobante_E = await _context.VMComprobante_E.FindAsync(codComprobante, codModulo);
+
+            var existeComprobanteN = await _context.VMComprobante_N
+                                        .Include(c => c.Sucursal)
+                                            .ThenInclude(s => s.Comprobante_N)
+                                        .FirstOrDefaultAsync(c => c.CodComprobante == codComprobante && c.CodModulo == codModulo);
+
+            if (existeComprobanteN != null)
+            {
+                TempData["MensajeError"] = Uri.EscapeDataString("Error, no se puede eliminar el comprobante porque está asociado a una sucursal.");
+                return RedirectToAction("Delete", new { codComprobante, codModulo });
+            }
+
             if (vMComprobante_E != null)
             {
                 _context.VMComprobante_E.Remove(vMComprobante_E);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool VMComprobante_EExists(string codComprobante, string codModulo)
         {
-          return _context.VMComprobante_E.Any(e => e.CodComprobante == codComprobante && e.CodModulo == codModulo);
+            return _context.VMComprobante_E.Any(e => e.CodComprobante == codComprobante && e.CodModulo == codModulo);
         }
     }
 }

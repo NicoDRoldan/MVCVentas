@@ -1,4 +1,4 @@
-﻿@model MVCVentas.Models.VMComprobante_E
+﻿@model MVCVentas.Models.VMComprobante_N
 
 @{
     ViewData["Title"] = "Create";
@@ -6,7 +6,7 @@
 }
 
 <br>
-<h2>Nuevo Comprobante</h2>
+<h2>Nuevo Comprobante con Sucursal</h2>
 
 <hr />
 <div class="row">
@@ -15,27 +15,30 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="CodComprobante" class="control-label">Código de Comprobante</label>
-                <input asp-for="CodComprobante" class="form-control" />
-                <span asp-validation-for="CodComprobante" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label">Descripción de Comprobante</label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+                <select asp-for="CodComprobante" class ="form-control" asp-items="ViewBag.CodComprobante"></select>
             </div>
             <div class="form-group">
                 <label asp-for="CodModulo" class="control-label">Módulo</label>
-                <select asp-for="CodModulo" class="form-control" asp-items="ViewBag.CodModulo"></select>
+                <select asp-for="CodModulo" class ="form-control" asp-items="ViewBag.CodModulo"></select>
             </div>
             <div class="form-group">
-                <input type="submit" value="Crear" class="btn btn-primary" />
+                <label asp-for="NumComprobante" class="control-label">Número de comprobante</label>
+                <input asp-for="NumComprobante" class="form-control" />
+                <span asp-validation-for="NumComprobante" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumSucursal" class="control-label">Número de Sucursal</label>
+                <select asp-for="NumSucursal" class ="form-control" asp-items="ViewBag.NumSucursal"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Volver</a>
+    <a asp-action="Index">Back to List</a>
 </div>
 
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
@@ -71,4 +74,19 @@
     </script>
 
     <script src="~/js/site.js"></script>
+
+    @* Script para cambiar dinamicamente los valores de la lista de modulos dependiendo del codigo de comprobante correspondiente. *@
+    <script>
+        $(document).ready(function () {
+            $('#CodComprobante').change(function () {
+                var codComprobante = $(this).val();
+                $.get('/Comprobantes_N/GetModulosByComprobante', { codComprobante: codComprobante }, function (data) {
+                    $('#CodModulo').empty();
+                    $.each(data, function (index, value) {
+                        $('#CodModulo').append('<option value="' + value + '">' + value + '</option>');
+                    });
+                });
+            });
+        });
+    </script>
 }
