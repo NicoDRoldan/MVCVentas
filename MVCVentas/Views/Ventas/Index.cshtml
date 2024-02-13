@@ -1,0 +1,379 @@
+﻿@model MVCVentas.Models.VMVentas
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@{
+    var listaArticulos = ViewData["ListaArticulos"] as List<SelectListItem>;
+    var listaVacia = ViewData["ArticulosEnResumenVentas"] as List<MVCVentas.Models.VMArticle>;
+}
+
+@{
+    Layout = "_Layout1";
+}
+
+<link href="~/css/sistemaventasstyle.css" rel="stylesheet" />
+<link href="~/css/sistemaventasresumenventa.css" rel="stylesheet" />
+
+<html>
+<body>
+    <div class="container-fluid">
+        <div class="grid-container">
+            <div class="tabla-articulos" id="div-tabla-articulos">
+                <div>
+                    <h3>Artículos</h3>
+                </div>
+                <div class="contenedor-tabla">
+                    <table id="table-Articulos">
+                        <tbody id="tabla-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="navegacion">
+                    <button class="anterior" disabled>Anterior</button>
+                    <button class="siguiente">Siguiente</button>
+                </div>
+            </div>
+            <div class="resumen-venta">
+                <div>
+                    <h3>Resumen de la Venta</h3>
+                </div>
+                <div id="div-Resumen-Venta">
+                    <table id="table-resumen-venta" class="display">
+                        <thead>
+                            <tr>
+                                <th id="id_ArticuloH">ID</th>
+                                <th id="nombreH">Nombre</th>
+                                <th id="precioH">Precio</th>
+                                <th id="cantidadH">Cantidad</th>
+                                <th id="precio-TotalH">Total</th>
+                                <th id="AccionH">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="contenedor-categorias-promociones">
+            </div>
+
+            <div class="contenedor-detalle-venta">
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-10">
+                        <label>Detalle de la Venta</label>
+                    </dt>
+                    <div class="row">
+                        <label asp-for="FormaPago" class="col-sm-3">Medio de Pago:</label>
+                        <div class="col-sm-4 form-group">
+                            <select asp-for="FormaPago.Id_FormaPago" class="form-control" asp-items="ViewBag.ListaMedioPago"></select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label asp-for="Cliente" class="col-sm-3">Cliente:</label>
+                        <div class="col-sm-4 form-group" id="cliente-select-btn">
+                            <div class="row">
+                                <div class="col-sm-4 form-group">
+                                    <select id="cliente-select" asp-for="Cliente.CodCliente" class="form-control" asp-items="ViewBag.ListaClientes"></select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <button class="btn btn-primary" id="btn-new-client" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="nuevoClienteModal" tabindex="-1" role="dialog" aria-labelledby="nuevoClienteModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="cliente-modal">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="nuevoClienteModalLabel">Crear Cliente</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Clientes/_PartialCreateClientes.cshtml", new MVCVentas.Models.VMCliente(), ViewData)
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    <button type="button" class="btn btn-primary" onclick="crearCliente()">Agregar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label class="col-sm-3">Descuento:</label>
+                        <div class="col-sm-4 form-group">
+                            <input type="text" class="form-control" id="descuento" value="0" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row div-subtotal">
+                        <label class="col-sm-3">Subtotal:</label>
+                        <div class="col-sm-4 form-group">
+                            <input type="text" class="form-control" id="subtotal" value="0" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row div-total">
+                        <label class="col-sm-3">Total:</label>
+                        <div class="col-sm-4 form-group">
+                            <input type="text" class="form-control" id="total" value="0" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row" id="btn-vender-cancelar">
+                        <dd class="">
+                            <button class="btn btn-danger" id="btn-venta">Cancelar Venta</button>
+                            <button class="btn btn-success" id="btn-cancel">Vender</button>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+@section Scripts {
+
+    <!-- Script para el manejo de la tabla de artículos -->
+    <script>
+
+        // Array con los datos de los artículos (ejemplo)
+        const articulos = @Html.Raw(ViewData["JsonListaArticulos"]);
+
+        // Variables para la paginación
+        let paginaActual = 1;
+        const articulosPorPagina = 12; // Cambiar el número de artículos por página a 12
+        const columnasPorFila = 3; // Definir el número de columnas por fila
+
+        const tablaBody = document.getElementById("tabla-body");
+        tablaBody.innerHTML = ""; // Borrar filas anteriores
+
+        // Obtener los artículos de la página actual
+        const articulosPaginaActual = articulos.slice(
+            (paginaActual - 1) * articulosPorPagina,
+            paginaActual * articulosPorPagina
+        );
+
+        // Función para agregar event listeners a los botones de artículos
+        function agregarEventListenersBotonesArticulos() {
+            tablaBody.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    // Obtener el ID del artículo
+                    const Id_Articulo = this.dataset.id;
+                    // Buscar el artículo en la lista de artículos
+                    const articuloLista = articulos.find(articulo => articulo.Value === Id_Articulo);
+                    // Llamar a la función para agregar el artículo al resumen de la venta
+                    agregarArticuloAlResumen(articuloLista);
+                });
+            });
+        }
+
+        function actualizarEventListenersEliminarArticulo(){
+            document.querySelectorAll(".eliminar").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    const fila = this.closest("tr");
+                    const id_Articulo = fila.dataset.id;
+                    fila.remove();
+                    });
+            });
+        }
+
+        // Actualizar los botones de navegación y los botones de artículos
+        function actualizarBotonesArticulos() {
+            tablaBody.innerHTML = ""; // Limpiar el contenido existente antes de agregar nuevas filas
+
+            // Obtener los artículos de la página actual
+            const articulosPaginaActual = articulos.slice(
+                (paginaActual - 1) * articulosPorPagina,
+                paginaActual * articulosPorPagina
+            );
+
+            // Agrupar los artículos en filas y columnas
+            for (let i = 0; i < articulosPaginaActual.length; i += columnasPorFila) {
+                const fila = document.createElement("tr");
+                for (let j = i; j < i + columnasPorFila && j < articulosPaginaActual.length; j++) {
+                    const articulo = articulosPaginaActual[j];
+                    const celda = document.createElement("td");
+                    const botonArticulo = document.createElement("button");
+                    botonArticulo.innerHTML = `<strong>${articulo.Text}</strong> (${articulo.Value})</strong><br>$${articulo.Precio}`;
+                    botonArticulo.dataset.id = articulo.Value;
+                    celda.appendChild(botonArticulo);
+                    fila.appendChild(celda);
+                }
+                tablaBody.appendChild(fila);
+            }
+
+            // Mostrar/ocultar botones de navegación
+            const botonAnterior = document.querySelector(".anterior");
+            const botonSiguiente = document.querySelector(".siguiente");
+
+            botonAnterior.disabled = paginaActual === 1;
+            botonSiguiente.disabled = articulosPaginaActual.length < articulosPorPagina;
+
+            // Agregar event listeners a los botones de artículos
+            agregarEventListenersBotonesArticulos();
+        }
+
+        // Mostrar la primera página al cargar la página
+        actualizarBotonesArticulos();
+
+        // Eventos para los botones de navegación
+        document.querySelector(".anterior").addEventListener("click", () => {
+            paginaActual--;
+            actualizarBotonesArticulos();
+        });
+
+        document.querySelector(".siguiente").addEventListener("click", () => {
+            paginaActual++;
+            actualizarBotonesArticulos();
+        });
+
+        function agregarArticuloAlResumen(articulo) {
+            
+            // Desestructurar el objeto articulo
+            const {
+                Value: Id_Articulo,
+                Text: Nombre,
+                Precio: Precio } = articulo;
+
+            // Verifico que el artículo no exista en el resumen de la venta
+            const articuloExistente = document.querySelector(`#table-resumen-venta tr[data-id="${Id_Articulo}"]`);
+
+            // Verificar si la fila de la tabla está vacía
+            const filasResumen = document.querySelectorAll('#table-resumen-venta tbody tr');
+            let filaVacia = -1;
+
+            for (let i = 0; i < filasResumen.length; i++) {
+                if (filasResumen[i].getAttribute('data-id') === null) {
+                    filaVaciaIndex = i;
+                    break;
+                }
+            }
+
+            if (articuloExistente) {
+                // Si el artículo ya existe en el resumen de la venta, aumentar la cantidad
+                const cantidad = articuloExistente.querySelector(".cantidad");
+                cantidad.textContent = Number(cantidad.textContent) + 1;
+                // Actualizar el precio total
+                const precioTotal = articuloExistente.querySelector(".precio-total");
+                precioTotal.textContent = (Number(precioTotal.textContent) + Precio).toFixed(2);
+            } 
+            else {
+
+                console.log("No existe fila vacía");
+                // Si no se encuentra ninguna fila vacía, agregar una nueva fila al final
+                const fila = document.createElement("tr");
+                fila.dataset.id = Id_Articulo;
+                fila.innerHTML = `
+                  <td id="id_Articulo">${Id_Articulo}</td>
+                  <td id="nombre">${Nombre}</td>
+                  <td id="precio">${Precio}</td>
+                  <td id="cantidad" class="cantidad">1</td>
+                  <td id="precio-Total" class="precio-total">${Precio}</td>
+                  <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                `;
+                document.querySelector("#table-resumen-venta tbody").appendChild(fila);
+            }
+
+            actualizarEventListenersEliminarArticulo();
+            actualizarEventListenersEliminarArticuloCalcularTotal();
+            // Llamar a las funciones para recalcular subtotal y total
+            calcularSubTotal();
+            calcularTotal();
+        }
+
+//Script para funciones de SubTotal y Total
+        function calcularSubTotal() {
+            let subTotal = 0;
+            const preciosTotales = document.querySelectorAll("#table-resumen-venta .precio-total");
+            for (const precioTotal of preciosTotales) {
+                subTotal += parseFloat(precioTotal.textContent);
+            }
+            document.getElementById("subtotal").value = subTotal.toFixed(2);
+        }
+
+        function calcularTotal() {
+            calcularSubTotal();
+            const subTotal = parseFloat(document.getElementById("subtotal").value);
+            const total = subTotal;
+            document.getElementById("total").value = total.toFixed(2);
+        }
+
+        function actualizarEventListenersEliminarArticuloCalcularTotal() {
+            document.querySelectorAll(".eliminar").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    const fila = this.closest("tr");
+                    const id_Articulo = fila.dataset.id;
+                    fila.remove();
+                    calcularTotal();
+                });
+            });
+        }
+
+        <!-- DataTables -->
+            $(document).ready(function () {
+                // Inicializar la tabla con DataTables
+                $('#table-resumen-venta').DataTable({
+                    "paging": false,          // Desactivar paginación
+                    "scrollY": "322px",       // Altura fija con barra de desplazamiento si es necesario
+                    "scrollCollapse": true,   // Colapsar la tabla si la altura es menor que el contenido
+                    "searching": false,        // Habilitar la función de búsqueda
+                    "ordering": false,         // Deshabilitar la ordenación
+                    "info": false,            // Deshabilitar la información de la tabla
+
+                });
+            });
+        
+    </script>
+
+    <!-- Script para el manejo de la creación de un nuevo cliente -->
+    <script>
+        // Función para agregar un nuevo cliente
+        function crearCliente() {
+            var formData = $("#formCliente").serialize();
+
+            $.ajax({
+                url: '@Url.Action("CrearCliente", "Ventas")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success == true) {
+                        var selectClientes = $('#cliente-select');
+
+                        // Actualizar la lista de clientes
+                        var nuevoClienteOption = $('<option>', {
+                            value: response.cliente.codCliente,
+                            text: response.cliente.nombre
+                        });
+
+                        // Agregar la nueva opción al select de clientes
+                        selectClientes.append(nuevoClienteOption);
+
+                        // Seleccionar el nuevo cliente en el select
+                        selectClientes.val(response.cliente.codCliente);
+
+                        // Cerrar el modal
+                        $('#nuevoClienteModal').modal('hide');
+
+                        // Limpiar los campos del formulario
+                        $('#formCliente')[0].reset();
+                    }
+                    else {
+                        console.log("No se llamó al cierre del modal ");
+                    }
+                },
+                error: function (response) {
+                }
+            })
+        }
+    </script>
+}

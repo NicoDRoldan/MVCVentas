@@ -23,8 +23,10 @@ namespace MVCVentas.Controllers
 
             if(claimUser.Identity.IsAuthenticated )
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Ventas");
             }
+
+            HttpContext.Session.Set("VMVentas", new VMVentas());
 
             return View();
         }
@@ -58,7 +60,7 @@ namespace MVCVentas.Controllers
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), properties);
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Ventas");
                 }
             }
 
