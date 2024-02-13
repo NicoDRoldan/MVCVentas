@@ -130,7 +130,7 @@
                     <div class="row" id="btn-vender-cancelar">
                         <dd class="">
                             <button class="btn btn-danger" id="btn-venta">Cancelar Venta</button>
-                            <button class="btn btn-success" id="btn-cancel">Vender</button>
+                            <button class="btn btn-success" id="btn-cancel-venta">Vender</button>
                         </dd>
                     </div>
                 </dl>
@@ -187,7 +187,7 @@
             });
         }
 
-        // Actualizar los botones de navegación y los botones de artículos
+        //////////////////////////////////// Actualizar los botones de navegación y los botones de artículos ////////////////////////////////////
         function actualizarBotonesArticulos() {
             tablaBody.innerHTML = ""; // Limpiar el contenido existente antes de agregar nuevas filas
 
@@ -236,6 +236,8 @@
             paginaActual++;
             actualizarBotonesArticulos();
         });
+
+        //////////////////////////////////// Funciones para agregar artículo al resumen de la venta ////////////////////////////////////
 
         function agregarArticuloAlResumen(articulo) {
             
@@ -291,7 +293,8 @@
             calcularTotal();
         }
 
-//Script para funciones de SubTotal y Total
+        //////////////////////////////////// Script para funciones de SubTotal y Total ////////////////////////////////////
+
         function calcularSubTotal() {
             let subTotal = 0;
             const preciosTotales = document.querySelectorAll("#table-resumen-venta .precio-total");
@@ -332,10 +335,27 @@
 
                 });
             });
+
+        //////////////////////////////////// Función para cancelar la venta ////////////////////////////////////
+        function varciarTablaResumen() {
+
+            // Limpiar la tabla de resumen de venta
+            const tablaResumenVenta = document.getElementById("table-resumen-venta").querySelector("tbody");
+            tablaResumenVenta.innerHTML = "";
+
+            // Llamar a las funciones para recalcular subtotal y total
+            calcularSubTotal();
+            calcularTotal();
+        }
+
+        // Evento para el botón de cancelar venta
+        document.getElementById("btn-venta").addEventListener("click", function () {
+            varciarTablaResumen();
+        });
         
     </script>
 
-    <!-- Script para el manejo de la creación de un nuevo cliente -->
+    <!-- //////////////////////////////////// Script para el manejo de la creación de un nuevo cliente //////////////////////////////////// -->
     <script>
         // Función para agregar un nuevo cliente
         function crearCliente() {
