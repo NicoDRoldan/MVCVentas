@@ -23,8 +23,10 @@ namespace MVCVentas.Controllers
 
             if(claimUser.Identity.IsAuthenticated )
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Ventas");
             }
+
+            HttpContext.Session.Set("VMVentas", new VMVentas());
 
             return View();
         }
@@ -43,7 +45,8 @@ namespace MVCVentas.Controllers
                     List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.NameIdentifier, modelLogin.User),
-                    new Claim(ClaimTypes.Role, user.Categoria.Nombre)
+                    new Claim(ClaimTypes.Role, user.Categoria.Nombre),
+                    new Claim("userid", user.Id_Usuario.ToString())
                 };
 
                     ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims,
@@ -58,7 +61,7 @@ namespace MVCVentas.Controllers
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity), properties);
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Ventas");
                 }
             }
 

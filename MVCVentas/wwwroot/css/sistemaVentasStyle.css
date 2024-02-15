@@ -1,0 +1,204 @@
+﻿.container-fluid {
+    display: flex;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 48%; /* Define dos columnas: una que ocupe el espacio restante y otra que ocupe el 48% del ancho */
+    /*gap: 100px;*/ /* Espacio entre las columnas */
+}
+
+.tabla-articulos {
+    width: 500px; /* Ajusta el ancho según tu diseño */
+    height: 405px; /* Ajusta el alto según tu diseño */
+}
+
+    .tabla-articulos .contenedor-tabla {
+        flex-grow: 1;
+        height: 400px; /* Ajusta el alto según tu diseño */
+    }
+
+#div-tabla-articulos {
+}
+
+.resumen-venta {
+    width: 650px; /* Ajusta el ancho según tu diseño */
+    height: 355px;
+}
+
+.contenedor-tabla {
+    overflow: hidden;
+    box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tabla-body td {
+    width: 33.33%;
+    height: 100px;
+}
+
+    #tabla-body td button {
+        width: 100%;
+        height: 100%;
+        border: none; /* Eliminar el borde */
+        background-color: transparent; /* Hacer transparente el fondo */
+        cursor: pointer;
+    }
+
+        #tabla-body td button:hover {
+            background-color: #ddd;
+        }
+
+td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.navegacion {
+    text-align: right;
+    margin-top: 10px;
+}
+
+    .navegacion button {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
+    }
+
+        .navegacion button:hover {
+            background-color: #ddd;
+        }
+
+#table-resumen-venta {
+    border-collapse: collapse;
+    border: 1px solid #ccc;
+}
+
+    #table-resumen-venta td {
+        border: 1px solid #ccc;
+    }
+
+    #table-resumen-venta tr:hover {
+        background-color: #ddd;
+    }
+
+.dataTables_empty {
+    display: none;
+}
+
+#div-Resumen-Venta {
+    height: 355px;
+    box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+.contenedor-detalle-venta{
+    width: 650px;
+    height: 270px;
+}
+
+    .contenedor-detalle-venta input{
+        width: 200px;
+    }
+
+    .contenedor-detalle-venta dl {
+        width: 650px;
+        height: 270px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .contenedor-detalle-venta dt {
+        margin: 0;
+        padding: 0;
+    }
+
+    .contenedor-detalle-venta dl div {
+        width: 650px;
+        margin: 0;
+        padding: 0;
+    }
+
+#cliente-select-btn select {
+    width: 118%;
+}
+
+#cliente-select-btn div {
+    width: 550px;
+    justify-content: space-between;
+}
+
+#div-comprobante-select {
+    width: 120px !important;
+    margin-left: -10px;
+}
+
+#div-cliente-select select {
+    width: 200px !important;
+}
+
+#FormaPago_Id_FormaPago{
+width: 200px !important;
+}
+
+#btn-new-client {
+    margin-left: -6px;
+}
+
+.contenedor-categorias-promociones {
+    margin-top: 100px;
+}
+
+
+.contenedor-detalle-venta {
+    position: relative; /* Establecer la posición relativa para alinear los botones relativos a este contenedor */
+}
+
+#btn-vender-cancelar {
+    position: absolute; /* Establecer la posición absoluta para que los botones estén fuera del flujo normal */
+    top: 290px;
+    bottom: 0; /* Alinear los botones en la parte inferior del contenedor */
+    right: -12px; /* Alinear los botones a la derecha del contenedor */
+    margin: 10px; /* Margen para separar los botones del borde del contenedor */
+    width: auto; /* Permitir que los botones se ajusten automáticamente al contenido */
+}
+
+    #btn-vender-cancelar button {
+        margin-left: 5px; /* Espacio entre los botones */
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
+    }
+
+#btn-venta button:hover {
+    background-color: #ddd;
+}
+
+#btn-cancel button:hover {
+    background-color: #ddd;
+}
+
+#nuevoClienteModal {
+    padding: 10px !important;
+    width: 450px !important;
+    height: 700px;
+    position: absolute;
+    left: -200px;
+    top: -400px;
+}
+
+    #nuevoClienteModal .modal-body {
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+    }
+
+    #nuevoClienteModal .modal-footer {
+        width: 450px !important;
+        padding: 10px !important;
+    }
+

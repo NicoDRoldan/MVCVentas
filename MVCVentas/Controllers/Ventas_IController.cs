@@ -41,12 +41,14 @@ namespace MVCVentas.Controllers
                 .Include(v => v.Sucursal)
                 .Include(v => v.Ventas_E)
                 .FirstOrDefaultAsync(m => m.NumVenta == id);
+
+
             if (vMVentas_I == null)
             {
                 return NotFound();
             }
 
-            return View(vMVentas_I);
+            return View();
         }
 
         // GET: Ventas_I/Create

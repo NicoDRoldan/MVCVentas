@@ -1,0 +1,14 @@
+﻿@model MVCVentas.Models.VMConfig
+
+<link href="~/css/configPartial.css" rel="stylesheet" />
+
+<div class="row" id="div-partial-config">
+    <div id="div-partial-config-sucursal">
+        <!-- Partial para configurar Sucursal / Punto de Venta: -->
+        @Html.Partial("~/Views/Configs/_EditSucursalPartial.cshtml", new MVCVentas.Models.VMConfig())
+    </div>
+    <div id="div-partial-config-numCaja">
+        <!-- Partial para configurar Número de Caja: -->
+        @Html.Partial("~/Views/Configs/_EditCajaPartial.cshtml", new MVCVentas.Models.VMConfig())
+    </div>
+</div>

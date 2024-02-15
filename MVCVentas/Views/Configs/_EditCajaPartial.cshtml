@@ -1,0 +1,15 @@
+﻿@model MVCVentas.Models.VMConfig
+
+<div class="">
+    <form asp-action="Edit" class="form-inline" id="NumCaja_Config-formConfig">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Codigo_Config" id="NumCaja_Config-codigo-config-input" />
+        <input type="hidden" asp-for="Descripcion_Config" id="NumCaja_Config-descripcion-config-input" />
+        <div class="form-group">
+            <label asp-for="Valor_Config" class="control-label mr-2">Número de Caja:</label>
+            <span asp-validation-for="Valor_Config" class="text-danger"></span>
+            <input asp-for="Valor_Config" class="form-control" id="NumCaja_Config-valor-config-input" />
+            <button type="button" class="btn btn-primary" data-codigo="NumCaja_Config" onclick="configurarRegistroConfig(this)">Confirmar Nro Caja</button>
+        </div>
+    </form>
+</div>

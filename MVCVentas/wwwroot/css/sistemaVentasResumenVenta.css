@@ -1,0 +1,94 @@
+﻿/*ENCABEZADO*/
+
+/*-----------------*/
+#id_ArticuloH {
+    text-align: center;
+}
+
+#table-resumen-venta th#id_ArticuloH {
+    width: 90px !important;
+}
+/*-----------------*/
+
+#nombreH {
+    text-align: center;
+}
+
+#table-resumen-venta th#nombreH {
+    width: 280px !important;
+}
+/*-----------------*/
+
+#precioH {
+    text-align: center;
+}
+
+#table-resumen-venta th#precioH {
+}
+/*-----------------*/
+
+#cantidadH {
+    text-align: center;
+}
+
+#table-resumen-venta th#cantidadH {
+}
+/*-----------------*/
+
+#precio-TotalH {
+    text-align: center;
+}
+
+#table-resumen-venta th#TotalH {
+}
+/*-----------------*/
+
+#AccionH {
+    text-align: center;
+}
+
+#table-resumen-venta th#AccionH {
+}
+/*-----------------*/
+
+/*FILAS*/
+
+#id_Articulo {
+    width: 60.41px;
+}
+
+#nombre {
+    width: 40% !important;
+}
+
+#precio {
+    width: 10%;
+}
+
+#cantidad {
+    width: 1px;
+}
+
+#precio-total {
+}
+
+#Accion {
+    width: 50px;
+    height: 36px;
+    text-align: center;
+}
+
+    #Accion button {
+        border: none;
+        background: none;
+        color: white;
+        cursor: pointer;
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: unset;
+    }
+
+        #Accion button button:hover {
+            background-color: #ddd;
+        }

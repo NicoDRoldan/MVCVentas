@@ -1,0 +1,15 @@
+﻿@model MVCVentas.Models.VMConfig
+
+<div class="">
+    <form asp-action="Edit" class="form-inline" id="Sucursal_Config-formConfig">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Codigo_Config" id="Sucursal_Config-codigo-config-input" />
+        <input type="hidden" asp-for="Descripcion_Config" id="Sucursal_Config-descripcion-config-input" />
+        <div class="form-group">
+            <label asp-for="Valor_Config" class="control-label mr-2">Número de Punto de Venta:</label>
+            <span asp-validation-for="Valor_Config" class="text-danger"></span>
+            <input asp-for="Valor_Config" class="form-control" id="Sucursal_Config-valor-config-input" />
+            <button type="button" class="btn btn-primary" data-codigo="Sucursal_Config" onclick="configurarRegistroConfig(this)">Confirmar Sucursal</button>
+        </div>
+    </form>
+</div>

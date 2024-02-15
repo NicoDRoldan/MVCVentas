@@ -1,0 +1,23 @@
+﻿#div-partial-create-client {
+    width: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#formCliente {
+}
+
+    #formCliente label {
+        text-align: center;
+        width: 200px;
+    }
+
+    #formCliente input {
+        width: 200px;
+    }
+
+    #formCliente select {
+        width: 200px;
+        text-align: center;
+    }

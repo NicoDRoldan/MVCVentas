@@ -1,0 +1,566 @@
+﻿@model MVCVentas.Models.VMVentas
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@{
+    var listaArticulos = ViewData["ListaArticulos"] as List<SelectListItem>;
+    var listaVacia = ViewData["ArticulosEnResumenVentas"] as List<MVCVentas.Models.VMArticle>;
+}
+
+@{
+    Layout = "_Layout1";
+}
+
+<link href="~/css/sistemaventasstyle.css" rel="stylesheet" />
+<link href="~/css/sistemaventasresumenventa.css" rel="stylesheet" />
+<link href="~/css/sistemavendasdetalleventa.css" rel="stylesheet" />
+
+<html>
+<body>
+
+    <!-- Inicio NavBar -->
+    @Html.Partial("~/Views/Shared/_navBarPartial.cshtml")
+    <!-- Fin NavBar -->
+
+    <div class="container-fluid">
+        <div class="grid-container">
+            <div class="tabla-articulos" id="div-tabla-articulos">
+                <div>
+                    <h3>Artículos</h3>
+                </div>
+                <div class="contenedor-tabla">
+                    <table id="table-Articulos">
+                        <tbody id="tabla-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="navegacion">
+                    <button class="anterior" disabled>Anterior</button>
+                    <button class="siguiente">Siguiente</button>
+                </div>
+            </div>
+            <div class="resumen-venta">
+                <div>
+                    <h3>Resumen de la Venta</h3>
+                </div>
+                <div id="div-Resumen-Venta">
+                    <table id="table-resumen-venta" class="display">
+                        <thead>
+                            <tr>
+                                <th id="id_ArticuloH">ID</th>
+                                <th id="nombreH">Nombre</th>
+                                <th id="precioH">Precio</th>
+                                <th id="cantidadH">Cantidad</th>
+                                <th id="precio-TotalH">Total</th>
+                                <th id="AccionH">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="contenedor-categorias-promociones">
+            </div>
+
+            <div class="contenedor-detalle-venta">
+                <hr />
+                    <dl class="row">
+                        <dt class="col-sm-10">
+                            <label>Detalle de la Venta</label>
+                        </dt>
+
+                    <form id="formVenta">
+
+                        <div class="form-group">
+                            <div>
+                                <label asp-for="CodComprobante" for="comprobante-select">Comprobante:</label>
+                            </div>
+                            <div>
+                                <select asp-for="CodComprobante" class="form-control" id="comprobante-select" asp-items="ViewBag.ListaComprobantes"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div>
+                                <label asp-for="CodCliente" for="cliente-select">Cliente:</label>
+                            </div>
+                            <div>
+                                <select asp-for="CodCliente" class="form-control" id="cliente-select" asp-items="ViewBag.ListaClientes"></select>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <div>
+                                <label asp-for="Id_FormaPago" for="forma">Forma de Pago:</label>
+                            </div>
+                            <div>
+                                <select asp-for="Id_FormaPago" class="form-control" id="forma" asp-items="ViewBag.ListaMedioPago"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <select asp-for="CodModulo" class="form-control" id="modulo-select" asp-items="ViewBag.ListaModulosVTAS" hidden></select>
+                        </div>
+
+                        <div class="form-group">
+                            <div>
+                                <label>Descuento:</label>
+                            </div>
+                            <div>
+                                <input type="text" class="form-control" id="descuento" value="0" readonly />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div>
+                                <label>Subtotal:</label>
+                            </div>
+                            <div>
+                                <input type="text" class="form-control" id="subtotal" value="0" readonly />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div>
+                                <label>Total:</label>
+                            </div>
+                            <div>
+                                <input type="text" class="form-control" id="total" value="0" readonly />
+                            </div>
+                        </div>
+
+                    </form>
+
+                    <div class="modal fade" id="nuevoClienteModal" tabindex="-1" role="dialog" aria-labelledby="nuevoClienteModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="cliente-modal">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="nuevoClienteModalLabel">Crear Cliente</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Clientes/_PartialCreateClientes.cshtml", new MVCVentas.Models.VMCliente(), ViewData)
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    <button type="button" class="btn btn-primary" onclick="crearCliente()">Agregar</button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                    <!-- Modal de Configuración -->
+
+                    <div class="modal fade" id="config-Modal" tabindex="-1" role="dialog" aria-labelledby="config-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="config-modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="config-ModalLabel">Configuración</h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Configs/_ConfigPartial.cshtml", new MVCVentas.Models.VMConfig())
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cerrarModalConfig()">Cerrar</button>
+
+                                    <div id="mensaje-confg" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" id="btn-vender-cancelar">
+                        <dd class="">
+                            <button class="btn btn-danger" id="btn-cancel-venta">Cancelar Venta</button>
+                            <button class="btn btn-success" id="btn-venta" onclick="CrearVenta()">Vender</button>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+@section Scripts {
+
+    <!-- Script para el manejo de la tabla de artículos -->
+    <script>
+
+        //////////////////////////////////// Lógica para Actualizar los botones de navegación y los botones de artículos ////////////////////////////////////
+        
+        // Array con los datos de los artículos (ejemplo)
+        const articulos = @Html.Raw(ViewData["JsonListaArticulos"]);
+
+        // Variables para la paginación
+        let paginaActual = 1;
+        const articulosPorPagina = 12; // Cambiar el número de artículos por página a 12
+        const columnasPorFila = 3; // Definir el número de columnas por fila
+
+        const tablaBody = document.getElementById("tabla-body");
+        tablaBody.innerHTML = ""; // Borrar filas anteriores
+
+        // Obtener los artículos de la página actual
+        const articulosPaginaActual = articulos.slice(
+            (paginaActual - 1) * articulosPorPagina,
+            paginaActual * articulosPorPagina
+        );
+
+        // Función para agregar event listeners a los botones de artículos
+        function agregarEventListenersBotonesArticulos() {
+            tablaBody.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    // Obtener el ID del artículo
+                    const Id_Articulo = this.dataset.id;
+                    // Buscar el artículo en la lista de artículos
+                    const articuloLista = articulos.find(articulo => articulo.Value === Id_Articulo);
+                    // Llamar a la función para agregar el artículo al resumen de la venta
+                    agregarArticuloAlResumen(articuloLista);
+                });
+            });
+        }
+
+        function actualizarEventListenersEliminarArticulo(){
+            document.querySelectorAll(".eliminar").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    const fila = this.closest("tr");
+                    const id_Articulo = fila.dataset.id;
+                    fila.remove();
+                    });
+            });
+        }
+
+        function actualizarBotonesArticulos() {
+            tablaBody.innerHTML = ""; // Limpiar el contenido existente antes de agregar nuevas filas
+
+            // Obtener los artículos de la página actual
+            const articulosPaginaActual = articulos.slice(
+                (paginaActual - 1) * articulosPorPagina,
+                paginaActual * articulosPorPagina
+            );
+
+            // Agrupar los artículos en filas y columnas
+            for (let i = 0; i < articulosPaginaActual.length; i += columnasPorFila) {
+                const fila = document.createElement("tr");
+                for (let j = i; j < i + columnasPorFila && j < articulosPaginaActual.length; j++) {
+                    const articulo = articulosPaginaActual[j];
+                    const celda = document.createElement("td");
+                    const botonArticulo = document.createElement("button");
+                    botonArticulo.innerHTML = `<strong>${articulo.Text}</strong> (${articulo.Value})</strong><br>$${articulo.Precio}`;
+                    botonArticulo.dataset.id = articulo.Value;
+                    celda.appendChild(botonArticulo);
+                    fila.appendChild(celda);
+                }
+                tablaBody.appendChild(fila);
+            }
+
+            // Mostrar/ocultar botones de navegación
+            const botonAnterior = document.querySelector(".anterior");
+            const botonSiguiente = document.querySelector(".siguiente");
+
+            botonAnterior.disabled = paginaActual === 1;
+            botonSiguiente.disabled = articulosPaginaActual.length < articulosPorPagina;
+
+            // Agregar event listeners a los botones de artículos
+            agregarEventListenersBotonesArticulos();
+        }
+
+        // Mostrar la primera página al cargar la página
+        actualizarBotonesArticulos();
+
+        // Eventos para los botones de navegación
+        document.querySelector(".anterior").addEventListener("click", () => {
+            paginaActual--;
+            actualizarBotonesArticulos();
+        });
+
+        document.querySelector(".siguiente").addEventListener("click", () => {
+            paginaActual++;
+            actualizarBotonesArticulos();
+        });
+
+        //////////////////////////////////// Lógica para agregar artículo al resumen de la venta ////////////////////////////////////
+
+        function agregarArticuloAlResumen(articulo) {
+            
+            // Desestructurar el objeto articulo
+            const {
+                Value: Id_Articulo,
+                Text: Nombre,
+                Precio: Precio } = articulo;
+
+            // Verifico que el artículo no exista en el resumen de la venta
+            const articuloExistente = document.querySelector(`#table-resumen-venta tr[data-id="${Id_Articulo}"]`);
+
+            if (articuloExistente) {
+                // Si el artículo ya existe en el resumen de la venta, aumentar la cantidad
+                const cantidad = articuloExistente.querySelector(".cantidad");
+                cantidad.textContent = Number(cantidad.textContent) + 1;
+                // Actualizar el precio total
+                const precioTotal = articuloExistente.querySelector(".precio-total");
+                precioTotal.textContent = (Number(precioTotal.textContent) + Precio).toFixed(2);
+            } 
+            else {
+                // Si no se encuentra ninguna fila vacía, agregar una nueva fila al final
+                const fila = document.createElement("tr");
+                fila.dataset.id = Id_Articulo;
+                fila.innerHTML = `
+                  <td asp-for="Id_Articulo" id="id_Articulo">${Id_Articulo}</td>
+                  <td asp-for="Descripcion" id="nombre">${Nombre}</td>
+                  <td asp-for="PrecioUnitario" id="precio">${Precio}</td>
+                  <td asp-for="Cantidad" id="cantidad" class="cantidad">1</td>
+                  <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${Precio}</td>
+                  <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                `;
+                document.querySelector("#table-resumen-venta tbody").appendChild(fila);
+            }
+
+            actualizarEventListenersEliminarArticulo();
+            actualizarEventListenersEliminarArticuloCalcularTotal();
+            // Llamar a las funciones para recalcular subtotal y total
+            calcularSubTotal();
+            calcularTotal();
+        }
+
+        //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////
+
+        function calcularSubTotal() {
+            let subTotal = 0;
+            const preciosTotales = document.querySelectorAll("#table-resumen-venta .precio-total");
+            for (const precioTotal of preciosTotales) {
+                subTotal += parseFloat(precioTotal.textContent);
+            }
+            document.getElementById("subtotal").value = subTotal.toFixed(2);
+        }
+
+        function calcularTotal() {
+            calcularSubTotal();
+            const subTotal = parseFloat(document.getElementById("subtotal").value);
+            const total = subTotal;
+            document.getElementById("total").value = total.toFixed(2);
+        }
+
+        function actualizarEventListenersEliminarArticuloCalcularTotal() {
+            document.querySelectorAll(".eliminar").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    const fila = this.closest("tr");
+                    const id_Articulo = fila.dataset.id;
+                    fila.remove();
+                    calcularTotal();
+                });
+            });
+        }
+
+        <!-- DataTables -->
+            $(document).ready(function () {
+                // Inicializar la tabla con DataTables
+                $('#table-resumen-venta').DataTable({
+                    "paging": false,          // Desactivar paginación
+                    "scrollY": "322px",       // Altura fija con barra de desplazamiento si es necesario
+                    "scrollCollapse": true,   // Colapsar la tabla si la altura es menor que el contenido
+                    "searching": false,        // Habilitar la función de búsqueda
+                    "ordering": false,         // Deshabilitar la ordenación
+                    "info": false,            // Deshabilitar la información de la tabla
+
+                });
+            });
+
+        //////////////////////////////////// Lógica para cancelar la venta ////////////////////////////////////
+        function varciarTablaResumen() {
+
+            // Limpiar la tabla de resumen de venta
+            const tablaResumen = document.getElementById("table-resumen-venta").querySelector("tbody");
+            tablaResumen.querySelectorAll("tr").forEach(function (fila, index) {
+                if (index !== 0) {
+                    fila.remove();
+                }
+            });
+
+            // Llamar a las funciones para recalcular subtotal y total
+            calcularSubTotal();
+            calcularTotal();
+        }
+
+        // Evento para el botón de cancelar venta
+        document.getElementById("btn-cancel-venta").addEventListener("click", function () {
+            varciarTablaResumen();
+        });
+
+
+        //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
+        function CrearVenta() {
+
+            // Crear un objeto con los datos de la venta (Ventas_E)
+            var vMVentas = {
+                CodComprobante: $("#comprobante-select").val(),
+                CodCliente: $("#cliente-select").val(),
+                Id_FormaPago: $("#forma").val(),
+                CodModulo: $("#modulo-select").val()
+            };
+
+            var detallesventa = [];
+
+            // Obtener los detalles de la venta (Ventas_D)
+            $('#table-resumen-venta tbody tr').each(function () {
+                var detalle = {
+                    Id_Articulo: $(this).find("#id_Articulo").text(),
+                    Cantidad: $(this).find("#cantidad").text(),
+                    PrecioUnitario: $(this).find("#precio").text(),
+                    PrecioTotal: $(this).find("#precio-Total").text()
+                };
+                detallesventa.push(detalle);
+            });
+
+            // Validar si la posición [1] de detallesventa es null
+            if (detallesventa[1] == null) {
+                alert("Debe seleccionar al menos un artículo para realizar la venta.");
+                return;
+            }
+
+            // Obtener el importe de la venta
+            var vMVentaImporte = {
+                Descuento: $("#descuento").val(),
+                Importe: $("#total").val()
+            };
+
+            // Realizar la petición AJAX
+            $.ajax({
+                url: '@Url.Action("CrearVenta", "Ventas")',
+                type: 'POST',
+                data: { vMVentas, detallesventa, vMVentaImporte },
+                success: function (response) {
+                    if (response.success == true) {
+                        console.log("Datos: " + vMVentas + " " + detallesventa + " " + response.message);
+                        varciarTablaResumen();
+                    }
+                    else {
+                        console.log("Error al realizar la venta.");
+                    }
+                },
+                error: function (response) {
+                }
+            });
+        }
+
+    </script>
+
+    <!-- //////////////////////////////////// Script para el manejo de la creación de un nuevo cliente //////////////////////////////////// -->
+    <script>
+        // Función para agregar un nuevo cliente
+        function crearCliente() {
+            var formData = $("#formCliente").serialize();
+
+            $.ajax({
+                url: '@Url.Action("CrearCliente", "Ventas")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success == true) {
+                        var selectClientes = $('#cliente-select');
+
+                        // Actualizar la lista de clientes
+                        var nuevoClienteOption = $('<option>', {
+                            value: response.cliente.codCliente,
+                            text: response.cliente.nombre
+                        });
+
+                        // Agregar la nueva opción al select de clientes
+                        selectClientes.append(nuevoClienteOption);
+
+                        // Seleccionar el nuevo cliente en el select
+                        selectClientes.val(response.cliente.codCliente);
+
+                        // Cerrar el modal
+                        $('#nuevoClienteModal').modal('hide');
+
+                        // Limpiar los campos del formulario
+                        $('#formCliente')[0].reset();
+                    }
+                    else {
+                        console.log("No se llamó al cierre del modal ");
+                    }
+                },
+                error: function (response) {
+                }
+            })
+        }
+    </script>
+
+<!-- //////////////////////////////////// Script para el manejo de la configuración de la sucursal //////////////////////////////////// -->
+    <script>
+        // Función para obtener la sucursal
+        function obtenerRegistrosConfig() {
+            var codigos = ["Sucursal_Config", "NumCaja_Config"];
+            codigos.forEach(function(codigo){
+                $.ajax({
+                    url: '@Url.Action("EditConfig", "Configs")',
+                    type: 'GET',
+                    data: { codigo_Config: codigo },
+                    success: function (response) {
+                        if (response.success == true) {
+
+                            var codigoConfigInput = $('#' + codigo + '-codigo-config-input');
+                            var descripcionConfigInput = $('#' + codigo + '-descripcion-config-input');
+                            var valorConfigInput = $('#' + codigo + '-valor-config-input');
+
+                            // Abrir el modal
+                            $('#config-Modal').modal('show');
+
+                            // Llenar los campos del formulario
+                            codigoConfigInput.val(response.codigo_Config);
+                            descripcionConfigInput.val(response.descripcion_Config);
+                            valorConfigInput.val(response.valor_Config);
+
+                            console.log("Valor del registro: " + response.valor_Config);
+                        }
+                        else {
+                            console.log("Error al obtener el valor del registro.");
+                        }
+                    },
+                    error: function (response) {
+                    }
+                })
+            })
+        }
+
+        // Función para configurar la sucursal
+        function configurarRegistroConfig(element) {
+            var codigo = $(element).data('codigo'); // Obtener el código del registro
+            var formData = $("#" + codigo + "-formConfig").serialize()
+
+            $.ajax({
+                url: '@Url.Action("EditConfig", "Configs")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success == true) {
+                        console.log("Success: " + response.message);
+                        $('#mensaje-confg').removeClass().addClass('text-success').text(response.message);
+                    }
+                    else {
+                        console.log("Error: " + response.message);
+                        $('#mensaje-confg').removeClass().addClass('text-danger').text("Error: " + response.message);
+                    }
+                },
+                error: function (response) {
+                }
+            })
+        }
+
+        // Función para cerrar el modal de configuración de la sucursal
+        function cerrarModalConfig() {
+            $('#config-Modal').modal('hide');
+            $('#mensaje-confg').text("");
+        }
+    </script>
+}

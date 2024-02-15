@@ -63,10 +63,10 @@ namespace MVCVentas.Data
                 .HasKey(ve => new { ve.NumVenta, ve.CodComprobante, ve.CodModulo, ve.NumSucursal });
 
             modelBuilder.Entity<VMVentas_D>()
-                .HasKey(vd => new { vd.NumVenta, vd.CodComprobante, vd.CodModulo, vd.NumSucursal });
+                .HasKey(vd => new { vd.NumVenta, vd.CodComprobante, vd.CodModulo, vd.NumSucursal, vd.Renglon });
 
             modelBuilder.Entity<VMVentas_I>()
-                .HasKey(vi => new { vi.NumVenta, vi.CodComprobante, vi.CodModulo, vi.NumSucursal });
+                .HasKey(vi => new { vi.NumVenta, vi.CodComprobante, vi.CodModulo, vi.NumSucursal, vi.CodConcepto });
 
             base.OnModelCreating(modelBuilder);
         }
@@ -76,5 +76,7 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMVentas_D> VMVentas_D { get; set; }
 
         public DbSet<MVCVentas.Models.VMVentas_I> VMVentas_I { get; set; }
+
+        public DbSet<MVCVentas.Models.VMConfig> VMConfig { get; set; }
     }
 }

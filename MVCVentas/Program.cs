@@ -4,6 +4,8 @@ using MVCVentas.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MVCVentas.Services;
 using MVCVentas.Controllers;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 //using MVCVentas.Data;
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,11 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("SupervisorOrAdmin", policy => policy.RequireRole("Admin", "Supervisor"));
 });
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(20);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,6 +55,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();
 

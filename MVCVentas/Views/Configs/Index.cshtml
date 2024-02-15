@@ -1,0 +1,48 @@
+﻿@model IEnumerable<MVCVentas.Models.VMConfig>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Descripcion_Config)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Valor_Config)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Fecha_Creacion)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Descripcion_Config)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Valor_Config)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fecha_Creacion)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Codigo_Config">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Codigo_Config">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Codigo_Config">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
