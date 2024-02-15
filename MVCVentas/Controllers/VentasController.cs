@@ -19,6 +19,7 @@ using Newtonsoft.Json.Linq;
 
 namespace MVCVentas.Controllers
 {
+    [Authorize]
     public class VentasController : Controller
     {
         private readonly MVCVentasContext _context;
@@ -360,8 +361,8 @@ namespace MVCVentas.Controllers
                             CodModulo = vMVentas.Modulo.CodModulo, // Se obtiene de la vista (HardCodeado a VTAS). OK
                             NumSucursal = vMVentas.Sucursal.NumSucursal, // Se obtiene de la base (Tabla Config). OK
                             CodConcepto = concepto.CodConcepto, // Se obtiene de la base de datos. OK
-                            Importe = importe, // Se obtiene de la base de datos. OK
-                            Descuento = porcentajeDescuento // Se obtiene de la base de datos. OK
+                            Importe = importe, // Se calcula en el switch dependiendo el concepto. OK
+                            Descuento = porcentajeDescuento // Se calcula en el switch. OK
                         };
                         // Se da de alta el importe de la venta en la base de datos:
                         _context.VMVentas_I.Add(ventaI);
@@ -385,6 +386,7 @@ namespace MVCVentas.Controllers
                         await _context.SaveChangesAsync();
                     }
 
+                    // Se confirma la transacción:
                     transaction.Commit();
 
                     return Json(new { success = true, message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos."
