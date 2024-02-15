@@ -73,6 +73,7 @@
                         </dt>
 
                     <form id="formVenta">
+
                         <div class="form-group">
                             <div>
                                 <label asp-for="CodComprobante" for="comprobante-select">Comprobante:</label>
@@ -134,6 +135,7 @@
                                 <input type="text" class="form-control" id="total" value="0" readonly />
                             </div>
                         </div>
+
                     </form>
 
                     <div class="modal fade" id="nuevoClienteModal" tabindex="-1" role="dialog" aria-labelledby="nuevoClienteModalLabel" aria-hidden="true">
@@ -400,6 +402,7 @@
 
             var detallesventa = [];
 
+            // Obtener los detalles de la venta (Ventas_D)
             $('#table-resumen-venta tbody tr').each(function () {
                 var detalle = {
                     Id_Articulo: $(this).find("#id_Articulo").text(),
@@ -416,12 +419,7 @@
                 return;
             }
 
-            var formData = $("#formVenta").serialize();
-
-            formData += "&detallesventa=" + detallesventa; // Convertir a JSON
-
-            console.log(formData);
-
+            // Crear un objeto con los datos de la venta (Ventas_E)
             var vMVentas = {
                 CodComprobante: $("#comprobante-select").val(),
                 CodCliente: $("#cliente-select").val(),

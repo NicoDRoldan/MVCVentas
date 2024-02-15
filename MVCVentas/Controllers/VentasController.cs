@@ -198,10 +198,6 @@ namespace MVCVentas.Controllers
             #endregion
 
             #region Datos Ventas_D
-
-            // Crear lista de detalles de venta menos la primera posición de la lista original llamada desde la vista:
-            List<VMVentasDetalle> listaDetallesVenta = detallesventa.Skip(1).ToList();
-
             // Inicialización de Renglon:
             int renglon = 1;
 
@@ -280,6 +276,8 @@ namespace MVCVentas.Controllers
                             .Where(a => a.Id_Articulo == int.Parse(detalle.Id_Articulo))
                             .FirstOrDefaultAsync();
 
+                        detalle.PrecioUnitario = detalle.PrecioUnitario.Replace(".", ",");
+
                         var ventaD = new VMVentas_D
                         {
                             NumVenta = nroVentaCorrelativa, // Se obtiene con la función de obtener número de venta. OK
@@ -291,11 +289,10 @@ namespace MVCVentas.Controllers
                             Cantidad = int.Parse(detalle.Cantidad), // Se obtiene de la vista. OK
                             Detalle = articulo.Nombre, // Se obtiene de la base de datos. OK
                             PrecioUnitario = decimal.Parse(detalle.PrecioUnitario), // Se obtiene de la vista. OK
-                            PrecioTotal = decimal.Parse(detalle.PrecioTotal) // Se obtiene de la vista. OK
+                            PrecioTotal = int.Parse(detalle.Cantidad) * decimal.Parse(detalle.PrecioUnitario) // Se obtiene de la vista. OK
                         };
                         // Se da de alta el detalle de la venta en la base de datos:
                         _context.VMVentas_D.Add(ventaD);
-                        Console.WriteLine("Se insertó el detalle de venta: " + ventaD.Id_Articulo);
                         // Se incrementa el renglón:
                         renglon++;
                     }
@@ -320,7 +317,7 @@ namespace MVCVentas.Controllers
 
                     transaction.Commit();
 
-                    return Json(new { success = true, message = "Se insertó la venta nro: " + nroVentaCorrelativa
+                    return Json(new { success = true, message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos."
                     });
                 }
                 catch (Exception ex)
