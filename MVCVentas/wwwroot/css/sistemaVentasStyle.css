@@ -102,6 +102,10 @@ td {
     height: 270px;
 }
 
+    .contenedor-detalle-venta input{
+        width: 200px;
+    }
+
     .contenedor-detalle-venta dl {
         width: 650px;
         height: 270px;
@@ -119,6 +123,7 @@ td {
         margin: 0;
         padding: 0;
     }
+
 #cliente-select-btn select {
     width: 118%;
 }
@@ -128,7 +133,21 @@ td {
     justify-content: space-between;
 }
 
+#div-comprobante-select {
+    width: 120px !important;
+    margin-left: -10px;
+}
+
+#div-cliente-select select {
+    width: 200px !important;
+}
+
+#FormaPago_Id_FormaPago{
+width: 200px !important;
+}
+
 #btn-new-client {
+    margin-left: -6px;
 }
 
 .contenedor-categorias-promociones {
@@ -142,9 +161,9 @@ td {
 
 #btn-vender-cancelar {
     position: absolute; /* Establecer la posición absoluta para que los botones estén fuera del flujo normal */
-    top: 271px;
+    top: 290px;
     bottom: 0; /* Alinear los botones en la parte inferior del contenedor */
-    right: 0; /* Alinear los botones a la derecha del contenedor */
+    right: -12px; /* Alinear los botones a la derecha del contenedor */
     margin: 10px; /* Margen para separar los botones del borde del contenedor */
     width: auto; /* Permitir que los botones se ajusten automáticamente al contenido */
 }
@@ -164,7 +183,8 @@ td {
     background-color: #ddd;
 }
 
-.modal {
+#nuevoClienteModal {
+    padding: 10px !important;
     width: 450px !important;
     height: 700px;
     position: absolute;
@@ -172,23 +192,13 @@ td {
     top: -400px;
 }
 
-    .modal .modal-header {
-        padding: 10px !important;
-    }
-
-    .modal .modal-body {
+    #nuevoClienteModal .modal-body {
         margin-top: 10px !important;
         margin-bottom: 10px !important;
     }
 
-    .modal .modal-footer {
+    #nuevoClienteModal .modal-footer {
         width: 450px !important;
         padding: 10px !important;
     }
 
-/* Estilo para el modal */
-.modal-dialog-centered {
-}
-
-.modal-dialog-centered .modal-content {
-}

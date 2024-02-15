@@ -45,7 +45,8 @@ namespace MVCVentas.Controllers
                     List<Claim> claims = new List<Claim>()
                 {
                     new Claim(ClaimTypes.NameIdentifier, modelLogin.User),
-                    new Claim(ClaimTypes.Role, user.Categoria.Nombre)
+                    new Claim(ClaimTypes.Role, user.Categoria.Nombre),
+                    new Claim("userid", user.Id_Usuario.ToString())
                 };
 
                     ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims,

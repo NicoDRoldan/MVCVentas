@@ -1,0 +1,21 @@
+﻿body {
+}
+
+#formVenta{
+    width: 100%;
+    height: 100%;
+}
+
+#formVenta .form-group{
+    display: flex;
+    width: 100%;
+    margin-bottom: 7px;
+}
+
+    #formVenta .form-group div{
+        width: 200px;
+    }
+
+    #formVenta .form-group button{
+        margin-left: 10px;
+    }

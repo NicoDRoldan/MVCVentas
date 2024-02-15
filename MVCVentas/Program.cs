@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using MVCVentas.Services;
 using MVCVentas.Controllers;
 using Microsoft.AspNetCore.Http;
+using System.Net;
 
 //using MVCVentas.Data;
 var builder = WebApplication.CreateBuilder(args);
