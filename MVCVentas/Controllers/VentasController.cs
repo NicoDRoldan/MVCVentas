@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.JSInterop;
 using MVCVentas.Data;
 using MVCVentas.Models;
 using Newtonsoft.Json;
@@ -138,7 +139,9 @@ namespace MVCVentas.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CrearVenta(VMVentas vMVentas, List<VMVentasDetalle> detallesventa)
+        public async Task<IActionResult> CrearVenta(VMVentas vMVentas, 
+                                                    List<VMVentasDetalle> detallesventa, 
+                                                    VMVentaImporte vMVentaImporte)
         {
             #region Datos para todas las ventas
 
@@ -200,6 +203,20 @@ namespace MVCVentas.Controllers
             #region Datos Ventas_D
             // Inicialización de Renglon:
             int renglon = 1;
+
+            #endregion
+
+            #region Datos Ventas_I
+
+            decimal impSubTotal = 0;
+            vMVentaImporte.Descuento = vMVentaImporte.Descuento.Replace(".", ","); // Se reemplaza el punto por la coma.
+
+            decimal descuento = decimal.Parse(vMVentaImporte.Descuento);
+
+            var conceptos = await _context.VMConcepto
+                .ToListAsync();
+
+            decimal iva21 = 1.21M;
 
             #endregion
 
@@ -276,7 +293,7 @@ namespace MVCVentas.Controllers
                             .Where(a => a.Id_Articulo == int.Parse(detalle.Id_Articulo))
                             .FirstOrDefaultAsync();
 
-                        detalle.PrecioUnitario = detalle.PrecioUnitario.Replace(".", ",");
+                        detalle.PrecioUnitario = detalle.PrecioUnitario.Replace(".", ","); // Se reemplaza el punto por la coma.
 
                         var ventaD = new VMVentas_D
                         {
@@ -289,12 +306,65 @@ namespace MVCVentas.Controllers
                             Cantidad = int.Parse(detalle.Cantidad), // Se obtiene de la vista. OK
                             Detalle = articulo.Nombre, // Se obtiene de la base de datos. OK
                             PrecioUnitario = decimal.Parse(detalle.PrecioUnitario), // Se obtiene de la vista. OK
-                            PrecioTotal = int.Parse(detalle.Cantidad) * decimal.Parse(detalle.PrecioUnitario) // Se obtiene de la vista. OK
+                            PrecioTotal = int.Parse(detalle.Cantidad) * decimal.Parse(detalle.PrecioUnitario) // Se calcula acá. OK
                         };
                         // Se da de alta el detalle de la venta en la base de datos:
                         _context.VMVentas_D.Add(ventaD);
                         // Se incrementa el renglón:
                         renglon++;
+
+                        // Se calcula el importe subtotal:
+                        impSubTotal += ventaD.PrecioTotal;
+                    }
+
+                    // Se da de alta el importe de la venta:
+                    foreach (var concepto in conceptos)
+                    {
+                        if(descuento == 0 && concepto.CodConcepto == "DTO")
+                        {
+                            continue;
+                        }
+
+                        decimal importe = 0;
+                        decimal neto = 0;
+                        decimal iva = 0;
+                        decimal porcentajeDescuento = 0;
+
+                        switch (concepto.CodConcepto)
+                        {
+                            case "SUBTOTAL":
+                                importe = impSubTotal;
+                                break;
+                            case "DTO":
+                                importe = descuento;
+                                porcentajeDescuento = (descuento / impSubTotal) * 100;
+                                break;
+                            case "NETO1":
+                                importe = (impSubTotal - descuento) / iva21;
+                                break;
+                            case "IVA21":
+                                neto = importe = (impSubTotal - descuento) / iva21;
+                                importe = impSubTotal - descuento - neto;
+                                break;
+                            case "TOTAL":
+                                neto = importe = (impSubTotal - descuento) / iva21;
+                                iva = impSubTotal - descuento - neto;
+                                importe = neto + iva;
+                                break;
+                        }
+
+                        var ventaI = new VMVentas_I
+                        {
+                            NumVenta = nroVentaCorrelativa, // Se obtiene con la función de obtener número de venta. OK
+                            CodComprobante = vMVentas.Comprobante_E.CodComprobante, // Se obtiene de la vista. OK
+                            CodModulo = vMVentas.Modulo.CodModulo, // Se obtiene de la vista (HardCodeado a VTAS). OK
+                            NumSucursal = vMVentas.Sucursal.NumSucursal, // Se obtiene de la base (Tabla Config). OK
+                            CodConcepto = concepto.CodConcepto, // Se obtiene de la base de datos. OK
+                            Importe = importe, // Se obtiene de la base de datos. OK
+                            Descuento = porcentajeDescuento // Se obtiene de la base de datos. OK
+                        };
+                        // Se da de alta el importe de la venta en la base de datos:
+                        _context.VMVentas_I.Add(ventaI);
                     }
 
                     // Se guardan los cambios en la base de datos:

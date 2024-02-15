@@ -400,6 +400,14 @@
         //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
         function CrearVenta() {
 
+            // Crear un objeto con los datos de la venta (Ventas_E)
+            var vMVentas = {
+                CodComprobante: $("#comprobante-select").val(),
+                CodCliente: $("#cliente-select").val(),
+                Id_FormaPago: $("#forma").val(),
+                CodModulo: $("#modulo-select").val()
+            };
+
             var detallesventa = [];
 
             // Obtener los detalles de la venta (Ventas_D)
@@ -419,18 +427,17 @@
                 return;
             }
 
-            // Crear un objeto con los datos de la venta (Ventas_E)
-            var vMVentas = {
-                CodComprobante: $("#comprobante-select").val(),
-                CodCliente: $("#cliente-select").val(),
-                Id_FormaPago: $("#forma").val(),
-                CodModulo: $("#modulo-select").val()
+            // Obtener el importe de la venta
+            var vMVentaImporte = {
+                Descuento: $("#descuento").val(),
+                Importe: $("#total").val()
             };
 
+            // Realizar la petición AJAX
             $.ajax({
                 url: '@Url.Action("CrearVenta", "Ventas")',
                 type: 'POST',
-                data: { vMVentas, detallesventa },
+                data: { vMVentas, detallesventa, vMVentaImporte },
                 success: function (response) {
                     if (response.success == true) {
                         console.log("Datos: " + vMVentas + " " + detallesventa + " " + response.message);
