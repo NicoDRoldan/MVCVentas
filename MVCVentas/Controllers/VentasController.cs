@@ -1,21 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using MVCVentas.Data;
 using MVCVentas.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Font = iTextSharp.text.Font;
 
 namespace MVCVentas.Controllers
 {
@@ -28,6 +33,8 @@ namespace MVCVentas.Controllers
         {
             _context = context;
         }
+
+        string rutaRaizApp = AppDomain.CurrentDomain.BaseDirectory;
 
         public async Task<IActionResult> Index()
         {
@@ -144,7 +151,7 @@ namespace MVCVentas.Controllers
                                                     List<VMVentasDetalle> detallesventa, 
                                                     VMVentaImporte vMVentaImporte)
         {
-            #region Datos para todas las ventas
+            // Datos Generales:
 
             // Traer Comprobante_N:
             vMVentas.Comprobante_E = await _context.VMComprobante_E
@@ -163,9 +170,7 @@ namespace MVCVentas.Controllers
                                        where c.Codigo_Config == "Sucursal_Config"
                                        select s).FirstOrDefaultAsync();
 
-            #endregion
-
-            #region Datos Ventas_E
+            // Datos Ventas E:
 
             // Traer Número de Caja:
             var numCajaString = await _context.VMConfig
@@ -199,15 +204,11 @@ namespace MVCVentas.Controllers
                 .Where(u => u.Usuario == userId)
                 .FirstOrDefaultAsync();
 
-            #endregion
+            // Datos Ventas D:
+            
+            int renglon = 1; // Inicialización de Renglon:
 
-            #region Datos Ventas_D
-            // Inicialización de Renglon:
-            int renglon = 1;
-
-            #endregion
-
-            #region Datos Ventas_I
+            // Datos Ventas I:
 
             decimal impSubTotal = 0;
             vMVentaImporte.Descuento = vMVentaImporte.Descuento.Replace(".", ","); // Se reemplaza el punto por la coma.
@@ -219,7 +220,6 @@ namespace MVCVentas.Controllers
 
             decimal iva21 = 1.21M;
 
-            #endregion
 
             // Obtener el número de venta:
             decimal nroVenta = await ObtenerNumVenta(vMVentas.Sucursal.NumSucursal,
@@ -389,8 +389,24 @@ namespace MVCVentas.Controllers
                     // Se confirma la transacción:
                     transaction.Commit();
 
-                    return Json(new { success = true, message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos."
-                    });
+                    var listVentaD = await _context.VMVentas_D
+                        .Where(v => v.NumVenta == nroVentaCorrelativa
+                                && v.CodComprobante == vMVentas.Comprobante_E.CodComprobante
+                                && v.CodModulo == vMVentas.Modulo.CodModulo
+                                && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
+                        .ToListAsync();
+
+                    var listVentaI = await _context.VMVentas_I
+                        .Where(v => v.NumVenta == nroVentaCorrelativa
+                                && v.CodComprobante == vMVentas.Comprobante_E.CodComprobante
+                                && v.CodModulo == vMVentas.Modulo.CodModulo
+                                && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
+                        .ToListAsync();
+
+                    GenerarReportePDF(ventaE, listVentaD, listVentaI, rutaRaizApp);
+                    ImprimirReporte(ventaE, listVentaD, listVentaI);
+
+                    return Json(new { success = true, message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos." });
                 }
                 catch (Exception ex)
                 {
@@ -398,6 +414,79 @@ namespace MVCVentas.Controllers
                     return Json(new { success = false, message = ex.Message });
                 }
             }
+        }
+
+        public Printer GenerarReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I)
+        {
+            // Se crea una instancia de la clase Printer:
+            Printer printer = new Printer();
+
+            // Se agregan las líneas al reporte:
+            printer.agregarLinea("Comprobante: " + vMVentas_E.Comprobante.Nombre, 7, "Consolas");
+            printer.agregarLinea("Número de Venta: " + vMVentas_E.NumVenta, 7, "Consolas");
+            printer.agregarLinea("Fecha: " + vMVentas_E.Fecha.ToString("dd/MM/yyyy"), 7, "Consolas");
+            printer.agregarLinea("Hora: " + vMVentas_E.Hora.ToString("HH:mm:ss"), 7, "Consolas");
+            printer.agregarLinea("Cliente: " + vMVentas_E.Cliente.RazonSocial, 7, "Consolas");
+            printer.agregarLinea("Forma De Pago: " + vMVentas_E.FormaPago.Nombre, 7, "Consolas");
+
+            printer.agregarLineaEnBlanco();
+
+            printer.agregarLinea("Detalle de la venta:", 7, "Consolas", FontStyle.Bold);
+
+            foreach(var detalle in vMVentas_D)
+            {
+                printer.agregarLineaConExtremos(detalle.Articulo.Nombre, detalle.Cantidad.ToString() + " x " + detalle.PrecioUnitario.ToString("0.00") + " = " + detalle.PrecioTotal.ToString("0.00"), 7, "Consolas");
+            }
+
+            printer.agregarLineaEnBlanco();
+
+            printer.agregarLinea("Importe de la venta:", 7, "Consolas", FontStyle.Bold);
+
+            foreach(var importe in vMVentas_I)
+            {
+                printer.agregarLineaConExtremos(importe.Concepto.Descripcion, importe.Importe.ToString("0.00"), 7, "Consolas");
+            }
+
+            return printer;
+        }
+
+        public void ImprimirReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I)
+        {
+            Printer printer = GenerarReporte(vMVentas_E, vMVentas_D, vMVentas_I);
+
+            printer.Imprimir();
+        }
+
+        public void GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, string projectPath)
+        {
+            string rutaComprobantesImpresos = Path.Combine(projectPath, "Comprobantes Impresos");
+            string rutaCodComprobate = Path.Combine(rutaComprobantesImpresos, vMVentas_E.CodComprobante);
+            string rutaNumSucursal = Path.Combine(rutaCodComprobate, vMVentas_E.NumSucursal);
+            string rutaReporte = Path.Combine(rutaNumSucursal, vMVentas_E.NumVenta + ".pdf");
+
+            Directory.CreateDirectory(rutaComprobantesImpresos);
+            Directory.CreateDirectory(rutaCodComprobate);
+            Directory.CreateDirectory(rutaNumSucursal);
+
+            Printer printer = GenerarReporte(vMVentas_E, vMVentas_D, vMVentas_I);
+
+            Document document = new Document();
+
+            PdfWriter writer = PdfWriter.GetInstance(document, new FileStream(rutaReporte, FileMode.Create));
+
+            document.SetMargins(0f, 0f, 0f, 0f);
+
+            document.Open();
+
+            foreach (var linea in printer.ObtenerLineas())
+            {
+                Font font = FontFactory.GetFont(linea.fuente, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED, linea.tamano, (int)linea.estilo);
+                Paragraph paragraph = new Paragraph(linea.texto, font);
+
+                document.Add(paragraph);
+            }
+
+            document.Close();
         }
     }
 }
