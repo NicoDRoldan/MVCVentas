@@ -18,8 +18,10 @@ namespace MVCVentas.Models
         [Key]
         public string NumSucursal { get; set; } //FK
 
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime Fecha { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:HH:mm}")]
         public DateTime Hora { get; set; }
 
         public int id_FormaPago { get; set; } //FK
@@ -48,10 +50,8 @@ namespace MVCVentas.Models
         [ForeignKey("id_Usuario")]
         public virtual VMUser Usuario { get; set; }
 
-        //[ForeignKey("NumVenta, CodComprobante, CodModulo, NumSucursal")]
-        //public virtual VMVentas_I Ventas_I { get; set; }
+        public virtual ICollection<VMVentas_I> Ventas_I { get; set; }
 
-        //[ForeignKey("NumVenta, CodComprobante, CodModulo, NumSucursal")]
-        //public virtual VMVentas_D Ventas_D { get; set; }
+        public virtual ICollection<VMVentas_D> Ventas_D { get; set; }
     }
 }

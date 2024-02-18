@@ -2,89 +2,105 @@
 
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout_Ventas_Report.cshtml";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.NumVenta)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Fecha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Hora)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NumCaja)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Comprobante)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Modulo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Sucursal)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FormaPago)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Cliente)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Usuario)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                    @Html.DisplayFor(modelItem => item.NumVenta)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Hora)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumCaja)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Comprobante.CodComprobante)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Modulo.CodModulo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Sucursal.NumSucursal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FormaPago.Id_FormaPago)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cliente.CodCliente)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Usuario.Usuario)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Reporte de Ventas</title>
+</head>
+<body>
+    <div class="card shadow mb-4 custom-card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Reporte de Ventas</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" id="table-resposibe-index-Ventas_E">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr id="tr-encabezado-reporte-venta">
+                            <th>
+                                Pto Venta
+                            </th>
+                            <th>
+                                Número Comprobante
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Fecha)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Hora)
+                            </th>
+                            <th>
+                                Caja
+                            </th>
+                            <th>
+                                Tipo
+                            </th>
+                            <th>
+                                Forma de Pago
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Cliente)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Usuario)
+                            </th>
+                            <th>
+                                Total
+                            </th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Sucursal.NumSucursal)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.NumVenta)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Fecha)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Hora)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.NumCaja)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Comprobante.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.FormaPago.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Cliente.RazonSocial)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Usuario.Usuario)
+                                </td>
+                                @{
+                                    var total = item.Ventas_I.Where(vi => vi.CodConcepto == "TOTAL").Select(v => v.Importe).FirstOrDefault();
+                                }
+                                <td>
+                                    $@Html.DisplayFor(modelItem => total)
+                                </td>
+                                <td class="text-center">
+                                    @Html.ActionLink("Detalles", "Details", new {numVenta = item.NumVenta, codComprobante = item.CodComprobante, codModulo = item.CodModulo, numSucursal = item.NumSucursal }, new { @class = "btn btn-primary btn-sm" })
+                                    <label>|</label>
+                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.NumVenta">Reimprimir</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

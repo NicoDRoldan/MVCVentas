@@ -28,26 +28,59 @@ namespace MVCVentas.Controllers
                 .Include(v => v.FormaPago)
                 .Include(v => v.Modulo)
                 .Include(v => v.Sucursal)
-                .Include(v => v.Usuario);
+                .Include(v => v.Usuario)
+                .Include(v => v.Ventas_D)
+                .Include(v => v.Ventas_I);
+
             return View(await mVCVentasContext.ToListAsync());
         }
 
         // GET: Ventas_E/Details/5
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(string numVenta, string codComprobante, string codModulo, string numSucursal)
         {
-            if (id == null || _context.VMVentas_E == null)
+            if (numVenta == null || codComprobante == null || codModulo == null || numSucursal == null)
             {
                 return NotFound();
             }
 
             var vMVentas_E = await _context.VMVentas_E
+                .Where(ve => ve.NumVenta == numVenta
+                        && ve.CodComprobante == codComprobante
+                        && ve.CodModulo == codModulo
+                        && ve.NumSucursal == numSucursal
+                )
                 .Include(v => v.Cliente)
                 .Include(v => v.Comprobante)
                 .Include(v => v.FormaPago)
                 .Include(v => v.Modulo)
                 .Include(v => v.Sucursal)
                 .Include(v => v.Usuario)
-                .FirstOrDefaultAsync(m => m.NumVenta == id);
+                .FirstOrDefaultAsync();
+
+            // Traer los detalles de la venta:
+            var vMVentas_D = await _context.VMVentas_D
+                .Where(vd => vd.NumVenta == numVenta
+                    && vd.CodComprobante == codComprobante
+                    && vd.CodModulo == codModulo
+                    && vd.NumSucursal == numSucursal
+                )
+                .Include(vd => vd.Articulo)
+                .ToListAsync();
+
+            ViewData["Ventas_D"] = vMVentas_D;
+
+            // Traer los importes de la venta:
+            var vMVentas_I = await _context.VMVentas_I
+                .Where(vi => vi.NumVenta == numVenta
+                        && vi.CodComprobante == codComprobante
+                        && vi.CodModulo == codModulo
+                        && vi.NumSucursal == numSucursal
+               )
+                .Include(vi => vi.Concepto)
+                .ToListAsync();
+
+            ViewData["Ventas_I"] = vMVentas_I;
+
             if (vMVentas_E == null)
             {
                 return NotFound();

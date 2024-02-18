@@ -1,0 +1,36 @@
+﻿#ventas_D-table {
+    width: 450px !important;
+}
+
+    #ventas_D-table thead {
+        width: 475px !important;
+    }
+
+    #ventas_D-table tbody {
+        width: 475px !important;
+    }
+
+#ventas_D-table-responsive {
+    width: 467px !important;
+}
+
+#ventas_I-table {
+    width: 450px !important;
+}
+
+    #ventas_I-table thead {
+        width: 475px !important;
+    }
+
+    #ventas_I-table tbody {
+        width: 475px !important;
+    }
+
+#ventas_I-table-responsive {
+    width: 467px !important;
+}
+
+#botones-detalles a{
+    margin-right: 20px !important;
+    margin-bottom: 10px !important;
+}
