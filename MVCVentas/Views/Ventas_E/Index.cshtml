@@ -17,7 +17,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive" id="table-resposibe-index-Ventas_E">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="index-dataTable-ventas_e" width="100%" cellspacing="0">
                     <thead>
                         <tr id="tr-encabezado-reporte-venta">
                             <th>
@@ -125,6 +125,7 @@
 
     <script>
         function llamarAReimpresion(element) {
+            event.preventDefault();
 
             var _numVenta = element.dataset.numVenta;
             var _codComprobante = element.dataset.codComprobante;
@@ -140,6 +141,8 @@
 
             console.log(formData);
 
+            var dataTable = $('#dataTable').DataTable();
+
             $.ajax({
                 url: '@Url.Action("LlamarAReimpresion", "Ventas_E")',
                 type: 'POST',
@@ -152,5 +155,14 @@
                 }
             })
         }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#index-dataTable-ventas_e').DataTable();
+
+            // Ordenar por la columna de Fecha (tercera columna, índice 2) de forma descendente
+            table.order([[2, 'desc'], [3, 'desc']]).draw();
+        });
     </script>
 }
