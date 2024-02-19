@@ -360,14 +360,19 @@
             agregarRubros();
         });
 
+        let idRubroActual;
+
         // Función para agregar event listeners a los botones de
         function actualizarBotonesArticulosPorRubros() {
 
             tablaBodyRubros.querySelectorAll("button").forEach(boton => {
                 boton.addEventListener("click", function () {
 
+                    paginaActual = 1;
                     // Obtener el ID del rubro
                     const id_Rubro = this.dataset.id;
+
+                    idRubroActual = this.dataset.id;
 
                     // Llamar a la función para filtrar los artículos por rubro
                     filtrarArticulosPorRubro(id_Rubro);
@@ -414,6 +419,17 @@
             // Agregar event listeners a los botones de artículos
             agregarEventListenersBotonesArticulos();
         }
+
+        // Eventos para los botones de navegación
+        document.querySelector(".anterior").addEventListener("click", () => {
+            paginaActual--;
+            filtrarArticulosPorRubro(idRubroActual);
+        });
+
+        document.querySelector(".siguiente").addEventListener("click", () => {
+            paginaActual++;
+            filtrarArticulosPorRubro(idRubroActual);
+        });
 
         //////////////////////////////////// Lógica para agregar artículo al resumen de la venta ////////////////////////////////////
 

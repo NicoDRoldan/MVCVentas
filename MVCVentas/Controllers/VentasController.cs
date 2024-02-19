@@ -39,7 +39,6 @@ namespace MVCVentas.Controllers
         public async Task<IActionResult> Index()
         {
             // Lógica para obtener la lista de artículos:
-
             var listaArticulos = await _context.VMArticle
                 .Include(a => a.Precio)
                 .Include(a => a.Rubro)
