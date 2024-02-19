@@ -5,12 +5,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Details</h1>
+<link href="~/css/detallesVentas_E.css" rel="stylesheet">
+
+<h1>Detalles de la venta</h1>
 
 <div>
-    <h4>VMVentas_E</h4>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            Número de Comprobante
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NumVenta)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Fecha)
         </dt>
@@ -24,7 +31,7 @@
             @Html.DisplayFor(model => model.Hora)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NumCaja)
+            Caja
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.NumCaja)
@@ -33,13 +40,7 @@
             @Html.DisplayNameFor(model => model.Comprobante)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Comprobante.CodComprobante)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Modulo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Modulo.CodModulo)
+            @Html.DisplayFor(model => model.Comprobante.Nombre)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Sucursal)
@@ -51,13 +52,13 @@
             @Html.DisplayNameFor(model => model.FormaPago)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FormaPago.Id_FormaPago)
+            @Html.DisplayFor(model => model.FormaPago.Nombre)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Cliente)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Cliente.CodCliente)
+            @Html.DisplayFor(model => model.Cliente.RazonSocial)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Usuario)
@@ -66,8 +67,142 @@
             @Html.DisplayFor(model => model.Usuario.Usuario)
         </dd>
     </dl>
+    <dt class="">
+        Artículos de la venta:
+    </dt>
+    <div class=" mb-4 custom-card">
+        <div class="card-body custom-card-dos">
+            <div class="table-responsive" id="ventas_D-table-responsive">
+                <table class="table table-bordered" id="ventas_D-table" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="custom-column">
+                                Artículo
+                            </th>
+                            <th class="custom-column">
+                                Cantidad
+                            </th>
+                            <th class="custom-column">
+                                Precio Unitario
+                            </th>
+                            <th class="custom-column">
+                                Precio Total
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.Ventas_D)
+                        {
+                            <tr>
+                                <td>@item.Articulo.Nombre</td>
+                                <td>@item.Cantidad</td>
+                                <td>@item.PrecioUnitario</td>
+                                <td>@item.PrecioTotal</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <dt class="">
+        Importes:
+    </dt>
+    <div class=" mb-4 custom-card">
+        <div class="card-body custom-card-dos">
+            <div class="table-responsive" id="ventas_I-table-responsive">
+                <table class="table table-bordered" id="ventas_I-table" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class="custom-column">
+                                Concepto
+                            </th>
+                            <th class="custom-column">
+                                Importe
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.Ventas_I)
+                        {
+                            <tr>
+                                <td>@item.Concepto.Descripcion</td>
+                                <td>@item.Importe</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-    <a asp-action="Index">Back to List</a>
+<div class="row" id="botones-detalles">
+    <div class="col">
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    </div>
+    <div class="col">
+        <form asp-controller="Ventas_E" class="d-inline">
+            <button onclick="llamarAReimpresion()" class="btn btn-primary btn-sm">Reimprimir Comprobante</button>
+            <div id="message-success" style="margin-top: 5px;"></div>
+            <input type="hidden" name="numVenta" value="@Model.NumVenta" />
+            <input type="hidden" name="codComprobante" value="@Model.CodComprobante" />
+            <input type="hidden" name="codModulo" value="@Model.CodModulo" />
+            <input type="hidden" name="numSucursal" value="@Model.NumSucursal" />
+        </form>
+    </div>
 </div>
+
+
+        
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function llamarAReimpresion(){
+            $.ajax({
+                url: '@Url.Action("LlamarAReimpresion", "Ventas_E")',
+                type: 'POST',
+                data: {
+                    numVenta: '@Model.NumVenta',
+                    codComprobante: '@Model.CodComprobante',
+                    codModulo: '@Model.CodModulo',
+                    numSucursal: '@Model.NumSucursal'
+                },
+                success: function (response) {
+                    $('#mensaje-success').removeClass().addClass('text-success').text(response.message);
+                },
+                error: function (response) {
+                    $('#mensaje-success').removeClass().addClass('text-danger').text("Error: " + response.message);
+                }
+            })
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Inicializar la tabla con DataTables
+            $('#ventas_D-table').DataTable({
+                "paging": false,          // Desactivar paginación
+                "scrollY": "200px",       // Agregar scroll vertical a partir de los 200px
+                "scrollCollapse": true,   // Colapsar la tabla si el contenido no llena la altura
+                "searching": false,        // Desactivar búsqueda
+                "info": false,
+                "ordering": false
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Inicializar la tabla con DataTables
+            $('#ventas_I-table').DataTable({
+                "paging": false,          // Desactivar paginación
+                "scrollY": "200px",       // Agregar scroll vertical a partir de los 200px
+                "scrollCollapse": true,   // Colapsar la tabla si el contenido no llena la altura
+                "searching": false,        // Desactivar búsqueda
+                "info": false,
+                "ordering": false
+            });
+        });
+    </script>
+}

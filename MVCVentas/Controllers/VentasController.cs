@@ -42,19 +42,42 @@ namespace MVCVentas.Controllers
 
             var listaArticulos = await _context.VMArticle
                 .Include(a => a.Precio)
+                .Include(a => a.Rubro)
                 .Where(a => a.Activo == true 
-                        && a.Precio != null)
+                        && a.Precio != null
+                        && a.Precio.Precio > 0)
                 .Select(a => new
             {
                 Value = a.Id_Articulo.ToString(),
                 Text = a.Nombre,
-                Precio = a.Precio.Precio
+                Precio = a.Precio.Precio,
+                Rubro = a.Id_Rubro.ToString()
             })
             .ToListAsync();
             // Convierte la lista de artículos a formato JSON.
             var jsonListaArticulos = JsonConvert.SerializeObject(listaArticulos);
             // Pasa la lista de artículos a la vista como una cadena JSON.
             ViewData["JsonListaArticulos"] = jsonListaArticulos;
+
+            // Lógica para obtener la lista de Rubros:
+            var listaRubros = await _context.VMRubro
+                .Join(_context.VMArticle,
+                    r => r.Id_Rubro,
+                    a => a.Id_Rubro,
+                    (r, a) => new { Articulo = a, Rubro = r })
+                .Where(ar => ar.Articulo.Activo == true
+                        && ar.Articulo.Precio != null
+                        && ar.Articulo.Precio.Precio > 0)
+                .GroupBy(ar => new { ar.Rubro.Id_Rubro, ar.Rubro.Nombre })
+                .Select(grp => new
+                {
+                    Value = grp.Key.Id_Rubro.ToString(),
+                    Text = grp.Key.Nombre
+                })
+                .ToListAsync();
+            // Convierte la lista de rubros a formato JSON.
+            var jsonListaRubros = JsonConvert.SerializeObject(listaRubros);
+            ViewData["JsonListaRubros"] = jsonListaRubros;
 
             // Lógica para obtener la lista de clientes:
             var listaClientes = await _context.VMCliente

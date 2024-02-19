@@ -62,7 +62,20 @@
                     </table>
                 </div>
             </div>
-            <div class="contenedor-categorias-promociones">
+            <div class="contenedor-rubros-promociones" id="id-contenedor-rubros-promociones">
+                <div>
+                    <h3>Rubros</h3>
+                </div>
+                <div class="contenedor-tabla-rubro">
+                    <table id="table-Rubros">
+                        <tbody id="tabla-body-rubros">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="navegacion">
+                    <button class="anteriorRubro" disabled>Anterior</button>
+                    <button class="siguienteRubro" disabled>Siguiente</button>
+                </div>
             </div>
 
             <div class="contenedor-detalle-venta">
@@ -94,7 +107,6 @@
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
                             </div>
                         </div>
-
 
                         <div class="form-group">
                             <div>
@@ -184,6 +196,7 @@
                             <button class="btn btn-success" id="btn-venta" onclick="CrearVenta()">Vender</button>
                         </dd>
                     </div>
+
                 </dl>
             </div>
         </div>
@@ -240,6 +253,7 @@
             });
         }
 
+        // Función actualizarBotonesArticulos() obsoleta:
         function actualizarBotonesArticulos() {
             tablaBody.innerHTML = ""; // Limpiar el contenido existente antes de agregar nuevas filas
 
@@ -275,19 +289,131 @@
             agregarEventListenersBotonesArticulos();
         }
 
-        // Mostrar la primera página al cargar la página
-        actualizarBotonesArticulos();
+        // Eventos para los botones de navegación
+
+        //////////////////////////////////// Lógica para traer artículos por Rubros ////////////////////////////////////
+
+        // Array con los rubros
+        const rubros = @Html.Raw(ViewData["JsonListaRubros"]);
+
+        const rubrosPorPagina = 6;
+
+        const tablaBodyRubros = document.getElementById("tabla-body-rubros");
+        tablaBodyRubros.innerHTML = "";
+
+        // Obtener rubros de la página actual
+        const rubrosPaginaActual = rubros.slice(
+            (paginaActual - 1) * rubrosPorPagina,
+            paginaActual * rubrosPorPagina
+        );
+
+        // Función para agregar los rubros a la tabla
+        function agregarRubros() {
+
+            const tablaBodyRubros = document.getElementById("tabla-body-rubros");
+            tablaBodyRubros.innerHTML = "";
+
+            // Obtener rubros de la página actual
+            const rubrosPaginaActual = rubros.slice(
+                (paginaActual - 1) * rubrosPorPagina,
+                paginaActual * rubrosPorPagina
+            );
+
+            for (let i = 0; i < rubrosPaginaActual.length; i += columnasPorFila) {
+
+                const fila = document.createElement("tr");
+
+                for (let j = i; j < i + columnasPorFila && j < rubrosPaginaActual.length; j++) {
+
+                    const rubro = rubrosPaginaActual[j];
+                    const celda = document.createElement("td");
+                    const botonRubro = document.createElement("button");
+
+                    botonRubro.innerHTML = `<strong>${rubro.Text}</strong>`;
+
+                    botonRubro.dataset.id = rubro.Value;
+
+                    celda.appendChild(botonRubro);
+                    fila.appendChild(celda);
+                }
+                tablaBodyRubros.appendChild(fila);
+            }
+
+            const botonAnterior = document.querySelector(".anteriorRubro");
+            const botonSiguiente = document.querySelector(".siguienteRubro");
+
+            botonAnterior.disabled = paginaActual === 1;
+            botonSiguiente.disabled = rubrosPaginaActual.length < rubrosPorPagina;
+
+            actualizarBotonesArticulosPorRubros();
+        }
+        agregarRubros();
 
         // Eventos para los botones de navegación
-        document.querySelector(".anterior").addEventListener("click", () => {
+        document.querySelector(".anteriorRubro").addEventListener("click", () => {
             paginaActual--;
-            actualizarBotonesArticulos();
+            agregarRubros();
         });
 
-        document.querySelector(".siguiente").addEventListener("click", () => {
+        document.querySelector(".siguienteRubro").addEventListener("click", () => {
             paginaActual++;
-            actualizarBotonesArticulos();
+            agregarRubros();
         });
+
+        // Función para agregar event listeners a los botones de
+        function actualizarBotonesArticulosPorRubros() {
+
+            tablaBodyRubros.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+
+                    // Obtener el ID del rubro
+                    const id_Rubro = this.dataset.id;
+
+                    // Llamar a la función para filtrar los artículos por rubro
+                    filtrarArticulosPorRubro(id_Rubro);
+                });
+            });
+        }
+
+        // Función para filtrar los artículos por Rubro:
+        function filtrarArticulosPorRubro(id_Rubro) {
+            // Convierte la cadena JSON de la lista de artículos en un objeto JavaScript.
+            var listaArticulos = JSON.parse('@Html.Raw(ViewData["JsonListaArticulos"])');
+            var listaRubros = JSON.parse('@Html.Raw(ViewData["JsonListaRubros"])');
+
+            const articulosFiltrados = listaArticulos.filter(articulo => articulo.Rubro === id_Rubro);
+
+            tablaBody.innerHTML = ""; // Borrar filas anteriores
+
+            const articulosPaginaActual = articulosFiltrados.slice(
+                (paginaActual - 1) * articulosPorPagina,
+                paginaActual * articulosPorPagina
+            );
+
+            for (let i = 0; i < articulosPaginaActual.length; i += columnasPorFila) {
+                const fila = document.createElement("tr");
+                for (let j = i; j < i + columnasPorFila && j < articulosPaginaActual.length; j++) {
+                    const articulo = articulosPaginaActual[j];
+                    const celda = document.createElement("td");
+                    const botonArticulo = document.createElement("button");
+                    botonArticulo.innerHTML = `<strong>${articulo.Text}</strong> (${articulo.Value})</strong><br>$${articulo.Precio}`;
+                    botonArticulo.dataset.id = articulo.Value;
+                    celda.appendChild(botonArticulo);
+                    fila.appendChild(celda);
+                }
+                tablaBody.appendChild(fila);
+            }
+
+            // Mostrar/ocultar botones de navegación
+            const botonAnterior = document.querySelector(".anterior");
+            const botonSiguiente = document.querySelector(".siguiente");
+
+            botonAnterior.disabled = paginaActual === 1;
+            botonSiguiente.disabled = articulosPaginaActual.length < articulosPorPagina;
+
+            // Agregar event listeners a los botones de artículos
+            agregarEventListenersBotonesArticulos();
+        }
 
         //////////////////////////////////// Lógica para agregar artículo al resumen de la venta ////////////////////////////////////
 
@@ -394,8 +520,8 @@
         // Evento para el botón de cancelar venta
         document.getElementById("btn-cancel-venta").addEventListener("click", function () {
             varciarTablaResumen();
+            tablaBody.innerHTML = "";
         });
-
 
         //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
         function CrearVenta() {
