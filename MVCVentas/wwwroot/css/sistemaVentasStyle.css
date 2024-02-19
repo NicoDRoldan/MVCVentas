@@ -75,6 +75,39 @@ td {
             background-color: #ddd;
         }
 
+.contenedor-rubros-promociones {
+    margin-top: 100px;
+    width: 320px; /* Ajusta el ancho según tu diseño */
+    height: 250px !important; /* Ajusta el alto según tu diseño */
+}
+
+    .contenedor-rubros-promociones .contenedor-tabla-rubro {
+        flex-grow: 1;
+        height: 201px; /* Ajusta el alto según tu diseño */
+    }
+
+.contenedor-tabla-rubro {
+    overflow: hidden;
+    box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+#tabla-body-rubros td {
+    width: 33.33%;
+    height: 100px;
+}
+
+    #tabla-body-rubros td button {
+        width: 100%;
+        height: 100%;
+        border: none; /* Eliminar el borde */
+        background-color: transparent; /* Hacer transparente el fondo */
+        cursor: pointer;
+    }
+
+        #tabla-body-rubros td button:hover {
+            background-color: #ddd;
+        }
+
 #table-resumen-venta {
     border-collapse: collapse;
     border: 1px solid #ccc;
