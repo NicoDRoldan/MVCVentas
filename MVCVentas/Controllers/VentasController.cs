@@ -209,8 +209,6 @@ namespace MVCVentas.Controllers
             return comprobante.NumComprobante;
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> CrearVenta(VMVentas vMVentas, 
                                                     List<VMVentasDetalle> detallesventa, 
@@ -276,15 +274,26 @@ namespace MVCVentas.Controllers
             // Datos Ventas I:
 
             decimal impSubTotal = 0;
-            vMVentaImporte.Descuento = vMVentaImporte.Descuento.Replace(".", ","); // Se reemplaza el punto por la coma.
 
-            decimal descuento = decimal.Parse(vMVentaImporte.Descuento);
+            var descuentoEntity = await _context.VMPromoDescuento_E
+                .Where(p => p.Id_Promocion == (vMVentaImporte.Descuento != null ? int.Parse(vMVentaImporte.Descuento) : 0))
+                .FirstOrDefaultAsync();
+
+            decimal PorcentajeDescuento = 0;
+
+            if (descuentoEntity != null)
+            {
+                PorcentajeDescuento = descuentoEntity.Porcentaje;
+            }
+            else
+            {
+                PorcentajeDescuento = 0;
+            }
 
             var conceptos = await _context.VMConcepto
                 .ToListAsync();
 
             decimal iva21 = 1.21M;
-
 
             // Obtener el número de venta:
             decimal nroVenta = await ObtenerNumVenta(vMVentas.Sucursal.NumSucursal,
@@ -357,9 +366,8 @@ namespace MVCVentas.Controllers
 
                         var articulo = await _context.VMArticle
                             .Where(a => a.Id_Articulo == int.Parse(detalle.Id_Articulo))
+                            .Include(a => a.Precio)
                             .FirstOrDefaultAsync();
-
-                        detalle.PrecioUnitario = detalle.PrecioUnitario.Replace(".", ","); // Se reemplaza el punto por la coma.
 
                         var ventaD = new VMVentas_D
                         {
@@ -371,8 +379,8 @@ namespace MVCVentas.Controllers
                             Id_Articulo = int.Parse(detalle.Id_Articulo), // Se obtiene de la vista. OK
                             Cantidad = int.Parse(detalle.Cantidad), // Se obtiene de la vista. OK
                             Detalle = articulo.Nombre, // Se obtiene de la base de datos. OK
-                            PrecioUnitario = decimal.Parse(detalle.PrecioUnitario), // Se obtiene de la vista. OK
-                            PrecioTotal = int.Parse(detalle.Cantidad) * decimal.Parse(detalle.PrecioUnitario) // Se calcula acá. OK
+                            PrecioUnitario = (decimal)articulo.Precio.Precio, // Se obtiene de la vista. OK
+                            PrecioTotal = int.Parse(detalle.Cantidad) * (decimal)articulo.Precio.Precio // Se calcula acá. OK
                         };
                         // Se da de alta el detalle de la venta en la base de datos:
                         _context.VMVentas_D.Add(ventaD);
@@ -386,7 +394,9 @@ namespace MVCVentas.Controllers
                     // Se da de alta el importe de la venta:
                     foreach (var concepto in conceptos)
                     {
-                        if(descuento == 0 && concepto.CodConcepto == "DTO")
+                        decimal descuento = (impSubTotal * PorcentajeDescuento) / 100;
+
+                        if (descuento == 0 && concepto.CodConcepto == "DTO")
                         {
                             continue;
                         }

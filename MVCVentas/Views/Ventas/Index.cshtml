@@ -625,7 +625,6 @@
             calcularTotal();
             
             actualizarEventListenersEliminarArticuloCalcularTotal();
-            // Llamar a las funciones para recalcular subtotal y total
         }
 
         //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////
@@ -814,7 +813,7 @@
 
             // Obtener el importe de la venta
             var vMVentaImporte = {
-                Descuento: $("#descuento").val(),
+                Descuento: $("#id-descuento-input").val(),
                 Importe: $("#total").val()
             };
 
