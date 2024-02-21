@@ -16,6 +16,7 @@
 <link href="~/css/sistemaventasstyle.css" rel="stylesheet" />
 <link href="~/css/sistemaventasresumenventa.css" rel="stylesheet" />
 <link href="~/css/sistemavendasdetalleventa.css" rel="stylesheet" />
+<link href="~/css/promosDescuentos.css" rel="stylesheet" />
 
 <html>
 <body>
@@ -62,6 +63,7 @@
                     </table>
                 </div>
             </div>
+
             <div class="contenedor-rubros-promociones" id="id-contenedor-rubros-promociones">
                 <div>
                     <h3>Rubros</h3>
@@ -76,6 +78,16 @@
                     <button class="anteriorRubro" disabled>Anterior</button>
                     <button class="siguienteRubro" disabled>Siguiente</button>
                 </div>
+
+                <div id="botones-promo-desc">
+                    <div>
+                        <button data-toggle="modal" data-target="#promos-Modal">Promociones</button>
+                    </div>
+                    <div>
+                        <button data-toggle="modal" data-target="#descuentos-Modal">Descuentos</button>
+                    </div>
+                </div>
+
             </div>
 
             <div class="contenedor-detalle-venta">
@@ -127,6 +139,8 @@
                             </div>
                             <div>
                                 <input type="text" class="form-control" id="descuento" value="0" readonly />
+                                <!-- Input Hiden para guardar el ID del descuento -->
+                                <input type="hidden" id="id-descuento-input" />
                             </div>
                         </div>
 
@@ -190,6 +204,44 @@
                         </div>
                     </div>
 
+                    <!-- Modals de Promociones y Descuentos -->
+
+                    <div class="modal fade" id="promos-Modal" tabindex="-1" role="dialog" aria-labelledby="promos-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="promos-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="promos-ModalLabel">Promociones</h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Ventas/_PromocionesPartial.cshtml", new MVCVentas.Models.VMPromoDescuento_E())
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
+
+                                    <div id="mensaje-promo" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="descuentos-Modal" tabindex="-1" role="dialog" aria-labelledby="descuentos-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="descuentos-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="descuentos-ModalLabel">Descuentos</h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Ventas/_DescuentosPartial.cshtml", new MVCVentas.Models.VMPromoDescuento_E())
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
+
+                                    <div id="mensaje-descuento" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row" id="btn-vender-cancelar">
                         <dd class="">
                             <button class="btn btn-danger" id="btn-cancel-venta">Cancelar Venta</button>
@@ -216,9 +268,9 @@
         const articulos = @Html.Raw(ViewData["JsonListaArticulos"]);
 
         // Variables para la paginación
-        let paginaActual = 1;
+        let paginaActual = 1; // ¡Variable Global!
         const articulosPorPagina = 12; // Cambiar el número de artículos por página a 12
-        const columnasPorFila = 3; // Definir el número de columnas por fila
+        const columnasPorFila = 3; // Definir el número de columnas por fila -- ¡Variable Global! --
 
         const tablaBody = document.getElementById("tabla-body");
         tablaBody.innerHTML = ""; // Borrar filas anteriores
@@ -431,6 +483,101 @@
             filtrarArticulosPorRubro(idRubroActual);
         });
 
+        //////////////////////////////////// Lógica para agregar descuentos ////////////////////////////////////
+
+        const descuentos = @Html.Raw(ViewData["JsonListaDescuentos"]);
+        const descuentosPorPagina = 18;
+        const columnasPorFilaDescProm = 6;
+        let paginaActualDescProm = 1;
+
+        const tablaBodyDescuentos = document.getElementById('tabla-body-descuentos');
+        tablaBodyDescuentos.innerHTML = "";
+
+        const descuentosPagActual = descuentos.slice(
+            (paginaActualDescProm - 1) * descuentosPorPagina,
+            paginaActualDescProm * descuentosPorPagina
+        );
+
+        function agregarBotonesDescuentos() {
+
+            const tablaBodyDescuentos = document.getElementById('tabla-body-descuentos');
+            tablaBodyDescuentos.innerHTML = "";
+
+            const descuentosPagActual = descuentos.slice(
+                (paginaActualDescProm - 1) * descuentosPorPagina,
+                paginaActualDescProm * descuentosPorPagina
+            );
+
+            for (let i = 0; i < descuentosPagActual.length; i += columnasPorFilaDescProm) {
+
+                const fila = document.createElement("tr")
+
+                for (let j = i; j < i + columnasPorFilaDescProm && j < descuentosPagActual.length; j++) {
+
+                    const descuento = descuentosPagActual[j];
+                    const celda = document.createElement("td");
+                    const botonDescuento = document.createElement("button");
+
+                    botonDescuento.innerHTML = `<strong>${descuento.Text}</strong>`;
+                    botonDescuento.dataset.id = descuento.Value;
+
+                    celda.appendChild(botonDescuento);
+                    fila.appendChild(celda);
+                }
+                tablaBodyDescuentos.appendChild(fila);
+            }
+        }
+
+        agregarBotonesDescuentos();
+
+        //////////////////////////////////// Lógica para agregar promociones ////////////////////////////////////
+
+        const promociones = @Html.Raw(ViewData["JsonListaPromociones"]);
+
+        const tablaBodyPromociones = document.getElementById('tabla-body-promociones');
+        tablaBodyPromociones.innerHTML = "";
+
+        const promocionesPagActual = promociones.slice(
+            (paginaActualDescProm - 1) * descuentosPorPagina,
+            paginaActualDescProm * descuentosPorPagina
+        );
+
+        function agregarBotonesPromociones() {
+
+            const tablaBodyPromociones = document.getElementById('tabla-body-promociones');
+            tablaBodyPromociones.innerHTML = "";
+
+            const promocionesPagActual = promociones.slice(
+                (paginaActualDescProm - 1) * descuentosPorPagina,
+                paginaActualDescProm * descuentosPorPagina
+            );
+
+            for (let i = 0; i < promocionesPagActual.length; i += columnasPorFilaDescProm) {
+
+                const fila = document.createElement("tr")
+
+                for (let j = i; j < i + columnasPorFilaDescProm && j < promocionesPagActual.length; j++) {
+
+                    const promocion = promocionesPagActual[j];
+                    const celda = document.createElement("td");
+                    const botonPromo = document.createElement("button");
+
+                    botonPromo.innerHTML = `<strong>${promocion.Nombre}</strong>`;
+                    botonPromo.dataset.id = promocion.Id_Promocion;
+
+                    celda.appendChild(botonPromo);
+                    fila.appendChild(celda);
+                }
+                tablaBodyPromociones.appendChild(fila);
+            }
+        }
+
+        agregarBotonesPromociones();
+
+        //////////////////////////////////// Lógica para agregar las Promos y los Descuentos al resumen de venta ////////////////////////////////////
+
+        
+
         //////////////////////////////////// Lógica para agregar artículo al resumen de la venta ////////////////////////////////////
 
         function agregarArticuloAlResumen(articulo) {
@@ -467,11 +614,18 @@
                 document.querySelector("#table-resumen-venta tbody").appendChild(fila);
             }
 
-            actualizarEventListenersEliminarArticulo();
+            const idDescuento = document.getElementById("id-descuento-input").value;
+
+            calcularSubTotal();
+
+            if(idDescuento != 0){
+                recalcularDescuento(idDescuento);
+            }
+
+            calcularTotal();
+            
             actualizarEventListenersEliminarArticuloCalcularTotal();
             // Llamar a las funciones para recalcular subtotal y total
-            calcularSubTotal();
-            calcularTotal();
         }
 
         //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////
@@ -485,10 +639,32 @@
             document.getElementById("subtotal").value = subTotal.toFixed(2);
         }
 
-        function calcularTotal() {
-            calcularSubTotal();
+        function recalcularDescuento(idDescuento){
+
+            const descuento = descuentos.find(descuento => descuento.Value === idDescuento);
+
             const subTotal = parseFloat(document.getElementById("subtotal").value);
-            const total = subTotal;
+
+            let descuentoAplicado = (subTotal * descuento.Porcentaje) / 100;
+
+            if(descuentoAplicado != 0 && descuentoAplicado == subTotal){
+                descuentoAplicado = descuentoAplicado - 0.01;
+            }
+
+            document.getElementById("descuento").value = descuentoAplicado.toFixed(2);
+        }
+
+        function calcularTotal() {
+            const subTotal = parseFloat(document.getElementById("subtotal").value);
+            const descuento = parseFloat(document.getElementById("descuento").value);
+            
+            if(subTotal == 0){
+                document.getElementById("total").value = 0;
+                return;
+            }
+
+            const total = subTotal - descuento;
+
             document.getElementById("total").value = total.toFixed(2);
         }
 
@@ -497,8 +673,71 @@
                 boton.addEventListener("click", function () {
                     const fila = this.closest("tr");
                     const id_Articulo = fila.dataset.id;
+                    const id_Descuento = document.getElementById("id-descuento-input").value;
+
                     fila.remove();
+
+                    calcularSubTotal();
+
+                    if(id_Descuento != 0){
+                        recalcularDescuento(id_Descuento);
+                    }
+                    
                     calcularTotal();
+                });
+            });
+        }
+
+        //////////////////////////////////// Lógica para agregar EventListeners a los botones de Promos y Descuentos ////////////////////////////////////
+
+        function agregarEventListenersBotonesDescuentos() {
+            tablaBodyDescuentos.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function (){
+
+                    if(document.getElementById("descuento").value != 0 || document.getElementById("id-descuento-input").value != ""){
+                        $('#mensaje-descuento').removeClass().addClass('text-danger').text("Ya se ha aplicado un descuento.");
+                        return;
+                    }
+
+                    // Obtener el ID del descuento
+                    const idDescuento = this.dataset.id;
+
+                    // Buscar el descuento por el id obtenido
+                    const descuento = descuentos.find(descuento => descuento.Value === idDescuento);
+                    
+                    // Traigo el subtotal
+                    const subTotal = parseFloat(document.getElementById("subtotal").value);
+
+                    // Calculo el descuento
+
+                    let descuentoAplicado = (subTotal * descuento.Porcentaje) / 100;
+
+                    if(descuentoAplicado != 0 && descuentoAplicado == subTotal){
+                        descuentoAplicado = descuentoAplicado - 0.01;
+                    }
+
+                    // Agregar el descuento al detalle de la venta
+                    document.getElementById("descuento").value = descuentoAplicado.toFixed(2);
+
+                    document.getElementById("id-descuento-input").value = idDescuento;
+
+                    // Llamar a las funciones para recalcular subtotal y total
+                    calcularTotal();
+
+                    // Cerrar el modal
+                    $('#descuentos-Modal').modal('hide');
+                });
+            });
+        }
+
+        agregarEventListenersBotonesDescuentos();
+        
+        function agregarEventListenersBotonesPromociones() {
+            tablaBodyPromociones.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    const idPromocion = this.dataset.id;
+                    const promocion = promociones.find(promocion => promocion.Id_Promocion === idPromocion);
+                    agregarPromocionAlResumen(promocion);
                 });
             });
         }
@@ -527,6 +766,10 @@
                     fila.remove();
                 }
             });
+
+            // Limpiar los campos de descuento, subtotal y total
+            document.getElementById("descuento").value = 0;
+            document.getElementById("id-descuento-input").value = "";
 
             // Llamar a las funciones para recalcular subtotal y total
             calcularSubTotal();

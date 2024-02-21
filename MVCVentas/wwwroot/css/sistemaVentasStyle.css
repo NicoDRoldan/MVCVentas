@@ -77,7 +77,7 @@ td {
 
 .contenedor-rubros-promociones {
     margin-top: 100px;
-    width: 320px; /* Ajusta el ancho según tu diseño */
+    width: 500px; /* Ajusta el ancho según tu diseño */
     height: 250px !important; /* Ajusta el alto según tu diseño */
 }
 
@@ -88,11 +88,15 @@ td {
 
 .contenedor-tabla-rubro {
     overflow: hidden;
+    width: 320px; /* Ajusta el ancho según tu diseño */
     box-shadow: -5px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
+.contenedor-rubros-promociones .navegacion {
+    width: 320px !important;
+}
+
 #tabla-body-rubros td {
-    width: 33.33%;
     height: 100px;
 }
 
@@ -107,6 +111,26 @@ td {
         #tabla-body-rubros td button:hover {
             background-color: #ddd;
         }
+
+#botones-promo-desc {
+    width: 109px;
+    position: absolute;
+    bottom: 150px;
+    left: 639px;
+}
+
+    #botones-promo-desc button {
+        width: 109px;
+        height: 50px;
+        margin-bottom: 10px;
+        background-color: transparent; /* Hacer transparente el fondo */
+        cursor: pointer;
+        border: 1px solid #ccc;
+    }
+
+    #botones-promo-desc button:hover {
+                background-color: #ddd;
+            }
 
 #table-resumen-venta {
     border-collapse: collapse;

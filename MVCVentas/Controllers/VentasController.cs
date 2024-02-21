@@ -78,6 +78,47 @@ namespace MVCVentas.Controllers
             var jsonListaRubros = JsonConvert.SerializeObject(listaRubros);
             ViewData["JsonListaRubros"] = jsonListaRubros;
 
+            // Lógica para obtener los descuentos:
+            var listaDescuentos = await _context.VMPromoDescuento_E
+                .Where(p => p.FechaInicio <= DateTime.Now
+                        && p.FechaFin >= DateTime.Now
+                        && p.Id_Tipo == 1)
+                .Include(p => p.ListPromoDescuento_D)
+                .Include(p => p.TipoPromoDescuento)
+                .Select(pd => new
+                {
+                    Value = pd.Id_Promocion.ToString(),
+                    Text = pd.Nombre,
+                    Porcentaje = pd.Porcentaje
+                })
+                .ToListAsync();
+            var jsonListDescuentos = JsonConvert.SerializeObject(listaDescuentos);
+            ViewData["JsonListaDescuentos"] = jsonListDescuentos;
+
+            // Lógica para obtener las promociones:
+            var listaPromociones = await _context.VMPromoDescuento_E
+                .Where(p => p.FechaInicio <= DateTime.Now
+                        && p.FechaFin >= DateTime.Now
+                        && p.Id_Tipo == 2
+                        && p.ListPromoDescuento_D.Count > 0)
+                .Include(p => p.ListPromoDescuento_D)
+                    .ThenInclude(pd => pd.Articulo)
+                .Include(p => p.TipoPromoDescuento)
+                .Select(pd => new
+                {
+                    pd.Id_Promocion,
+                    pd.Nombre,
+                    pd.Porcentaje,
+                    pd.FechaInicio,
+                    pd.FechaFin,
+                    pd.Id_Tipo,
+                    pd.TipoPromoDescuento.Descripcion,
+                    pd.ListPromoDescuento_D
+                })
+                .ToListAsync();
+            var jsonListPromociones = JsonConvert.SerializeObject(listaPromociones);
+            ViewData["JsonListaPromociones"] = jsonListPromociones;
+
             // Lógica para obtener la lista de clientes:
             var listaClientes = await _context.VMCliente
                 .Include(c => c.Provincia)
@@ -167,6 +208,8 @@ namespace MVCVentas.Controllers
 
             return comprobante.NumComprobante;
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> CrearVenta(VMVentas vMVentas, 
