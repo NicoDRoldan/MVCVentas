@@ -78,5 +78,7 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMVentas_I> VMVentas_I { get; set; }
 
         public DbSet<MVCVentas.Models.VMConfig> VMConfig { get; set; }
+
+        public DbSet<MVCVentas.Models.VMCombo> VMCombo { get; set; }
     }
 }

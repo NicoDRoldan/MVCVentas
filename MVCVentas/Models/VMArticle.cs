@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MVCVentas.Models
@@ -22,11 +23,27 @@ namespace MVCVentas.Models
 
         public bool UsaStock { get; set; }
 
+        public bool UsaCombo { get; set; }
+
         public virtual VMPrice? Precio { get; set; }
 
         public virtual VMStock? Stock { get; set; }
 
         [ForeignKey("Id_Rubro")]
         public virtual VMRubro Rubro { get; set; }
+
+        public virtual ICollection<VMCombo> Combos { get; set; }
+
+        [NotMapped]
+        public List<SelectListItem> ListaArticulos { get; set; }
+
+        [NotMapped]
+        public List<int> ArticulosSeleccionados { get; set; }
+
+        public VMArticle()
+        {
+            ListaArticulos = new List<SelectListItem>();
+            ArticulosSeleccionados = new List<int>();
+        }
     }
 }

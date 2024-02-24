@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -58,8 +60,17 @@ namespace MVCVentas.Controllers
         // GET: Articles/Create
         public IActionResult Create()
         {
+            var entityModel = new VMArticle()
+            {
+                ListaArticulos = _context.VMArticle.Select(a => new SelectListItem
+                {
+                    Value = a.Id_Articulo.ToString(),
+                    Text = a.Nombre
+                }).ToList()
+            };
+
             ViewData["Id_Rubro"] = new SelectList(_context.Set<VMRubro>(), "Id_Rubro", "Nombre");
-            return View();
+            return View(entityModel);
         }
 
         // POST: Articles/Create
@@ -67,10 +78,13 @@ namespace MVCVentas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,Fecha,UsaStock,Precio,Stock")] VMArticle vMArticle)
+        public async Task<IActionResult> Create([Bind("Nombre,Id_Rubro,Activo,Descripcion,Fecha,UsaStock,UsaCombo,Precio,Stock,Combo")] VMArticle vMArticle)
         {
             vMArticle.Fecha = DateTime.Now;
             vMArticle.Precio.Fecha = DateTime.Now;
+
+            // Obtener de Lista de Articulos Seleccionados:
+            var articulosSeleccionados = Request.Form["ArticulosSeleccionados"].Select(x => int.Parse(x)).ToList();
 
             // Verifica si el campo Precio.Precio es null antes de agregarlo al contexto
             if (vMArticle.Precio != null && vMArticle.Precio.Precio == null)
@@ -83,6 +97,11 @@ namespace MVCVentas.Controllers
                 vMArticle.Stock = null; // Setea a null para evitar la inserción en la tabla de stock
             }
 
+            if (!vMArticle.UsaCombo)
+            {
+                vMArticle.Combos = null;
+            }
+
             ModelState.Clear();
             TryValidateModel(vMArticle);
 
@@ -90,6 +109,28 @@ namespace MVCVentas.Controllers
             {
                 _context.Add(vMArticle);
                 await _context.SaveChangesAsync();
+
+                if (vMArticle.UsaCombo && articulosSeleccionados.Any())
+                {
+                    VMCombo vMComboArtPrincipal = new VMCombo
+                    {
+                        Id_Articulo = vMArticle.Id_Articulo,
+                        Id_ArticuloAgregado = vMArticle.Id_Articulo
+                    };
+                    _context.Add(vMComboArtPrincipal);
+
+                    foreach (int idArticulo in articulosSeleccionados)
+                    {
+                        VMCombo vMCombo = new VMCombo
+                        {
+                            Id_Articulo = vMArticle.Id_Articulo,
+                            Id_ArticuloAgregado = idArticulo
+                        };
+                        _context.Add(vMCombo);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             ViewData["Id_Rubro"] = new SelectList(_context.Set<VMRubro>(), "Id_Rubro", "Id_Rubro", vMArticle.Id_Rubro);
@@ -108,7 +149,19 @@ namespace MVCVentas.Controllers
             var vMArticle = await _context.VMArticle
                 .Include(a => a.Precio)
                 .Include(a => a.Stock)
+                .Include(a => a.Combos)
                 .FirstOrDefaultAsync(p => p.Id_Articulo == id);
+
+            vMArticle.ListaArticulos = _context.VMArticle
+                .Where(vMArticle => vMArticle.Id_Articulo != id)
+                .Select(a => new SelectListItem
+                {
+                Value = a.Id_Articulo.ToString(),
+                Text = a.Nombre
+                })
+                .ToList();
+
+            vMArticle.ArticulosSeleccionados = vMArticle.Combos.Select(c => c.Id_ArticuloAgregado).ToList();
 
             //Guarda el valor de fecha en memoria cache en un campo llamado "FechaEdicion".
             _memoryCache.Set("FechaEdicion", vMArticle.Fecha, new MemoryCacheEntryOptions
@@ -126,19 +179,18 @@ namespace MVCVentas.Controllers
             return View(vMArticle);
         }
 
-        // POST: Articles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,UsaStock,Precio,Stock")] VMArticle vMArticle)
+        public async Task<IActionResult> Edit(int id, [Bind("Id_Articulo,Nombre,Id_Rubro,Activo,Descripcion,UsaStock,UsaCombo,Precio,Stock,Combo")] 
+                                                                                            VMArticle vMArticle)
         {
             if (id != vMArticle.Id_Articulo)
             {
                 return NotFound();
             }
 
-            vMArticle.Stock.Id_Articulo = id;
+            // Obtener de Lista de Articulos Seleccionados:
+            var articulosSeleccionados = Request.Form["ArticulosSeleccionados"].Select(x => int.Parse(x)).ToList();
 
             ModelState.Clear();
             TryValidateModel(vMArticle);
@@ -177,7 +229,8 @@ namespace MVCVentas.Controllers
                             }
                         }
                     }
-                    // Si el precio no existe, se creará un nuevo objeto y se insertará en la tabla correspondiente con los datos pasados en la vista y un dato predeterminado (fecha).
+                    // Si el precio no existe, se creará un nuevo objeto y se insertará en la tabla correspondiente con los datos pasados en la vista
+                    // y un dato predeterminado (fecha).
                     else if (artExistente.Precio == null && vMArticle.Precio.Precio != null)
                     {
                         artExistente.Precio = new VMPrice
@@ -230,6 +283,37 @@ namespace MVCVentas.Controllers
                     artExistente.Activo = vMArticle.Activo;
                     artExistente.Descripcion = vMArticle.Descripcion;
                     artExistente.UsaStock = vMArticle.UsaStock;
+                    artExistente.UsaCombo = vMArticle.UsaCombo;
+
+                    if (vMArticle.UsaCombo && articulosSeleccionados.Any())
+                    {
+                        var combos = _context.VMCombo.Where(c => c.Id_Articulo == vMArticle.Id_Articulo).ToList();
+                        _context.RemoveRange(combos);
+
+                        // Agregar el artículo principal al combo
+                        VMCombo vMComboArtPrincipal = new VMCombo
+                        {
+                            Id_Articulo = vMArticle.Id_Articulo,
+                            Id_ArticuloAgregado = vMArticle.Id_Articulo
+                        };
+                        _context.Add(vMComboArtPrincipal);
+
+                        foreach (int idArticulo in articulosSeleccionados)
+                        {
+                            VMCombo vMCombo = new VMCombo
+                            {
+                                Id_Articulo = vMArticle.Id_Articulo,
+                                Id_ArticuloAgregado = idArticulo
+                            };
+
+                            _context.Add(vMCombo);
+                        }
+                    }
+                    else
+                    {
+                        var combos = _context.VMCombo.Where(c => c.Id_Articulo == vMArticle.Id_Articulo).ToList();
+                        _context.RemoveRange(combos);
+                    }
 
                     await _context.SaveChangesAsync();
                 }
@@ -313,7 +397,8 @@ namespace MVCVentas.Controllers
 
         private bool VMArticleExists(int id)
         {
-          return _context.VMArticle.Any(e => e.Id_Articulo == id);
+            return _context.VMArticle.Any(e => e.Id_Articulo == id);
         }
+
     }
 }

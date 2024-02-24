@@ -1,0 +1,57 @@
+﻿#promos-Modal {
+    height: 600px;
+    position: absolute;
+    left: -200px;
+    top: -400px;
+}
+
+#descuentos-Modal {
+    height: 600px;
+    position: absolute;
+    left: -200px;
+    top: -400px;
+}
+
+#promos-Modal-content .modal-header {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+#descuentos-Modal-content .modal-header {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+#promos-Modal .modal-dialog .modal-content{
+    display: flex;
+    justify-content: center;
+}
+
+#descuentos-Modal .modal-dialog .modal-content{
+    display: flex;
+    justify-content: center;
+}
+
+#tabla-body-promociones button {
+    padding: 20px;
+    border: none; /* Eliminar el borde */
+    background-color: transparent; /* Hacer transparente el fondo */
+    cursor: pointer;
+}
+
+#tabla-body-promociones button:hover {
+    background-color: #ddd;
+}
+
+#tabla-body-descuentos button {
+    padding: 20px;
+    border: none; /* Eliminar el borde */
+    background-color: transparent; /* Hacer transparente el fondo */
+    cursor: pointer;
+}
+
+#tabla-body-descuentos button:hover {
+    background-color: #ddd;
+}

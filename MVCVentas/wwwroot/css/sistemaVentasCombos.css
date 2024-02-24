@@ -1,0 +1,50 @@
+﻿#tipoArt-Modal {
+    width: 400px;
+    height: 600px;
+    position: absolute;
+    left: -40px;
+    top: -300px;
+}
+
+#tipoArt-Modal-content .modal-header {
+    width: 400px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+#tipoArt-Modal-content .modal-body {
+    width: 400px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#tipoArt-Modal .modal-dialog .modal-content {
+    width: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+#tipoArt-Modal-content .modal-body button {
+    width: 150px;
+    padding: 20px;
+    border: none;
+    background-color: lightgray;
+    cursor: pointer;
+    border-radius: 3px;
+    justify-content: center;
+    text-align: center;
+}
+
+    #tipoArt-Modal-content .modal-body button:hover {
+        background-color: #ddd;
+    }
+
+#tipoArt-Modal-content .modal-footer {
+    width: 400px;
+    padding: 5px;
+}
