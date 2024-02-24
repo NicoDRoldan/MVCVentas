@@ -1,0 +1,43 @@
+﻿@model MVCVentas.Models.VMArticle
+
+<!-- Código para la ventana emergente -->
+<div class="modal fade" id="articulosModal" tabindex="-1" role="dialog" aria-labelledby="articulosModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="articulosModalLabel">Seleccionar Artículos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table" id="articulosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Artículo</th>
+                            <th>Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!--  Recorrer la lista de artículos -->
+                        @foreach (var articulo in Model.ListaArticulos)
+                        {
+                            <tr>
+                                <td id="id_Articulo_Seleccionado">@articulo.Value</td>
+                                <td>@articulo.Text</td>
+                                <td>
+                                    <input type="checkbox" id="@articulo.Value" name="ArticulosSeleccionados" value="@articulo.Value"
+                                    @(Model.ArticulosSeleccionados.Contains(int.Parse(articulo.Value)) ? "checked" : "")>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

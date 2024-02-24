@@ -17,6 +17,7 @@
 <link href="~/css/sistemaventasresumenventa.css" rel="stylesheet" />
 <link href="~/css/sistemavendasdetalleventa.css" rel="stylesheet" />
 <link href="~/css/promosDescuentos.css" rel="stylesheet" />
+<link href="~/css/sistemaVentasCombos.css" rel="stylesheet" />
 
 <html>
 <body>
@@ -164,6 +165,8 @@
 
                     </form>
 
+                    <!-- Modal de Nuevo Cliente -->
+
                     <div class="modal fade" id="nuevoClienteModal" tabindex="-1" role="dialog" aria-labelledby="nuevoClienteModalLabel" aria-hidden="true">
                         <div class=" modal-dialog" role="document">
                             <div class="modal-content" id="cliente-modal">
@@ -182,7 +185,7 @@
                                 </div>
                             </div>
                         </div>
-                        </div>
+                    </div>
 
                     <!-- Modal de Configuración -->
 
@@ -197,7 +200,6 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cerrarModalConfig()">Cerrar</button>
-
                                     <div id="mensaje-confg" style="margin-top: 5px;"></div>
                                 </div>
                             </div>
@@ -217,7 +219,6 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
-
                                     <div id="mensaje-promo" style="margin-top: 5px;"></div>
                                 </div>
                             </div>
@@ -235,8 +236,45 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
-
                                     <div id="mensaje-descuento" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal tipo de artículo (Solo / Combo) -->
+
+                    <div class="modal fade" id="tipoArt-Modal" tabindex="-1" role="dialog" aria-labelledby="tipoArt-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="tipoArt-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="tipoArt-ModalLabel">Tipo de Artículo</h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Ventas/_TipoArtPartial.cshtml")
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
+                                    <div id="mensaje-tipoArt" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modals Combos -->
+
+                    <div class="modal fade" id="combos-Modal" tabindex="-1" role="dialog" aria-labelledby="combos-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="combos-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="combos-ModalLabel">Combos</h5>
+                                </div>
+                                <div class="modal-body">
+                                    
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
+                                    <div id="mensaje-combos" style="margin-top: 5px;"></div>
                                 </div>
                             </div>
                         </div>
@@ -266,6 +304,7 @@
         
         // Array con los datos de los artículos (ejemplo)
         const articulos = @Html.Raw(ViewData["JsonListaArticulos"]);
+        const articulosConCombos = @Html.Raw(ViewData["JsonListaArticulosConCombo"]);
 
         // Variables para la paginación
         let paginaActual = 1; // ¡Variable Global!
@@ -281,20 +320,7 @@
             paginaActual * articulosPorPagina
         );
 
-        // Función para agregar event listeners a los botones de artículos
-        function agregarEventListenersBotonesArticulos() {
-            tablaBody.querySelectorAll("button").forEach(boton => {
-                boton.addEventListener("click", function () {
-                    // Obtener el ID del artículo
-                    const Id_Articulo = this.dataset.id;
-                    // Buscar el artículo en la lista de artículos
-                    const articuloLista = articulos.find(articulo => articulo.Value === Id_Articulo);
-                    // Llamar a la función para agregar el artículo al resumen de la venta
-                    agregarArticuloAlResumen(articuloLista);
-                });
-            });
-        }
-
+        // Función Obsoleta.
         function actualizarEventListenersEliminarArticulo(){
             document.querySelectorAll(".eliminar").forEach(boton => {
                 boton.addEventListener("click", function () {
@@ -305,7 +331,7 @@
             });
         }
 
-        // Función actualizarBotonesArticulos() obsoleta:
+        // Función Obsoleta:
         function actualizarBotonesArticulos() {
             tablaBody.innerHTML = ""; // Limpiar el contenido existente antes de agregar nuevas filas
 
@@ -580,6 +606,51 @@
 
         //////////////////////////////////// Lógica para agregar artículo al resumen de la venta ////////////////////////////////////
 
+        // Función para agregar event listeners a los botones de artículos
+        function agregarEventListenersBotonesArticulos() {
+            tablaBody.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+                    // Obtener el ID del artículo
+                    const Id_Articulo = this.dataset.id;
+                    // Buscar el artículo en la lista de artículos
+                    const articuloLista = articulos.find(articulo => articulo.Value === Id_Articulo);
+                    // Llamar a la función para agregar el artículo al resumen de la venta
+
+                    if (!articuloLista.UsaCombo) {
+                        agregarArticuloAlResumen(articuloLista);
+                    } 
+                    else {
+                        abrirModal(articuloLista)
+                    }
+                });
+            });
+        }
+
+        function abrirModal(articuloLista) {
+            $('#tipoArt-Modal').modal('show');
+
+            $('#btn-tipo-solo').off('click').on('click', function () {
+                elegirTipoArticulo('solo', articuloLista)
+            });
+
+            $('#btn-tipo-combo').off('click').on('click', function () {
+                elegirTipoArticulo('combo', articuloLista)
+            });
+        }
+
+        function elegirTipoArticulo(tipo,articuloLista) {
+
+            if (tipo === 'solo') {
+                agregarArticuloAlResumen(articuloLista);
+            }
+            else if (tipo === 'combo'){
+                agregarComboAlResumen(articuloLista);
+            }
+
+            $('#tipoArt-Modal').modal('hide');
+
+        }
+
         function agregarArticuloAlResumen(articulo) {
             
             // Desestructurar el objeto articulo
@@ -625,6 +696,76 @@
             calcularTotal();
             
             actualizarEventListenersEliminarArticuloCalcularTotal();
+        }
+
+        function agregarComboAlResumen(articulo){
+            
+            var articulosCombos = [];
+
+            for (var artsConCombos = 0; artsConCombos < articulosConCombos.length; artsConCombos++) {
+
+                if (articulosConCombos[artsConCombos].Value === articulo.Value) {
+
+                    if (artsConCombos[0]){
+
+                        var combo = {
+                            ComboId: articulosConCombos[artsConCombos].ComboId,
+                            Value: articulosConCombos[artsConCombos].Value,
+                            Text: articulosConCombos[artsConCombos].Text,
+                            Precio: articulosConCombos[artsConCombos].Precio,
+                        };
+                        articulosCombos.push(combo);
+                    }
+
+                    var combo = {
+                        ComboId: articulosConCombos[artsConCombos].ComboId,
+                        Value: articulosConCombos[artsConCombos].ValueAgregado,
+                        Text: articulosConCombos[artsConCombos].TextAgregado,
+                        Precio: articulosConCombos[artsConCombos].PrecioAgregado,
+                    };
+                    articulosCombos.push(combo);
+                }
+            }
+
+            for (var combo in articulosCombos) {
+
+                const comboExistente = document.querySelector(`#table-resumen-venta tr[data-id="${articulosCombos[combo].ComboId}"]`);
+                if (comboExistente){
+
+                    var cantidad = comboExistente.querySelector(".cantidad");
+                    cantidad.textContent = Number(cantidad.textContent) + 1;
+                    var precioTotal = comboExistente.querySelector(".precio-total");
+                    precioTotal.textContent = (Number(precioTotal.textContent) + articulosCombos[combo].Precio).toFixed(2);
+                }
+                else{
+
+                    const fila = document.createElement("tr");
+                    fila.dataset.id = articulosCombos[combo].ComboId;
+                    fila.innerHTML = `
+                            <td asp-for="id_Combo" id="id_Combo" hidden>${articulosCombos[combo].ComboId}</td>
+                            <td asp-for="Id_Articulo" id="id_Articulo">${articulosCombos[combo].Value}</td>
+                            <td asp-for="Descripcion" id="nombre">${articulosCombos[combo].Text}</td>
+                            <td asp-for="PrecioUnitario" id="precio">${articulosCombos[combo].Precio}</td>
+                            <td asp-for="Cantidad" id="cantidad" class="cantidad">1</td>
+                            <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${articulosCombos[combo].Precio}</td>
+                            <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                        `;
+                    document.querySelector("#table-resumen-venta tbody").appendChild(fila);
+                }
+            }
+            const idDescuento = document.getElementById("id-descuento-input").value;
+
+            calcularSubTotal();
+
+            if(idDescuento != 0){
+                recalcularDescuento(idDescuento);
+            }
+
+            calcularTotal();
+
+            actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            console.log(articulosCombos);
         }
 
         //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////

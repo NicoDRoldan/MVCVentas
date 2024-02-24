@@ -50,7 +50,9 @@ namespace MVCVentas.Controllers
                 Value = a.Id_Articulo.ToString(),
                 Text = a.Nombre,
                 Precio = a.Precio.Precio,
-                Rubro = a.Id_Rubro.ToString()
+                Rubro = a.Id_Rubro.ToString(),
+                UsaStock = a.UsaStock,
+                UsaCombo = a.UsaCombo
             })
             .ToListAsync();
             // Convierte la lista de artículos a formato JSON.
@@ -118,6 +120,57 @@ namespace MVCVentas.Controllers
                 .ToListAsync();
             var jsonListPromociones = JsonConvert.SerializeObject(listaPromociones);
             ViewData["JsonListaPromociones"] = jsonListPromociones;
+
+            // Lógica para obtener la lista de Combos:
+            var listaCombos = await _context.VMCombo
+                .Select(c => new
+                {
+                    Value = c.Id_Combo.ToString(),
+                    ArtPrincipal = c.Id_Articulo.ToString(),
+                    ArtAgregado = c.Id_ArticuloAgregado.ToString(),
+                })
+                .ToListAsync();
+            var jsonListCombos = JsonConvert.SerializeObject(listaCombos);
+            ViewData["JsonListaCombos"] = jsonListCombos;
+
+            // Lógica para traer artículos con combos:
+            var listaArticulosConCombo = await _context.VMArticle
+            .Include(a => a.Precio)
+            .Include(a => a.Rubro)
+            .Include(a => a.Combos)
+            .Join(_context.VMCombo,
+                a => a.Id_Articulo,
+                c => c.Id_Articulo,
+                (a, c) => new { Articulo = a, Combo = c })
+            .Join(_context.VMArticle,
+                ac => ac.Combo.Id_ArticuloAgregado,
+                aa => aa.Id_Articulo,
+                (ac, aa) => new { ArticuloCombo = ac, ArticuloAgregado = aa })
+            .Join(_context.VMPrice,
+                acaa => acaa.ArticuloAgregado.Id_Articulo,
+                p => p.Id_Articulo,
+                (acaa, p) => new { ArticuloComboAgregado = acaa, Precio = p })
+            .Where(acap => acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Activo == true
+                    && acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Precio != null
+                    && acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Precio.Precio > 0
+                    && acap.ArticuloComboAgregado.ArticuloCombo.Articulo.UsaCombo == true)
+            .Select(acap => new
+            {
+                Value = acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Id_Articulo.ToString(), // Id Artículo principal.
+                Text = acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Nombre, // Nombre Artículo principal.
+                Precio = acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Precio.Precio, // Precio Artículo principal.
+                Rubro = acap.ArticuloComboAgregado.ArticuloCombo.Articulo.Id_Rubro.ToString(), // Rubro Artículo principal.
+                ValueAgregado = acap.ArticuloComboAgregado.ArticuloAgregado.Id_Articulo.ToString(), // Id Artículo agregado.
+                ComboId = acap.ArticuloComboAgregado.ArticuloCombo.Combo.Id_Combo.ToString(), // Id Combo.
+                PrecioAgregado = acap.Precio.Precio, // Precio Artículo agregado.
+                TextAgregado = acap.ArticuloComboAgregado.ArticuloAgregado.Nombre // Nombre Artículo agregado.
+            })
+            .ToListAsync();
+
+            var jsonListArticulosConCombo = JsonConvert.SerializeObject(listaArticulosConCombo);
+            ViewData["JsonListaArticulosConCombo"] = jsonListArticulosConCombo;
+
+
 
             // Lógica para obtener la lista de clientes:
             var listaClientes = await _context.VMCliente

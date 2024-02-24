@@ -20,7 +20,7 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id_Articulo" />
+            <input id="id-art" type="hidden" asp-for="Id_Articulo" />
             <div class="form-group">
                 <label>Nombre de Artículo</label>
                 <input asp-for="Nombre" class="form-control" />
@@ -72,8 +72,33 @@
 
             @* Fin formulario para Stock *@
 
+            @* Inicio formulario para Combo *@
+
             <div class="form-group">
-                <input type="submit" value="Guardar Cambios" class="btn btn-primary" />
+                <label>¿El artículo tiene Combo?</label>
+                <div class="form-check">
+                    <input type="radio" id="siOptionCombo" class="form-check-input" asp-for="UsaCombo" value="true" />
+                    <label for="siOptionCombo" class="form-check-label">Sí</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" id="noOptionCombo" class="form-check-input" asp-for="UsaCombo" value="false" />
+                    <label for="noOptionCombo" class="form-check-label">No</label>
+                </div>
+            </div>
+
+            <!-- Botón para abrir la ventana emergente -->
+            <div id="divCombosForm" class="form-group">
+                <button type="button" class="btn btn-primary boton-add-articulos" data-toggle="modal" data-target="#articulosModal">
+                    Agregar Artículos al Combo
+                </button>
+            </div>
+
+            @Html.Partial("_CombosPartial", Model)
+
+            @* Fin formulario para Combo *@
+
+            <div class="form-group">
+                <input type="submit" value="Guardar Cambios" class="btn btn-primary" onclick="agregarArticulos()" />
             </div>
         </form>
     </div>
@@ -104,5 +129,39 @@
                 $('#divStockForm').show();
             }
         });
+
+        $(document).ready(function () {
+            // Manejo del cambio en el radio
+            $('input[name="UsaCombo"]').change(function () {
+                if ($(this).val() == "true") {
+                    // Si UsaCombo es true, muestra el formulario de stock
+                    $('#divCombosForm').show();
+                } else {
+                    // Si UsaCombo es false, oculta el formulario de stock
+                    $('#divCombosForm').hide();
+                }
+            });
+
+            // Al cargar la pag, verifica el valor inicial de UsaStock
+            if ($('input[name="UsaCombo"]:checked').val() === "true") {
+                $('#divCombosForm').show();
+            }
+            else{
+                $('#divCombosForm').hide();
+            }
+        });
+
+        $(document).ready(function () {
+            // Inicializar la tabla con DataTables
+            $('#articulosTable').DataTable({
+                "paging": false,          // Desactivar paginación
+                "scrollY": "400px",       // Altura fija con barra de desplazamiento si es necesario
+                "scrollCollapse": true,   // Colapsar la tabla si la altura es menor que el contenido
+                "searching": true,        // Habilitar la función de búsqueda
+                "ordering": true,         // Deshabilitar la ordenación
+                "info": false,            // Deshabilitar la información de la tabla
+            });
+        });
+
     </script>
 }
