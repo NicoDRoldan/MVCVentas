@@ -112,6 +112,13 @@ namespace MVCVentas.Controllers
 
                 if (vMArticle.UsaCombo && articulosSeleccionados.Any())
                 {
+                    VMCombo vMComboArtPrincipal = new VMCombo
+                    {
+                        Id_Articulo = vMArticle.Id_Articulo,
+                        Id_ArticuloAgregado = vMArticle.Id_Articulo
+                    };
+                    _context.Add(vMComboArtPrincipal);
+
                     foreach (int idArticulo in articulosSeleccionados)
                     {
                         VMCombo vMCombo = new VMCombo
@@ -282,6 +289,14 @@ namespace MVCVentas.Controllers
                     {
                         var combos = _context.VMCombo.Where(c => c.Id_Articulo == vMArticle.Id_Articulo).ToList();
                         _context.RemoveRange(combos);
+
+                        // Agregar el artículo principal al combo
+                        VMCombo vMComboArtPrincipal = new VMCombo
+                        {
+                            Id_Articulo = vMArticle.Id_Articulo,
+                            Id_ArticuloAgregado = vMArticle.Id_Articulo
+                        };
+                        _context.Add(vMComboArtPrincipal);
 
                         foreach (int idArticulo in articulosSeleccionados)
                         {

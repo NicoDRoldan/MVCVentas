@@ -235,7 +235,7 @@
                                     @Html.Partial("~/Views/Ventas/_DescuentosPartial.cshtml", new MVCVentas.Models.VMPromoDescuento_E())
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cerrarModalDescuentos()">Cerrar</button>
                                     <div id="mensaje-descuento" style="margin-top: 5px;"></div>
                                 </div>
                             </div>
@@ -559,11 +559,12 @@
         //////////////////////////////////// Lógica para agregar promociones ////////////////////////////////////
 
         const promociones = @Html.Raw(ViewData["JsonListaPromociones"]);
+        const promocionesAgrupadas = @Html.Raw(ViewData["JsonListaPromocionesAgrupadas"]);
 
         const tablaBodyPromociones = document.getElementById('tabla-body-promociones');
         tablaBodyPromociones.innerHTML = "";
 
-        const promocionesPagActual = promociones.slice(
+        const promocionesPagActual = promocionesAgrupadas.slice(
             (paginaActualDescProm - 1) * descuentosPorPagina,
             paginaActualDescProm * descuentosPorPagina
         );
@@ -573,7 +574,7 @@
             const tablaBodyPromociones = document.getElementById('tabla-body-promociones');
             tablaBodyPromociones.innerHTML = "";
 
-            const promocionesPagActual = promociones.slice(
+            const promocionesPagActual = promocionesAgrupadas.slice(
                 (paginaActualDescProm - 1) * descuentosPorPagina,
                 paginaActualDescProm * descuentosPorPagina
             );
@@ -589,7 +590,7 @@
                     const botonPromo = document.createElement("button");
 
                     botonPromo.innerHTML = `<strong>${promocion.Nombre}</strong>`;
-                    botonPromo.dataset.id = promocion.Id_Promocion;
+                    botonPromo.dataset.id = promocion.Value;
 
                     celda.appendChild(botonPromo);
                     fila.appendChild(celda);
@@ -600,9 +601,67 @@
 
         agregarBotonesPromociones();
 
-        //////////////////////////////////// Lógica para agregar las Promos y los Descuentos al resumen de venta ////////////////////////////////////
+        //////////////////////////////////// Lógica para agregar EventListeners a los botones de Promos y Descuentos ////////////////////////////////////
 
-        
+        function cerrarModalDescuentos() {
+            $('#mensaje-descuento').removeClass().text("");
+        }
+
+        function agregarEventListenersBotonesDescuentos() {
+            tablaBodyDescuentos.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+
+                    if (document.getElementById("descuento").value != 0 || document.getElementById("id-descuento-input").value != "") {
+                        $('#mensaje-descuento').removeClass().addClass('text-danger').text("Ya se ha aplicado un descuento.");
+                        return;
+                    }
+
+                    // Obtener el ID del descuento
+                    const idDescuento = this.dataset.id;
+                    // Buscar el descuento por el id obtenido
+                    const descuento = descuentos.find(descuento => descuento.Value === idDescuento);
+
+                    // Traigo el subtotal
+                    const subTotal = parseFloat(document.getElementById("subtotal").value);
+
+                    // Calculo el descuento
+
+                    let descuentoAplicado = (subTotal * descuento.Porcentaje) / 100;
+
+                    if (descuentoAplicado != 0 && descuentoAplicado == subTotal) {
+                        descuentoAplicado = descuentoAplicado - 0.01;
+                    }
+
+                    // Agregar el descuento al detalle de la venta
+                    document.getElementById("descuento").value = descuentoAplicado.toFixed(2);
+
+                    document.getElementById("id-descuento-input").value = idDescuento;
+
+                    // Llamar a las funciones para recalcular subtotal y total
+                    calcularTotal();
+
+                    // Cerrar el modal
+                    $('#descuentos-Modal').modal('hide');
+                });
+            });
+        }
+
+        agregarEventListenersBotonesDescuentos();
+
+        function agregarEventListenersBotonesPromociones() {
+            tablaBodyPromociones.querySelectorAll("button").forEach(boton => {
+                boton.addEventListener("click", function () {
+
+                    const idPromocion = this.dataset.id;
+
+                    const promocion = promociones.find(promocion => promocion.Value === idPromocion);
+
+                    agregarPromocionAlResumen(promocion);
+                });
+            });
+        }
+
+        agregarEventListenersBotonesPromociones();
 
         //////////////////////////////////// Lógica para agregar artículo al resumen de la venta ////////////////////////////////////
 
@@ -706,7 +765,7 @@
 
                 if (articulosConCombos[artsConCombos].Value === articulo.Value) {
 
-                    if (artsConCombos[0]){
+                    if (articulosConCombos[artsConCombos].ValueAgregado === articulo.Value) {
 
                         var combo = {
                             ComboId: articulosConCombos[artsConCombos].ComboId,
@@ -715,15 +774,15 @@
                             Precio: articulosConCombos[artsConCombos].Precio,
                         };
                         articulosCombos.push(combo);
+                    }else{
+                        var combo = {
+                            ComboId: articulosConCombos[artsConCombos].ComboId,
+                            Value: articulosConCombos[artsConCombos].ValueAgregado,
+                            Text: "---> " + articulosConCombos[artsConCombos].TextAgregado,
+                            Precio: articulosConCombos[artsConCombos].PrecioAgregado,
+                        };
+                        articulosCombos.push(combo);
                     }
-
-                    var combo = {
-                        ComboId: articulosConCombos[artsConCombos].ComboId,
-                        Value: articulosConCombos[artsConCombos].ValueAgregado,
-                        Text: articulosConCombos[artsConCombos].TextAgregado,
-                        Precio: articulosConCombos[artsConCombos].PrecioAgregado,
-                    };
-                    articulosCombos.push(combo);
                 }
             }
 
@@ -749,6 +808,7 @@
                             <td asp-for="Cantidad" id="cantidad" class="cantidad">1</td>
                             <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${articulosCombos[combo].Precio}</td>
                             <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                                    <td id="EsCombo" hidden>1</td>
                         `;
                     document.querySelector("#table-resumen-venta tbody").appendChild(fila);
                 }
@@ -764,8 +824,64 @@
             calcularTotal();
 
             actualizarEventListenersEliminarArticuloCalcularTotal();
+        }
 
-            console.log(articulosCombos);
+        //////////////////////////////////// Lógica para agregar promoción al resumen de la venta ////////////////////////////////////
+
+        function agregarPromocionAlResumen(promocion){
+
+            // Declaro una lista:
+            var artPromos = [];
+
+            // Recorro la lista de promociones
+            for (var promoIndice = 0; promoIndice < promociones.length; promoIndice++) {
+                
+                // Si el id de la promoción es igual al id de la promoción seleccionada
+                if (promociones[promoIndice].Value === promocion.Value) {
+
+                    // Creo un objeto con los datos de la promoción
+                    var promoD = {
+                        Value: promociones[promoIndice].Value,
+                        Porcentaje: promociones[promoIndice].Porcentaje,
+                        ValuePromoD: promociones[promoIndice].ValuePromoD,
+                        TextPromoD: promociones[promoIndice].TextPromoD + " - " + promociones[promoIndice].Porcentaje + "%",
+                        PrecioArticulo: promociones[promoIndice].PrecioArticulo
+                    };
+                    artPromos.push(promoD);
+                }
+            }
+
+            for (var promo in artPromos) {
+                
+                const idArtExistente = document.querySelector(`#table-resumen-venta tr[data-id="${artPromos[promo].Value}"]`);
+                const fila = document.createElement("tr");
+                fila.dataset.id = artPromos[promo].Value;
+
+                fila.innerHTML = `
+                    <td asp-for="Id_Promo" id="Id_Promo" hidden>${artPromos[promo].Value}</td>
+                    <td asp-for="Id_Articulo" id="id_Articulo">${artPromos[promo].ValuePromoD}</td>
+                    <td asp-for="Descripcion" id="nombre">${artPromos[promo].TextPromoD}</td>
+                    <td asp-for="PrecioUnitario" id="precio">${artPromos[promo].PrecioArticulo}</td>
+                    <td asp-for="Cantidad" id="cantidad" class="cantidad">1</td>
+                    <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${artPromos[promo].PrecioArticulo}</td>
+                    <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                    <td id="AplicaPromo" hidden>1</td>
+                    `;
+                document.querySelector("#table-resumen-venta tbody").appendChild(fila);
+            }
+            $('#promos-Modal').modal('hide');
+
+            const idDescuento = document.getElementById("id-descuento-input").value;
+
+            calcularSubTotal();
+
+            if(idDescuento != 0){
+                recalcularDescuento(idDescuento);
+            }
+
+            calcularTotal();
+
+            actualizarEventListenersEliminarArticuloCalcularTotal();
         }
 
         //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////
@@ -828,60 +944,6 @@
             });
         }
 
-        //////////////////////////////////// Lógica para agregar EventListeners a los botones de Promos y Descuentos ////////////////////////////////////
-
-        function agregarEventListenersBotonesDescuentos() {
-            tablaBodyDescuentos.querySelectorAll("button").forEach(boton => {
-                boton.addEventListener("click", function (){
-
-                    if(document.getElementById("descuento").value != 0 || document.getElementById("id-descuento-input").value != ""){
-                        $('#mensaje-descuento').removeClass().addClass('text-danger').text("Ya se ha aplicado un descuento.");
-                        return;
-                    }
-
-                    // Obtener el ID del descuento
-                    const idDescuento = this.dataset.id;
-
-                    // Buscar el descuento por el id obtenido
-                    const descuento = descuentos.find(descuento => descuento.Value === idDescuento);
-                    
-                    // Traigo el subtotal
-                    const subTotal = parseFloat(document.getElementById("subtotal").value);
-
-                    // Calculo el descuento
-
-                    let descuentoAplicado = (subTotal * descuento.Porcentaje) / 100;
-
-                    if(descuentoAplicado != 0 && descuentoAplicado == subTotal){
-                        descuentoAplicado = descuentoAplicado - 0.01;
-                    }
-
-                    // Agregar el descuento al detalle de la venta
-                    document.getElementById("descuento").value = descuentoAplicado.toFixed(2);
-
-                    document.getElementById("id-descuento-input").value = idDescuento;
-
-                    // Llamar a las funciones para recalcular subtotal y total
-                    calcularTotal();
-
-                    // Cerrar el modal
-                    $('#descuentos-Modal').modal('hide');
-                });
-            });
-        }
-
-        agregarEventListenersBotonesDescuentos();
-        
-        function agregarEventListenersBotonesPromociones() {
-            tablaBodyPromociones.querySelectorAll("button").forEach(boton => {
-                boton.addEventListener("click", function () {
-                    const idPromocion = this.dataset.id;
-                    const promocion = promociones.find(promocion => promocion.Id_Promocion === idPromocion);
-                    agregarPromocionAlResumen(promocion);
-                });
-            });
-        }
-
         <!-- DataTables -->
             $(document).ready(function () {
                 // Inicializar la tabla con DataTables
@@ -910,6 +972,7 @@
             // Limpiar los campos de descuento, subtotal y total
             document.getElementById("descuento").value = 0;
             document.getElementById("id-descuento-input").value = "";
+            $('#mensaje-descuento').removeClass().text("");
 
             // Llamar a las funciones para recalcular subtotal y total
             calcularSubTotal();
@@ -939,9 +1002,14 @@
             $('#table-resumen-venta tbody tr').each(function () {
                 var detalle = {
                     Id_Articulo: $(this).find("#id_Articulo").text(),
+                    Detalle : $(this).find("#nombre").text(),
                     Cantidad: $(this).find("#cantidad").text(),
                     PrecioUnitario: $(this).find("#precio").text(),
-                    PrecioTotal: $(this).find("#precio-Total").text()
+                    PrecioTotal: $(this).find("#precio-Total").text(),
+                    Id_Promo: $(this).find("#Id_Promo").text(),
+                    AplicaPromo: $(this).find("#AplicaPromo").text(),
+                    Id_Combo: $(this).find("#id_Combo").text(),
+                    EsCombo: $(this).find("#EsCombo").text()
                 };
                 detallesventa.push(detalle);
             });

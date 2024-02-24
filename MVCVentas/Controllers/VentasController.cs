@@ -99,27 +99,61 @@ namespace MVCVentas.Controllers
 
             // Lógica para obtener las promociones:
             var listaPromociones = await _context.VMPromoDescuento_E
-                .Where(p => p.FechaInicio <= DateTime.Now
-                        && p.FechaFin >= DateTime.Now
-                        && p.Id_Tipo == 2
-                        && p.ListPromoDescuento_D.Count > 0)
-                .Include(p => p.ListPromoDescuento_D)
-                    .ThenInclude(pd => pd.Articulo)
-                .Include(p => p.TipoPromoDescuento)
-                .Select(pd => new
+                .Join(_context.VMPromoDescuento_D,
+                    pe => pe.Id_Promocion,
+                    pd => pd.Id_Promocion,
+                    (pe, pd) => new { PromoE = pe, PromoD = pd }
+                )
+                .Join(_context.VMArticle,
+                prd => prd.PromoD.Id_Articulo,
+                a => a.Id_Articulo,
+                (prd, a) => new { PromoED = prd, Articulo = a }
+                )
+                .Join(_context.VMPrice,
+                prda => prda.Articulo.Id_Articulo,
+                p => p.Id_Articulo,
+                (prda, p) => new { PromoDA = prda, Precio = p }
+                )
+                .Where(pedp => pedp.PromoDA.PromoED.PromoE.FechaInicio <= DateTime.Now
+                    && pedp.PromoDA.PromoED.PromoE.FechaFin >= DateTime.Now
+                    && pedp.PromoDA.PromoED.PromoE.Id_Tipo == 2
+                    && pedp.PromoDA.PromoED.PromoE.ListPromoDescuento_D.Count > 0
+                )
+                .Select(pedp => new
                 {
-                    pd.Id_Promocion,
-                    pd.Nombre,
-                    pd.Porcentaje,
-                    pd.FechaInicio,
-                    pd.FechaFin,
-                    pd.Id_Tipo,
-                    pd.TipoPromoDescuento.Descripcion,
-                    pd.ListPromoDescuento_D
+                    Value = pedp.PromoDA.PromoED.PromoE.Id_Promocion.ToString(),
+                    pedp.PromoDA.PromoED.PromoE.Nombre,
+                    Porcentaje = pedp.PromoDA.PromoED.PromoE.Porcentaje,
+                    pedp.PromoDA.PromoED.PromoE.FechaInicio,
+                    pedp.PromoDA.PromoED.PromoE.FechaFin,
+                    pedp.PromoDA.PromoED.PromoE.Id_Tipo,
+                    pedp.PromoDA.PromoED.PromoE.ListPromoDescuento_D,
+                    ValuePromoD = pedp.PromoDA.PromoED.PromoD.Id_Articulo,
+                    TextPromoD = pedp.PromoDA.Articulo.Nombre,
+                    Precio = pedp.PromoDA.Articulo.Precio.Precio,
+                    PrecioArticulo = calcularDescuento(pedp.PromoDA.Articulo.Precio.Precio, pedp.PromoDA.PromoED.PromoE.Porcentaje)
                 })
                 .ToListAsync();
             var jsonListPromociones = JsonConvert.SerializeObject(listaPromociones);
             ViewData["JsonListaPromociones"] = jsonListPromociones;
+
+            // Lógica para obtener las promociones agrupadas:
+            var listaPromocionesAgrupadas = await _context.VMPromoDescuento_E
+                .Where(p => p.FechaInicio <= DateTime.Now
+                    && p.FechaFin >= DateTime.Now
+                    && p.Id_Tipo == 2)
+                .Include(p => p.ListPromoDescuento_D)
+                .Include(p => p.TipoPromoDescuento)
+                .GroupBy(gbp => new { gbp.Id_Promocion, gbp.Nombre, gbp.Porcentaje })
+                .Select(pd => new
+                {
+                    Value = pd.Key.Id_Promocion.ToString(),
+                    pd.Key.Nombre,
+                    Porcentaje = pd.Key.Porcentaje
+                })
+                .ToListAsync();
+            var jsonListaPromocionesAgrupadas = JsonConvert.SerializeObject(listaPromocionesAgrupadas);
+            ViewData["JsonListaPromocionesAgrupadas"] = jsonListaPromocionesAgrupadas;
 
             // Lógica para obtener la lista de Combos:
             var listaCombos = await _context.VMCombo
@@ -165,12 +199,12 @@ namespace MVCVentas.Controllers
                 PrecioAgregado = acap.Precio.Precio, // Precio Artículo agregado.
                 TextAgregado = acap.ArticuloComboAgregado.ArticuloAgregado.Nombre // Nombre Artículo agregado.
             })
+            // Ordernar por id de artículo principal.
+            .OrderBy(acap => acap.ValueAgregado)
             .ToListAsync();
 
             var jsonListArticulosConCombo = JsonConvert.SerializeObject(listaArticulosConCombo);
             ViewData["JsonListaArticulosConCombo"] = jsonListArticulosConCombo;
-
-
 
             // Lógica para obtener la lista de clientes:
             var listaClientes = await _context.VMCliente
@@ -321,7 +355,9 @@ namespace MVCVentas.Controllers
                 .FirstOrDefaultAsync();
 
             // Datos Ventas D:
-            
+
+            decimal precioU = 0;
+
             int renglon = 1; // Inicialización de Renglon:
 
             // Datos Ventas I:
@@ -352,6 +388,10 @@ namespace MVCVentas.Controllers
             decimal nroVenta = await ObtenerNumVenta(vMVentas.Sucursal.NumSucursal,
                 vMVentas.Comprobante_E.CodComprobante,
                 vMVentas.Modulo.CodModulo);
+
+            // Variables promociones:
+            var promocion = new VMPromoDescuento_E();
+
 
             // Si no se pudo obtener el número de venta, se da de alta un nuevo comprobante:
             if (nroVenta == -1)
@@ -422,6 +462,19 @@ namespace MVCVentas.Controllers
                             .Include(a => a.Precio)
                             .FirstOrDefaultAsync();
 
+                        if (detalle.AplicaPromo == "1")
+                        {
+                            promocion = await _context.VMPromoDescuento_E
+                                .Where(p => p.Id_Promocion == int.Parse(detalle.Id_Promo))
+                                .FirstOrDefaultAsync();
+
+                            precioU = calcularDescuento(articulo.Precio.Precio, promocion.Porcentaje);
+                        }
+                        else
+                        {
+                            precioU = articulo.Precio.Precio;
+                        }
+
                         var ventaD = new VMVentas_D
                         {
                             NumVenta = nroVentaCorrelativa, // Se obtiene con la función de obtener número de venta. OK
@@ -431,12 +484,12 @@ namespace MVCVentas.Controllers
                             Renglon = renglon, // Se incrementa en cada iteración. OK
                             Id_Articulo = int.Parse(detalle.Id_Articulo), // Se obtiene de la vista. OK
                             Cantidad = int.Parse(detalle.Cantidad), // Se obtiene de la vista. OK
-                            Detalle = articulo.Nombre, // Se obtiene de la base de datos. OK
-                            PrecioUnitario = (decimal)articulo.Precio.Precio, // Se obtiene de la vista. OK
-                            PrecioTotal = int.Parse(detalle.Cantidad) * (decimal)articulo.Precio.Precio // Se calcula acá. OK
+                            Detalle = detalle.Detalle, // Se obtiene de la base de datos. OK
+                            PrecioUnitario = precioU, // Se obtiene de la base de datos. OK
+                            PrecioTotal = int.Parse(detalle.Cantidad) * precioU // Se calcula acá. OK
                         };
-                        // Se da de alta el detalle de la venta en la base de datos:
                         _context.VMVentas_D.Add(ventaD);
+
                         // Se incrementa el renglón:
                         renglon++;
 
@@ -551,6 +604,7 @@ namespace MVCVentas.Controllers
 
             // Se agregan las líneas al reporte:
             printer.agregarLinea("Comprobante: " + vMVentas_E.Comprobante.Nombre, 7, "Consolas");
+            printer.agregarLinea("Sucursal: " + vMVentas_E.Sucursal.NumSucursal, 7, "Consolas");
             printer.agregarLinea("Número de Venta: " + vMVentas_E.NumVenta, 7, "Consolas");
             printer.agregarLinea("Fecha: " + vMVentas_E.Fecha.ToString("dd/MM/yyyy"), 7, "Consolas");
             printer.agregarLinea("Hora: " + vMVentas_E.Hora.ToString("HH:mm:ss"), 7, "Consolas");
@@ -563,7 +617,7 @@ namespace MVCVentas.Controllers
 
             foreach(var detalle in vMVentas_D)
             {
-                printer.agregarLineaConExtremos(detalle.Articulo.Nombre, detalle.Cantidad.ToString() + " x " + detalle.PrecioUnitario.ToString("0.00") + " = " + detalle.PrecioTotal.ToString("0.00"), 7, "Consolas");
+                printer.agregarLineaConExtremos(detalle.Detalle, detalle.Cantidad.ToString() + " x " + detalle.PrecioUnitario.ToString("0.00") + " = " + detalle.PrecioTotal.ToString("0.00"), 7, "Consolas");
             }
 
             printer.agregarLineaEnBlanco();
@@ -616,5 +670,7 @@ namespace MVCVentas.Controllers
 
             document.Close();
         }
+
+        public static decimal calcularDescuento(decimal precio, decimal porcentaje) => (precio - ((precio * porcentaje) / 100));
     }
 }
