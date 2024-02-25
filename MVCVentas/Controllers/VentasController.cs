@@ -297,6 +297,27 @@ namespace MVCVentas.Controllers
         }
 
         [HttpPost]
+        public void ReducirStock(int idArticulo, int cantidad)
+        {
+            var articulo = _context.VMArticle
+                .Where(a => a.Id_Articulo == idArticulo)
+                .Include(a => a.Stock)
+                .FirstOrDefault();
+
+            if (articulo.UsaStock && articulo.Stock.Cantidad > 0)
+            {
+                articulo.Stock.Cantidad -= cantidad;
+
+                if(articulo.Stock.Cantidad < 0)
+                {
+                    articulo.Stock.Cantidad = 0;
+                }
+
+                _context.SaveChanges();
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CrearVenta(VMVentas vMVentas, 
                                                     List<VMVentasDetalle> detallesventa, 
                                                     VMVentaImporte vMVentaImporte)
@@ -359,6 +380,8 @@ namespace MVCVentas.Controllers
             decimal precioU = 0;
 
             int renglon = 1; // Inicialización de Renglon:
+
+            string messageStock;
 
             // Datos Ventas I:
 
@@ -475,6 +498,11 @@ namespace MVCVentas.Controllers
                             precioU = articulo.Precio.Precio;
                         }
 
+                        if(articulo.UsaStock)
+                        {
+                            ReducirStock(articulo.Id_Articulo, int.Parse(detalle.Cantidad));
+                        }
+
                         var ventaD = new VMVentas_D
                         {
                             NumVenta = nroVentaCorrelativa, // Se obtiene con la función de obtener número de venta. OK
@@ -587,7 +615,9 @@ namespace MVCVentas.Controllers
                     GenerarReportePDF(ventaE, listVentaD, listVentaI, rutaRaizApp);
                     ImprimirReporte(ventaE, listVentaD, listVentaI);
 
-                    return Json(new { success = true, message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos." });
+                    return Json(new { success = true, 
+                        message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos."
+                    });
                 }
                 catch (Exception ex)
                 {

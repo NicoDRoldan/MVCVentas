@@ -307,7 +307,8 @@
         const articulosConCombos = @Html.Raw(ViewData["JsonListaArticulosConCombo"]);
 
         // Variables para la paginación
-        let paginaActual = 1; // ¡Variable Global!
+        let paginaActualArt = 1; // ¡Variable Global!
+        let paginaActualRub = 1; // ¡Variable Global!
         const articulosPorPagina = 12; // Cambiar el número de artículos por página a 12
         const columnasPorFila = 3; // Definir el número de columnas por fila -- ¡Variable Global! --
 
@@ -316,8 +317,8 @@
 
         // Obtener los artículos de la página actual
         const articulosPaginaActual = articulos.slice(
-            (paginaActual - 1) * articulosPorPagina,
-            paginaActual * articulosPorPagina
+            (paginaActualArt - 1) * articulosPorPagina,
+            paginaActualArt * articulosPorPagina
         );
 
         // Función Obsoleta.
@@ -337,8 +338,8 @@
 
             // Obtener los artículos de la página actual
             const articulosPaginaActual = articulos.slice(
-                (paginaActual - 1) * articulosPorPagina,
-                paginaActual * articulosPorPagina
+                (paginaActualArt - 1) * articulosPorPagina,
+                paginaActualArt * articulosPorPagina
             );
 
             // Agrupar los artículos en filas y columnas
@@ -360,7 +361,7 @@
             const botonAnterior = document.querySelector(".anterior");
             const botonSiguiente = document.querySelector(".siguiente");
 
-            botonAnterior.disabled = paginaActual === 1;
+            botonAnterior.disabled = paginaActualArt === 1;
             botonSiguiente.disabled = articulosPaginaActual.length < articulosPorPagina;
 
             // Agregar event listeners a los botones de artículos
@@ -381,8 +382,8 @@
 
         // Obtener rubros de la página actual
         const rubrosPaginaActual = rubros.slice(
-            (paginaActual - 1) * rubrosPorPagina,
-            paginaActual * rubrosPorPagina
+            (paginaActualRub - 1) * rubrosPorPagina,
+            paginaActualRub * rubrosPorPagina
         );
 
         // Función para agregar los rubros a la tabla
@@ -393,8 +394,8 @@
 
             // Obtener rubros de la página actual
             const rubrosPaginaActual = rubros.slice(
-                (paginaActual - 1) * rubrosPorPagina,
-                paginaActual * rubrosPorPagina
+                (paginaActualRub - 1) * rubrosPorPagina,
+                paginaActualRub * rubrosPorPagina
             );
 
             for (let i = 0; i < rubrosPaginaActual.length; i += columnasPorFila) {
@@ -408,7 +409,6 @@
                     const botonRubro = document.createElement("button");
 
                     botonRubro.innerHTML = `<strong>${rubro.Text}</strong>`;
-
                     botonRubro.dataset.id = rubro.Value;
 
                     celda.appendChild(botonRubro);
@@ -420,7 +420,7 @@
             const botonAnterior = document.querySelector(".anteriorRubro");
             const botonSiguiente = document.querySelector(".siguienteRubro");
 
-            botonAnterior.disabled = paginaActual === 1;
+            botonAnterior.disabled = paginaActualRub === 1;
             botonSiguiente.disabled = rubrosPaginaActual.length < rubrosPorPagina;
 
             actualizarBotonesArticulosPorRubros();
@@ -429,12 +429,12 @@
 
         // Eventos para los botones de navegación
         document.querySelector(".anteriorRubro").addEventListener("click", () => {
-            paginaActual--;
+            paginaActualRub--;
             agregarRubros();
         });
 
         document.querySelector(".siguienteRubro").addEventListener("click", () => {
-            paginaActual++;
+            paginaActualRub++;
             agregarRubros();
         });
 
@@ -446,7 +446,7 @@
             tablaBodyRubros.querySelectorAll("button").forEach(boton => {
                 boton.addEventListener("click", function () {
 
-                    paginaActual = 1;
+                    paginaActualArt = 1;
                     // Obtener el ID del rubro
                     const id_Rubro = this.dataset.id;
 
@@ -464,13 +464,13 @@
             var listaArticulos = JSON.parse('@Html.Raw(ViewData["JsonListaArticulos"])');
             var listaRubros = JSON.parse('@Html.Raw(ViewData["JsonListaRubros"])');
 
-            const articulosFiltrados = listaArticulos.filter(articulo => articulo.Rubro === id_Rubro);
+            var articulosFiltrados = listaArticulos.filter(articulo => articulo.Rubro === id_Rubro);
 
             tablaBody.innerHTML = ""; // Borrar filas anteriores
 
             const articulosPaginaActual = articulosFiltrados.slice(
-                (paginaActual - 1) * articulosPorPagina,
-                paginaActual * articulosPorPagina
+                (paginaActualArt - 1) * articulosPorPagina,
+                paginaActualArt * articulosPorPagina
             );
 
             for (let i = 0; i < articulosPaginaActual.length; i += columnasPorFila) {
@@ -491,7 +491,7 @@
             const botonAnterior = document.querySelector(".anterior");
             const botonSiguiente = document.querySelector(".siguiente");
 
-            botonAnterior.disabled = paginaActual === 1;
+            botonAnterior.disabled = paginaActualArt === 1;
             botonSiguiente.disabled = articulosPaginaActual.length < articulosPorPagina;
 
             // Agregar event listeners a los botones de artículos
@@ -500,12 +500,12 @@
 
         // Eventos para los botones de navegación
         document.querySelector(".anterior").addEventListener("click", () => {
-            paginaActual--;
+            paginaActualArt--;
             filtrarArticulosPorRubro(idRubroActual);
         });
 
         document.querySelector(".siguiente").addEventListener("click", () => {
-            paginaActual++;
+            paginaActualArt++;
             filtrarArticulosPorRubro(idRubroActual);
         });
 
@@ -786,6 +786,8 @@
                 }
             }
 
+            moverAlFinal(articulosCombos);
+
             for (var combo in articulosCombos) {
 
                 const comboExistente = document.querySelector(`#table-resumen-venta tr[data-id="${articulosCombos[combo].ComboId}"]`);
@@ -931,7 +933,17 @@
                     const id_Articulo = fila.dataset.id;
                     const id_Descuento = document.getElementById("id-descuento-input").value;
 
-                    fila.remove();
+                    const cantidad = fila.querySelector(".cantidad");
+                    let cantidadActual = Number(cantidad.textContent);
+
+                    if (cantidadActual > 1) {
+                        console.log(cantidadActual)
+                        cantidad.textContent = cantidadActual - 1;
+                        return;
+                    } else {
+                        console.log(cantidadActual)
+                        fila.remove();
+                    }
 
                     calcularSubTotal();
 
@@ -1087,6 +1099,25 @@
                 }
             })
         }
+
+        function moverAlFinal(array) {
+
+            for (let i = 0; i < array.length; i++) {
+                while (array[0].Text.startsWith('--->')) {
+
+                    const elementoAMover = array.splice(i, 1)[0];
+
+                    let j = array.length - 1;
+                    while (j >= 0 && array[j].Text.startsWith('--->')) {
+                        j--;
+                    }
+
+                    array.splice(j + 1, 0, elementoAMover);
+
+                    break;
+                }
+            }
+        }
     </script>
 
 <!-- //////////////////////////////////// Script para el manejo de la configuración de la sucursal //////////////////////////////////// -->
@@ -1155,5 +1186,6 @@
             $('#config-Modal').modal('hide');
             $('#mensaje-confg').text("");
         }
+
     </script>
 }
