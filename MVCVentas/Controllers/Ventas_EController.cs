@@ -23,17 +23,30 @@ namespace MVCVentas.Controllers
         // GET: Ventas_E
         public async Task<IActionResult> Index()
         {
-            var mVCVentasContext = _context.VMVentas_E
-                .Include(v => v.Cliente)
-                .Include(v => v.Comprobante)
-                .Include(v => v.FormaPago)
-                .Include(v => v.Modulo)
-                .Include(v => v.Sucursal)
-                .Include(v => v.Usuario)
-                .Include(v => v.Ventas_D)
-                .Include(v => v.Ventas_I);
+            var jsonVentasFiltradas = HttpContext.Session.GetString("VentasFiltradas");
 
-            return View(await mVCVentasContext.ToListAsync());
+            if(jsonVentasFiltradas != null)
+            {
+                var ventasFiltradas = JsonConvert.DeserializeObject<List<VMVentas_E>>(jsonVentasFiltradas) ?? new List<VMVentas_E>();
+
+                HttpContext.Session.Remove("VentasFiltradas");
+
+                return View(ventasFiltradas);
+            }
+            else
+            {
+                var mVCVentasContext = _context.VMVentas_E
+                    .Include(v => v.Cliente)
+                    .Include(v => v.Comprobante)
+                    .Include(v => v.FormaPago)
+                    .Include(v => v.Modulo)
+                    .Include(v => v.Sucursal)
+                    .Include(v => v.Usuario)
+                    .Include(v => v.Ventas_D)
+                    .Include(v => v.Ventas_I);
+
+                return View(await mVCVentasContext.ToListAsync());
+            }
         }
 
         // GET: Ventas_E/Details/5
@@ -288,6 +301,40 @@ namespace MVCVentas.Controllers
         private bool VMVentas_EExists(string id)
         {
           return _context.VMVentas_E.Any(e => e.NumVenta == id);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> FiltrarVentasEntreFechas(string fechaInicio, string fechaFin)
+        {
+            if (fechaInicio == null || fechaFin == null)
+            {
+                TempData["ErrorMessage"] = "Las fechas de inicio y fin son requeridas.";
+                return RedirectToAction("Index");
+            }
+
+            DateTime fechaInicioDate = DateTime.Parse(fechaInicio);
+            DateTime fechaFinDate = DateTime.Parse(fechaFin);
+
+            var ventas = await _context.VMVentas_E
+                .Where(ve => ve.Fecha >= fechaInicioDate && ve.Fecha <= fechaFinDate)
+                .Include(v => v.Cliente)
+                .Include(v => v.Comprobante)
+                .Include(v => v.FormaPago)
+                .Include(v => v.Modulo)
+                .Include(v => v.Sucursal)
+                .Include(v => v.Usuario)
+                .Include(v => v.Ventas_D)
+                .Include(v => v.Ventas_I)
+                .ToListAsync();
+
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            HttpContext.Session.SetString("VentasFiltradas", JsonConvert.SerializeObject(ventas, settings));
+
+            return RedirectToAction("Index", "Ventas_E");
         }
     }
 }
