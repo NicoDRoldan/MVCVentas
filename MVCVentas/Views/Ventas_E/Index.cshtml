@@ -5,6 +5,19 @@
     Layout = "~/Views/Shared/_Layout_Ventas_Report.cshtml";
 }
 
+<style>
+    #formFiltrarVentas{
+        display: flex;
+        margin-bottom: 20px;
+    }
+
+    #formFiltrarVentas td{
+            padding-left: 0;
+            padding-right: 20px;
+    }
+
+</style>
+
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -17,6 +30,36 @@
         </div>
         <div class="card-body">
             <div class="table-responsive" id="table-resposibe-index-Ventas_E">
+                <form id="formFiltrarVentas" method="post" action="@Url.Action("FiltrarVentasEntreFechas", "Ventas_E")">
+                    <table border="0" cellspacing="5" cellpadding="5">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label>Fecha Inicio:</label>
+                                    <input type="date" id="fechaInicio" name="fechaInicio" />
+                                </td>
+                                <td>
+                                    <label>Fecha Fin:</label>
+                                    <input type="date" id="fechaFin" name="fechaFin" />
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("Index", "Ventas_E")'">Restablecer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
                 <table class="table table-bordered" id="index-dataTable-ventas_e" width="100%" cellspacing="0">
                     <thead>
                         <tr id="tr-encabezado-reporte-venta">
@@ -155,6 +198,7 @@
                 }
             })
         }
+
     </script>
 
     <script>
@@ -165,4 +209,5 @@
             table.order([[2, 'desc'], [3, 'desc']]).draw();
         });
     </script>
+
 }
