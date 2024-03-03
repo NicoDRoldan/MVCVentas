@@ -234,6 +234,16 @@ namespace MVCVentas.Controllers
             ViewData["CodLocalidad"] = new SelectList(_context.Set<VMLocalidad>(), "CodLocalidad", "Nombre");
             ViewData["CodProvincia"] = new SelectList(_context.Set<VMProvincia>(), "CodProvincia", "Nombre");
 
+            // Lógica para obtener los tipos de tarjeta:
+            var listaTarjetas = await _context.VMTipoTarjeta
+                .ToListAsync();
+            ViewData["ListaTarjetas"] = new SelectList(listaTarjetas, "CodTarjeta", "Nombre");
+            
+            // Lógica para obtener los tipos de trasacciones:
+            var listaTipoTransacciones = await _context.VMTipoTransaccion
+                .ToListAsync();
+            ViewData["ListaTipoTransacciones"] = new SelectList(listaTipoTransacciones, "CodTipoTran", "Nombre");
+
             return View();
         }
 
