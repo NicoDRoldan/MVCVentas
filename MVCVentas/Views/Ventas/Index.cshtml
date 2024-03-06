@@ -303,6 +303,7 @@
                                             <tr>
                                                 <th>Forma de Pago</th>
                                                 <th>Seleccionar</th>
+                                                <th>Monto</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -312,7 +313,10 @@
                                                 <tr>
                                                     <td>@formaPago.Text</td>
                                                     <td>
-                                                        <input type="checkbox" id="@formaPago.Value" name="FormasPagoSeleccionados" value="@formaPago.Value">
+                                                        <input type="checkbox" class="input-checkbox-formasPago" id="@formaPago.Value" name="FormasPagoSeleccionados" value="@formaPago.Value">
+                                                    </td>
+                                                    <td class="td-text-formasPago">
+                                                        <input type="number" class="form-control input-text-formasPago" id="@($"{formaPago.Value}-monto-formaPago")" value="0" disabled />
                                                     </td>
                                                 </tr>
                                             }
@@ -320,13 +324,40 @@
                                     </table>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    <div id="div-total-formaPago">
+                                        <label>Total:</label>
+                                        <input type="text" class="form-control" id="total-formaPago" value="0" readonly />
+                                        <label>Resta:</label>
+                                        <input type="text" class="form-control" id="resto-formaPago" value="0" readonly />
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Fin Modals Formas de Pago -->
+
+                    <!-- Modal para indicar monto por forma de pago -->
+
+                    <div class="modal fade" id="monto-formaPago-Modal" tabindex="-1" role="dialog" aria-labelledby="monto-formaPago-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="monto-formaPago-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="monto-formaPago-ModalLabel">Combos</h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Ventas/_MontoFormasDePagoPartial.cshtml")
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="">Cerrar</button>
+                                    <div id="mensaje-monto-formaPago" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fin Modal para indicar monto por forma de pago -->
 
                     <div class="row" id="btn-vender-cancelar">
                         <dd class="">
@@ -1048,11 +1079,20 @@
         //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
         function CrearVenta() {
 
+            // Obtener las formas de pago seleccionadas
+            var formasPagoSeleccionadas = [];
+            $('input[name="FormasPagoSeleccionados"]:checked').each(function () {
+                formasPagoSeleccionadas.push($(this).val());
+            });
+
+            console.log(formasPagoSeleccionadas);
+
             // Crear un objeto con los datos de la venta (Ventas_E)
             var vMVentas = {
                 CodComprobante: $("#comprobante-select").val(),
                 CodCliente: $("#cliente-select").val(),
                 Id_FormaPago: $("#forma").val(),
+                FormasPagos: formasPagoSeleccionadas,
                 CodTarjeta: $("#listaTarjetas").val(),
                 CodModulo: $("#modulo-select").val()
             };
@@ -1133,6 +1173,24 @@
                 }
             });
         });
+
+        $(document).ready(function () {
+            // Agregar evento change a los checkboxes
+            $('.input-checkbox-formasPago').change(function () {
+                // Obtener el checkbox y el campo de texto de la misma fila
+                var checkbox = $(this);
+                var inputText = checkbox.closest('tr').find('.input-text-formasPago');
+
+                // Habilitar o deshabilitar el campo de texto según el estado del checkbox
+                inputText.prop('disabled', !checkbox.prop('checked'));
+
+                if(!checkbox.prop('checked')){
+                    inputText.val('0');
+                }
+            });
+        });
+
+
 
     </script>
 

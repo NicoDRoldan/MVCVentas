@@ -33,6 +33,8 @@
 
         public virtual VMFormaPago FormaPago { get; set; }
 
+        public virtual List<int> FormasPagos { get; set; }
+
         public string CodCliente { get; set; }
 
         public virtual VMCliente Cliente { get; set; }
