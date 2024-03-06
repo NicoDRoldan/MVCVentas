@@ -12,5 +12,8 @@ namespace MVCVentas.Models
         public string Nombre { get; set; }
 
         public virtual ICollection<VMTipoTarjeta> Tarjetas { get; set; }
+
+        [NotMapped]
+        public virtual VMTipoTarjeta VMTipoTarjeta { get; set; }
     }
 }

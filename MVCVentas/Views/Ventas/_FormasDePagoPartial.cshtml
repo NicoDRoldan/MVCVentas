@@ -1,0 +1,22 @@
+﻿<!-- Código para la ventana emergente -->
+
+<table class="table" id="formasPagoTable">
+    <thead>
+        <tr>
+            <th>Forma de Pago</th>
+            <th>Seleccionar</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!--  Recorrer la lista de formas de pago -->
+        @foreach (var formaPago in (SelectList)ViewData["ListaMedioPago"])
+        {
+            <tr>
+                <td>@formaPago.Text</td>
+                <td>
+                    <input type="checkbox" id="@formaPago.Value" name="FormasPagoSeleccionados" value="@formaPago.Value">
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

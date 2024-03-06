@@ -235,7 +235,12 @@ namespace MVCVentas.Controllers
             ViewData["CodProvincia"] = new SelectList(_context.Set<VMProvincia>(), "CodProvincia", "Nombre");
 
             // Lógica para obtener los tipos de tarjeta:
-            var listaTarjetas = await _context.VMTipoTarjeta
+            var listaTarjetas = await 
+                (from tt in _context.VMTipoTarjeta
+                 join tp in _context.VMTipoTransaccion
+                 on tt.CodTipoTran equals tp.CodTipoTran into temp
+                 from tp in temp.DefaultIfEmpty()
+                 select new { tt.CodTarjeta, tp.Nombre })
                 .ToListAsync();
             ViewData["ListaTarjetas"] = new SelectList(listaTarjetas, "CodTarjeta", "Nombre");
             
@@ -394,7 +399,6 @@ namespace MVCVentas.Controllers
             string messageStock;
 
             // Datos Ventas I:
-
             decimal impSubTotal = 0;
 
             var descuentoEntity = await _context.VMPromoDescuento_E
@@ -416,6 +420,43 @@ namespace MVCVentas.Controllers
                 .ToListAsync();
 
             decimal iva21 = 1.21M;
+
+            // Datos Ventas_TipoTransacción:
+            decimal ImporteTotal = 0;
+
+            // Traer el tipo de transacción:
+            if(vMVentas.FormaPago.Nombre == "Tarjeta")
+            {
+                vMVentas.VMTipoTransaccion = await _context.VMTipoTransaccion
+                .Where(tt => tt.CodTipoTran == vMVentas.CodTarjeta)
+                .FirstOrDefaultAsync();
+            }
+            else
+            {
+                vMVentas.VMTipoTransaccion = await _context.VMTipoTransaccion
+                .Where(tt => tt.Nombre == vMVentas.FormaPago.Nombre)
+                .FirstOrDefaultAsync();
+            }
+
+            // Si el tipo de transacción no existe, lo crea y luego lo asigna:
+            if(vMVentas.VMTipoTransaccion  == null)
+            {
+                string codTipoTranVar = vMVentas.FormaPago.Nombre.Replace(" ", "").ToUpper();
+
+
+                var tipoTransaccion = new VMTipoTransaccion
+                {
+                    CodTipoTran = codTipoTranVar,
+                    Nombre = "Codigo " + vMVentas.FormaPago.Nombre
+                };
+                _context.VMTipoTransaccion.Add(tipoTransaccion);
+
+                await _context.SaveChangesAsync();
+
+                vMVentas.VMTipoTransaccion = await _context.VMTipoTransaccion
+                .Where(tt => tt.CodTipoTran == codTipoTranVar)
+                .FirstOrDefaultAsync();
+            }
 
             // Obtener el número de venta:
             decimal nroVenta = await ObtenerNumVenta(vMVentas.Sucursal.NumSucursal,
@@ -532,7 +573,7 @@ namespace MVCVentas.Controllers
                         renglon++;
 
                         // Se calcula el importe subtotal:
-                        impSubTotal += ventaD.PrecioTotal;
+                        impSubTotal += ventaD.PrecioTotal; // El importa 
                     }
 
                     // Se da de alta el importe de la venta:
@@ -570,6 +611,7 @@ namespace MVCVentas.Controllers
                                 neto = importe = (impSubTotal - descuento) / iva21;
                                 iva = impSubTotal - descuento - neto;
                                 importe = neto + iva;
+                                ImporteTotal = importe;
                                 break;
                         }
 
@@ -587,6 +629,25 @@ namespace MVCVentas.Controllers
                         _context.VMVentas_I.Add(ventaI);
                     }
 
+                    //if (vMVentas.VMTipoTransaccion.CodTipoTran == "EFECTIVO")
+                    //{
+
+                    //}
+
+                    // Se da de alta el tipo de transacción (Ventas_TipoTransaccion):
+                    var ventasTipoTransaccion = new VMVentas_TipoTransaccion
+                    {
+                        CodTipoTran = vMVentas.VMTipoTransaccion.CodTipoTran,
+                        NumTransaccion = nroVentaCorrelativa,
+                        NumVenta = nroVentaCorrelativa,
+                        CodComprobante = vMVentas.Comprobante_E.CodComprobante,
+                        CodModulo = vMVentas.Modulo.CodModulo,
+                        NumSucursal = vMVentas.Sucursal.NumSucursal,
+                        Importe = ImporteTotal
+                    };
+
+                    _context.VMVentas_TipoTransaccion.Add(ventasTipoTransaccion);
+
                     // Se guardan los cambios en la base de datos:
                     await _context.SaveChangesAsync();
 
@@ -598,7 +659,7 @@ namespace MVCVentas.Controllers
                             && c.CodModulo == vMVentas.Modulo.CodModulo)
                         .FirstOrDefaultAsync();
 
-                    if(comprobanteN != null)
+                    if (comprobanteN != null)
                     {
                         // Se actualiza el número de comprobante en Comprobantes_N:
                         comprobanteN.NumComprobante = nroVenta + 1;

@@ -1,0 +1,63 @@
+﻿#formaPago-Modal {
+    width: 400px;
+    height: 400px;
+    position: absolute;
+    left: -40px;
+    top: -300px;
+}
+
+#formaPago-Modal-content .modal-header {
+    width: 400px;
+    padding: 10px;
+    display: flex;
+    justify-content: start;
+}
+
+#formaPago-Modal-content .modal-body {
+    width: 400px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    #formaPago-Modal-content .modal-body table {
+        margin-right: 15px;
+    }
+
+    #formaPago-Modal-content .modal-body td input {
+        width: 25px;
+        height: 15px;
+    }
+
+#formaPago-Modal .modal-dialog .modal-content {
+    width: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+#formaPago-Modal-content .modal-body button {
+    width: 150px;
+    padding: 20px;
+    border: none;
+    background-color: lightgray;
+    cursor: pointer;
+    border-radius: 3px;
+    justify-content: center;
+    text-align: center;
+}
+
+    #formaPago-Modal-content .modal-body button:hover {
+        background-color: #ddd;
+    }
+
+    #formaPago-Modal-content .modal-footer {
+        width: 400px;
+        padding: 5px;
+    }
+
+#formaPago-Modal-content .modal-footer button{
+    margin-right: 20px;
+}

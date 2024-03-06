@@ -18,6 +18,7 @@
 <link href="~/css/sistemavendasdetalleventa.css" rel="stylesheet" />
 <link href="~/css/promosDescuentos.css" rel="stylesheet" />
 <link href="~/css/sistemaVentasCombos.css" rel="stylesheet" />
+<link href="~/css/sistemaVentasFormasPago.css" rel="stylesheet" />
 
 <html>
 <body>
@@ -117,7 +118,7 @@
                                 <select asp-for="CodCliente" class="form-control" id="cliente-select" asp-items="ViewBag.ListaClientes"></select>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
+                                <button type="button" class="btn btn-primary" id="btn-cliente-modal" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
                             </div>
                         </div>
 
@@ -129,6 +130,7 @@
                                 <select asp-for="Id_FormaPago" class="form-control" id="forma" asp-items="ViewBag.ListaMedioPago"></select>
                             </div>
                             <div>
+                                <select asp-for="Ventas_TipoTransaccion.VMTipoTransaccion.VMTipoTarjeta.CodTarjeta" class="form-control" id="listaTarjetas" asp-items="ViewBag.ListaTarjetas"></select>
                             </div>
                         </div>
 
@@ -146,7 +148,8 @@
                                 <input type="hidden" id="id-descuento-input" />
                             </div>
                             <div>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#">Formas de Pago</button>
+                                @* Boton Forma de pago, llama a un modal con todos los medios de pago disponibles*@
+                                <button type="button" class="btn btn-primary" id="btn-formaspago-modal" data-toggle="modal" data-target="#formaPago-Modal">Formas de Pago</button>
                             </div>
                         </div>
 
@@ -284,6 +287,46 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modals Formas de Pago -->
+
+                    <div class="modal fade" id="formaPago-Modal" tabindex="-1" role="dialog" aria-labelledby="formaPago-ModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content" id="formaPago-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="formaPago-ModalLabel">Seleccionar Formas de Pago</h5>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table" id="formasPagoTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Forma de Pago</th>
+                                                <th>Seleccionar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!--  Recorrer la lista de formas de pago -->
+                                            @foreach (var formaPago in (SelectList)ViewData["ListaMedioPago"])
+                                            {
+                                                <tr>
+                                                    <td>@formaPago.Text</td>
+                                                    <td>
+                                                        <input type="checkbox" id="@formaPago.Value" name="FormasPagoSeleccionados" value="@formaPago.Value">
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fin Modals Formas de Pago -->
 
                     <div class="row" id="btn-vender-cancelar">
                         <dd class="">
@@ -1010,6 +1053,7 @@
                 CodComprobante: $("#comprobante-select").val(),
                 CodCliente: $("#cliente-select").val(),
                 Id_FormaPago: $("#forma").val(),
+                CodTarjeta: $("#listaTarjetas").val(),
                 CodModulo: $("#modulo-select").val()
             };
 
@@ -1061,6 +1105,34 @@
                 }
             });
         }
+
+        // Si la forma de pago es Tarjeta, muestra las tarjetas disponibles.
+        $(document).ready(function () {
+            $('#listaTarjetas').hide();
+            $('#forma').change(function () {
+                var formaSeleccionada = $(this).find("option:selected").text();
+
+                if (formaSeleccionada == "Tarjeta") {
+                    $('#listaTarjetas').show();
+                } else {
+                    $('#listaTarjetas').hide();
+                }
+            });
+        });
+
+        // Si la forma de pago es "Varias", se agrega botón para seleccionar las formas de pago.
+        $(document).ready(function () {
+            $('#btn-formaspago-modal').hide();
+            $('#forma').change(function () {
+                var formaSeleccionada = $(this).find("option:selected").text();
+
+                if (formaSeleccionada == "Varias") {
+                    $('#btn-formaspago-modal').show();
+                } else {
+                    $('#btn-formaspago-modal').hide();
+                }
+            });
+        });
 
     </script>
 

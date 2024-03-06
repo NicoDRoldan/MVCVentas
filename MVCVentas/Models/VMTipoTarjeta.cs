@@ -11,8 +11,6 @@ namespace MVCVentas.Models
 
         public string CodTipoTran { get; set; }
 
-        public string Nombre { get; set; }
-
         [ForeignKey("CodTipoTran")]
         public virtual VMTipoTransaccion TipoTransaccion { get; set; }
     }

@@ -77,6 +77,12 @@
 
         public VMVentas_TipoTransaccion Ventas_TipoTransaccion { get; set; }
 
+        public VMTipoTarjeta VMTipoTarjeta { get; set; }
+
+        public VMTipoTransaccion VMTipoTransaccion { get; set; }
+
+        public string CodTarjeta { get; set; }
+
         public string CodTipoTran { get; set; }
 
         public string NumTransaccion { get; set; }
