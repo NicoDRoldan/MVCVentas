@@ -711,6 +711,8 @@
 
                     // Cerrar el modal
                     $('#descuentos-Modal').modal('hide');
+
+                    calcularVuelto();
                 });
             });
         }
@@ -726,6 +728,8 @@
                     const promocion = promociones.find(promocion => promocion.Value === idPromocion);
 
                     agregarPromocionAlResumen(promocion);
+
+                    calcularVuelto();
                 });
             });
         }
@@ -826,6 +830,8 @@
             actualizarEventListenersEliminarArticuloCalcularTotal();
 
             calcularTotalFormaPago();
+
+            calcularVuelto();
         }
 
         function agregarComboAlResumen(articulo){
@@ -897,6 +903,8 @@
             calcularTotal();
 
             actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            calcularVuelto();
         }
 
         //////////////////////////////////// Lógica para agregar promoción al resumen de la venta ////////////////////////////////////
@@ -955,6 +963,8 @@
             calcularTotal();
 
             actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            calcularVuelto();
         }
 
         //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////
@@ -1021,8 +1031,10 @@
                     if(id_Descuento != 0){
                         recalcularDescuento(id_Descuento);
                     }
-                    
+
                     calcularTotal();
+
+                    calcularVuelto();
                 });
             });
         }
@@ -1073,7 +1085,7 @@
         //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
         function CrearVenta() {
 
-            var montoTotalVenta = parseInt($('#total').val());
+            var montoTotalVenta = parseFloat($('#total').val());
             var formaSeleccionada = $('#forma').find("option:selected").text();
 
             // Obtener las formas de pago seleccionadas
@@ -1119,7 +1131,7 @@
             }
 
             if (formaSeleccionada == "Efectivo") {
-                var montoResto = parseInt($('#efectivo-monto').val());
+                var montoResto = parseFloat($('#efectivo-monto').val());
 
                 if (montoResto < montoTotalVenta) {
                     return alert("¡Completar el monto de cobro!");
@@ -1127,7 +1139,7 @@
             }
 
             if (formaSeleccionada == "Varias") {
-                var totalFormaPago = parseInt($('#total-formaPago').val());
+                var totalFormaPago = parseFloat($('#total-formaPago').val());
                 console.log(totalFormaPago + " --- Y --- " + montoTotalVenta);
 
                 if (totalFormaPago !== montoTotalVenta) {
@@ -1187,7 +1199,7 @@
                     $('#btn-formaspago-modal').hide();
                 }
 
-                var resto = parseInt($('#total').val());
+                var resto = parseFloat($('#total').val());
                 $('#resto-formaPago').val(resto);
             });
         });
@@ -1212,8 +1224,8 @@
         });
 
         function calcularVuelto(){
-            var pagaCon = parseInt($('#efectivo-monto').val());
-            var totalVenta = parseInt($('#total').val());
+            var pagaCon = parseFloat($('#efectivo-monto').val());
+            var totalVenta = parseFloat($('#total').val());
             var vuelto = pagaCon - totalVenta;
             vuelto = Math.max(0, vuelto);
             $('#efectivo-monto-resto').val(vuelto);
@@ -1263,14 +1275,14 @@
             var total = 0;
 
             $('.input-text-formasPago').each(function (){
-                total += parseInt($(this).val()) || 0;
+                total += parseFloat($(this).val()) || 0;
             });
 
             // Actualizar el campo "total-formaPago" con el total calculado
             $('#total-formaPago').val(total);
 
             // Calcular el resto
-            var totalVenta = parseInt($('#total').val());
+            var totalVenta = parseFloat($('#total').val());
             var resto = totalVenta - total;
             resto = Math.max(0, resto);
             //Actualiza el campo "resto-formaPago" con el resto calculado
