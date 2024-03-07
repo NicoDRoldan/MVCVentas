@@ -396,8 +396,6 @@ namespace MVCVentas.Controllers
 
             int renglon = 1; // Inicialización de Renglon:
 
-            string messageStock;
-
             // Datos Ventas I:
             decimal impSubTotal = 0;
 
