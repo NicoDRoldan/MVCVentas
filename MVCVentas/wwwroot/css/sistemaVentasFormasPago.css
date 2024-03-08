@@ -1,0 +1,116 @@
+﻿#formaPago-Modal {
+    width: 400px;
+    height: 700px;
+    position: absolute;
+    left: -40px;
+    top: -400px;
+}
+
+#formaPago-Modal-content .modal-header {
+    width: 400px;
+    padding: 10px;
+    display: flex;
+    justify-content: start;
+}
+
+#formaPago-Modal-content .modal-body {
+    width: 400px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    #formaPago-Modal-content .modal-body table {
+    }
+
+.input-checkbox-formasPago {
+    width: 25px !important;
+    height: 15px;
+}
+
+.td-text-formasPago {
+    padding: 5px !important;
+    margin: 0 !important;
+}
+
+.input-text-formasPago {
+    width: 70px !important;
+    height: 40px !important;
+    padding-left: 5px;
+    padding-right: 0;
+    margin: 0;
+}
+
+#formaPago-Modal .modal-dialog .modal-content {
+    width: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+#formaPago-Modal-content .modal-body button {
+    width: 150px;
+    padding: 20px;
+    border: none;
+    background-color: lightgray;
+    cursor: pointer;
+    border-radius: 3px;
+    justify-content: center;
+    text-align: center;
+}
+
+    #formaPago-Modal-content .modal-body button:hover {
+        background-color: #ddd;
+    }
+
+    #formaPago-Modal-content .modal-footer {
+        width: 400px;
+        padding: 5px;
+    }
+
+#formaPago-Modal-content .modal-footer button{
+}
+
+#div-total-formaPago{
+    display:flex;
+}
+
+    #div-total-formaPago label{
+        margin-right: 10px;
+        margin-top: 8px;
+    }
+
+    #div-total-formaPago input {
+        margin-right: 10px;
+        width: 100px;
+    }
+
+    #div-total-formaPago button {
+        margin: 0;
+    }
+
+.div-efectivo-monto{
+    display: flex;
+}
+
+    .div-efectivo-monto label {
+        margin-left: 10px;
+    }
+
+    #efectivo-monto {
+        margin-left: 10px;
+        width: 100px;
+    }
+
+#efectivo-monto-resto {
+    margin-left: 28px;
+    width: 100px;
+}
+
+#listaTarjetas-modal {
+    right: 20px;
+    margin: 10px;
+    width: 200px;
+}

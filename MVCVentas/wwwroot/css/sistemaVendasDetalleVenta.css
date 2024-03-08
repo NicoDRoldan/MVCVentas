@@ -19,3 +19,19 @@
     #formVenta .form-group button{
         margin-left: 10px;
     }
+
+#listaTarjetas {
+    margin-left: 10px;
+    width: 141px;
+    padding-right: 0;
+}
+
+#btn-cliente-modal {
+    width: 141px;
+}
+
+#btn-formaspago-modal {
+    width: 141px;
+    padding-left: 0;
+    padding-right: 0;
+}

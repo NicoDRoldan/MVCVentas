@@ -43,7 +43,9 @@ namespace MVCVentas.Controllers
                     .Include(v => v.Sucursal)
                     .Include(v => v.Usuario)
                     .Include(v => v.Ventas_D)
-                    .Include(v => v.Ventas_I);
+                    .Include(v => v.Ventas_I)
+                .OrderByDescending(v => v.Fecha)
+                .ThenByDescending(v => v.Hora);
 
                 return View(await mVCVentasContext.ToListAsync());
             }
@@ -325,6 +327,8 @@ namespace MVCVentas.Controllers
                 .Include(v => v.Usuario)
                 .Include(v => v.Ventas_D)
                 .Include(v => v.Ventas_I)
+                .OrderByDescending(v => v.Fecha)
+                .ThenByDescending(v => v.Hora)
                 .ToListAsync();
 
             var settings = new JsonSerializerSettings

@@ -33,6 +33,8 @@
 
         public virtual VMFormaPago FormaPago { get; set; }
 
+        public virtual List<int> FormasPagos { get; set; }
+
         public string CodCliente { get; set; }
 
         public virtual VMCliente Cliente { get; set; }
@@ -70,5 +72,25 @@
         public decimal Importe { get; set; }
 
         public decimal Descuento { get; set; }
+
+        // Ventas_TipoTransaccion
+
+        public List<VMVentas_TipoTransaccion> Ventas_TipoTransacciones { get; set; }
+
+        public VMVentas_TipoTransaccion Ventas_TipoTransaccion { get; set; }
+
+        public VMTipoTarjeta VMTipoTarjeta { get; set; }
+
+        public VMTipoTransaccion VMTipoTransaccion { get; set; }
+
+        public string CodTarjeta { get; set; }
+
+        public string CodTipoTran { get; set; }
+
+        public string NumTransaccion { get; set; }
+
+        public string Pago { get; set; } // Monto con el que pagó el cliente.
+
+        public string Vuelto { get; set; } // Vuelto al cliente.
     }
 }

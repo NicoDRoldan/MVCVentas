@@ -18,6 +18,7 @@
 <link href="~/css/sistemavendasdetalleventa.css" rel="stylesheet" />
 <link href="~/css/promosDescuentos.css" rel="stylesheet" />
 <link href="~/css/sistemaVentasCombos.css" rel="stylesheet" />
+<link href="~/css/sistemaVentasFormasPago.css" rel="stylesheet" />
 
 <html>
 <body>
@@ -117,7 +118,7 @@
                                 <select asp-for="CodCliente" class="form-control" id="cliente-select" asp-items="ViewBag.ListaClientes"></select>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
+                                <button type="button" class="btn btn-primary" id="btn-cliente-modal" data-toggle="modal" data-target="#nuevoClienteModal">Nuevo Cliente</button>
                             </div>
                         </div>
 
@@ -128,10 +129,32 @@
                             <div>
                                 <select asp-for="Id_FormaPago" class="form-control" id="forma" asp-items="ViewBag.ListaMedioPago"></select>
                             </div>
+                            <div>
+                                @* Lista de tarjeta *@
+                                <select asp-for="Ventas_TipoTransaccion.VMTipoTransaccion.VMTipoTarjeta.CodTarjeta" class="form-control" id="listaTarjetas" asp-items="ViewBag.ListaTarjetas"></select>
+
+                                @* Boton Forma de pago, llama a un modal con todos los medios de pago disponibles *@
+                                <button type="button" class="btn btn-primary" id="btn-formaspago-modal" data-toggle="modal" data-target="#formaPago-Modal" onclick="calcularTotalFormaPago()">Formas de Pago</button>
+
+                            </div>
                         </div>
 
                         <div class="form-group">
                             <select asp-for="CodModulo" class="form-control" id="modulo-select" asp-items="ViewBag.ListaModulosVTAS" hidden></select>
+                        </div>
+
+                        <div class="form-group">
+                            <div>
+                                <label>Subtotal:</label>
+                            </div>
+                            <div>
+                                <input type="text" class="form-control" id="subtotal" value="0" readonly />
+                            </div>
+                            @* Formulario para pago en efectivo *@
+                            <div class="div-efectivo-monto">
+                                <label>Paga con:</label>
+                                <input type="number" class="form-control input-text-efectivoMonto" id="efectivo-monto" value="0" min="0"/>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -143,14 +166,10 @@
                                 <!-- Input Hiden para guardar el ID del descuento -->
                                 <input type="hidden" id="id-descuento-input" />
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div>
-                                <label>Subtotal:</label>
-                            </div>
-                            <div>
-                                <input type="text" class="form-control" id="subtotal" value="0" readonly />
+                            @* Formulario para pago en efectivo *@
+                            <div class="div-efectivo-monto">
+                                <label>Vuelto:</label>
+                                <input type="number" class="form-control input-text-efectivoMontoResto" id="efectivo-monto-resto" value="0" disabled />
                             </div>
                         </div>
 
@@ -279,6 +298,61 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modals Formas de Pago -->
+
+                    <div class="modal fade" id="formaPago-Modal" tabindex="-1" role="dialog" aria-labelledby="formaPago-ModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content" id="formaPago-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="formaPago-ModalLabel">Seleccionar Formas de Pago</h5>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table" id="formasPagoTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Forma de Pago</th>
+                                                <th>Seleccionar</th>
+                                                <th>Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!--  Recorrer la lista de formas de pago -->
+                                            @foreach (var formaPago in (SelectList)ViewData["ListaMedioPago"])
+                                            {
+                                                <tr>
+                                                    <td id="@formaPago.Text">@formaPago.Text</td>
+                                                    <td>
+                                                        <input type="checkbox" class="input-checkbox-formasPago" id="@($"{formaPago.Text}-checkbox")" name="FormasPagoSeleccionados" value="@formaPago.Value">
+                                                    </td>
+                                                    <td class="td-text-formasPago">
+                                                        <input type="number" class="form-control input-text-formasPago" id="@($"{formaPago.Value}-monto-formaPago")" value="0" min="0" disabled data-id="@formaPago.Value"/>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                @* Lista de tarjeta *@
+                                <div class="modal-footer">
+                                    <label id="listaTarjetas-modal-label" hidden>Tarjeta:</label>
+                                    <select asp-for="Ventas_TipoTransaccion.VMTipoTransaccion.VMTipoTarjeta.CodTarjeta" class="form-control" id="listaTarjetas-modal" asp-items="ViewBag.ListaTarjetas" disabled hidden></select>
+                                </div>
+                                <div class="modal-footer">
+                                    <div id="div-total-formaPago">
+                                        <label>Total:</label>
+                                        <input type="text" class="form-control" id="total-formaPago" value="0" readonly />
+                                        <label>Resta:</label>
+                                        <input type="text" class="form-control" id="resto-formaPago" value="0" readonly />
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fin Modals Formas de Pago -->
 
                     <div class="row" id="btn-vender-cancelar">
                         <dd class="">
@@ -642,6 +716,8 @@
 
                     // Cerrar el modal
                     $('#descuentos-Modal').modal('hide');
+
+                    calcularVuelto();
                 });
             });
         }
@@ -657,6 +733,8 @@
                     const promocion = promociones.find(promocion => promocion.Value === idPromocion);
 
                     agregarPromocionAlResumen(promocion);
+
+                    calcularVuelto();
                 });
             });
         }
@@ -755,6 +833,10 @@
             calcularTotal();
             
             actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            calcularTotalFormaPago();
+
+            calcularVuelto();
         }
 
         function agregarComboAlResumen(articulo){
@@ -826,6 +908,8 @@
             calcularTotal();
 
             actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            calcularVuelto();
         }
 
         //////////////////////////////////// Lógica para agregar promoción al resumen de la venta ////////////////////////////////////
@@ -884,6 +968,8 @@
             calcularTotal();
 
             actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            calcularVuelto();
         }
 
         //////////////////////////////////// Lógica para funciones de SubTotal y Total ////////////////////////////////////
@@ -950,8 +1036,10 @@
                     if(id_Descuento != 0){
                         recalcularDescuento(id_Descuento);
                     }
-                    
+
                     calcularTotal();
+
+                    calcularVuelto();
                 });
             });
         }
@@ -986,6 +1074,8 @@
             document.getElementById("id-descuento-input").value = "";
             $('#mensaje-descuento').removeClass().text("");
 
+            formasPagoEnCero();
+
             // Llamar a las funciones para recalcular subtotal y total
             calcularSubTotal();
             calcularTotal();
@@ -1000,13 +1090,40 @@
         //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
         function CrearVenta() {
 
+            var montoTotalVenta = parseFloat($('#total').val());
+            var formaSeleccionada = $('#forma').find("option:selected").text();
+
+            // Obtener las formas de pago seleccionadas
+            var formaPagoSelects = [];
+            $('input[name="FormasPagoSeleccionados"]:checked').each(function () {
+                var id = $(this).val();
+                var monto = parseFloat($('#' + id + '-monto-formaPago').val());
+                formaPagoSelects.push({ Id: id, Monto: monto});
+            });
+
+            var codTarjeta = "";
+            console.log($('#forma option:selected').text());
+            console.log($('#Tarjeta-checkbox').prop('checked'));
+            if ($('#forma option:selected').text() == "Varias" && $('#Tarjeta-checkbox').prop('checked')) {
+                console.log("ENTRE VARIOS");
+                codTarjeta = $('#listaTarjetas-modal').val();
+            } else if ($('#forma option:selected').text() == "Tarjeta") {
+                console.log("ENTRE TARJETA");
+                codTarjeta = $('#listaTarjetas').val();
+            }
+
             // Crear un objeto con los datos de la venta (Ventas_E)
             var vMVentas = {
                 CodComprobante: $("#comprobante-select").val(),
                 CodCliente: $("#cliente-select").val(),
                 Id_FormaPago: $("#forma").val(),
-                CodModulo: $("#modulo-select").val()
+                CodTarjeta: codTarjeta,
+                CodModulo: $("#modulo-select").val(),
+                Pago: $('#efectivo-monto').val(),
+                Vuelto: parseFloat($('#efectivo-monto-resto').val()).toFixed(2)
             };
+
+            console.log(vMVentas);
 
             var detallesventa = [];
 
@@ -1032,6 +1149,24 @@
                 return;
             }
 
+            if (formaSeleccionada == "Efectivo") {
+                var montoResto = parseFloat($('#efectivo-monto').val());
+
+                if (montoResto < montoTotalVenta) {
+                    return alert("¡Completar el monto de cobro!");
+                }
+            }
+
+            if (formaSeleccionada == "Varias") {
+                var totalFormaPago = parseFloat($('#total-formaPago').val());
+                console.log(totalFormaPago + " --- Y --- " + montoTotalVenta);
+
+                if (totalFormaPago !== montoTotalVenta) {
+                    console.log(totalFormaPago);
+                    return alert("¡Completar el monto de los medios de pago!");
+                }
+            }
+
             // Obtener el importe de la venta
             var vMVentaImporte = {
                 Descuento: $("#id-descuento-input").val(),
@@ -1042,7 +1177,7 @@
             $.ajax({
                 url: '@Url.Action("CrearVenta", "Ventas")',
                 type: 'POST',
-                data: { vMVentas, detallesventa, vMVentaImporte },
+                data: { vMVentas, detallesventa, vMVentaImporte, formaPagoSelects },
                 success: function (response) {
                     if (response.success == true) {
                         console.log("Datos: " + vMVentas + " " + detallesventa + " " + response.message);
@@ -1055,6 +1190,131 @@
                 error: function (response) {
                 }
             });
+        }
+
+        // Si la forma de pago es Tarjeta, muestra las tarjetas disponibles.
+        $(document).ready(function () {
+            $('#listaTarjetas').hide();
+            $('#forma').change(function () {
+                var formaSeleccionada = $(this).find("option:selected").text();
+
+                if (formaSeleccionada == "Tarjeta") {
+                    $('#listaTarjetas').show();
+                } else {
+                    $('#listaTarjetas').hide();
+                }
+            });
+        });
+
+        // Si la forma de pago es "Varias", se agrega botón para seleccionar las formas de pago.
+        $(document).ready(function () {
+            $('#btn-formaspago-modal').hide();
+            $('#forma').change(function () {
+                var formaSeleccionada = $(this).find("option:selected").text();
+
+                if (formaSeleccionada == "Varias") {
+                    $('#btn-formaspago-modal').show();
+                } else {
+                    $('#btn-formaspago-modal').hide();
+                }
+
+                var resto = parseFloat($('#total').val());
+                $('#resto-formaPago').val(resto);
+            });
+        });
+
+        // Si la forma de pago es "Efectivo", se agrega formulario para indicar con cuanto se paga y el vuelto.
+        $(document).ready(function () {
+            $('#forma').change(function (){
+                var formaSeleccionada = $(this).find("option:selected").text();
+                var inp
+                if (formaSeleccionada == "Efectivo") {
+                    $('.div-efectivo-monto').show();
+                } else {
+                    $('.div-efectivo-monto').hide();
+                    $('#efectivo-monto').val('0');
+                    $('#efectivo-monto-resto').val('0');
+                }
+            })
+        });
+
+        $('#efectivo-monto').on('input',function () {
+            calcularVuelto();
+        });
+
+        function calcularVuelto(){
+            var pagaCon = parseFloat($('#efectivo-monto').val());
+            var totalVenta = parseFloat($('#total').val());
+            var vuelto = pagaCon - totalVenta;
+            vuelto = Math.max(0, vuelto).toFixed(2);
+            $('#efectivo-monto-resto').val(vuelto);
+        }
+
+        $(document).ready(function () {
+            // Agregar evento change a los checkboxes
+            $('.input-checkbox-formasPago').change(function () {
+                // Obtener el checkbox y el campo de texto de la misma fila
+                var checkbox = $(this);
+                var inputText = checkbox.closest('tr').find('.input-text-formasPago');
+
+                var checkboxTarjeta = $('#Tarjeta-checkbox');
+                var listTarjetas = $('#listaTarjetas-modal');
+                var listTarjetasLabel = $('#listaTarjetas-modal-label');
+
+                // Habilitar o deshabilitar el campo de texto según el estado del checkbox
+                inputText.prop('disabled', !checkbox.prop('checked'));
+
+                // Habilitar o deshabilitar el campo de lista de tarjetas según el estado del checkbox de Tarjeta
+                listTarjetas.prop('disabled', !checkboxTarjeta.prop('checked'));
+                listTarjetas.prop('hidden', !checkboxTarjeta.prop('checked'));
+                listTarjetasLabel.prop('hidden', !checkboxTarjeta.prop('checked'));
+
+                if(!checkbox.prop('checked')){
+                    inputText.val('0');
+                }
+
+                calcularTotalFormaPago();
+            });
+        });
+
+        function formasPagoEnCero(){
+            
+            // Obtener el checkbox y el campo de texto de la misma fila
+            var checkbox = $('.input-checkbox-formasPago');
+            var inputText = checkbox.closest('tr').find('.input-text-formasPago');
+
+            checkbox.prop('checked', false);
+            inputText.prop('disabled', true);
+            inputText.val('0');
+
+            $('#efectivo-monto').val('0');
+            $('#efectivo-monto-resto').val('0');
+            $('#resto-formaPago').val('0');
+            $('#total-formaPago').val('0');
+
+            calcularTotalFormaPago();
+        }
+
+        $('.input-text-formasPago').on('input', function () {
+            calcularTotalFormaPago();
+        });
+
+        function calcularTotalFormaPago(){
+            var total = 0;
+
+            $('.input-text-formasPago').each(function (){
+                total += parseFloat($(this).val()) || 0;
+            });
+
+            // Actualizar el campo "total-formaPago" con el total calculado
+            $('#total-formaPago').val(total);
+
+            // Calcular el resto
+            var totalVenta = parseFloat($('#total').val());
+            var resto = totalVenta - total;
+            resto = Math.max(0, resto);
+            //Actualiza el campo "resto-formaPago" con el resto calculado
+            $('#resto-formaPago').val(resto);
         }
 
     </script>

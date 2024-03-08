@@ -53,5 +53,7 @@ namespace MVCVentas.Models
         public virtual ICollection<VMVentas_I> Ventas_I { get; set; }
 
         public virtual ICollection<VMVentas_D> Ventas_D { get; set; }
+
+        public virtual ICollection<VMVentas_TipoTransaccion> VMVentas_TipoTransaccion { get; set; }
     }
 }

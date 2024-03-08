@@ -68,6 +68,9 @@ namespace MVCVentas.Data
             modelBuilder.Entity<VMVentas_I>()
                 .HasKey(vi => new { vi.NumVenta, vi.CodComprobante, vi.CodModulo, vi.NumSucursal, vi.CodConcepto });
 
+            modelBuilder.Entity<VMVentas_TipoTransaccion>()
+                .HasKey(vt =>new { vt.NumTransaccion, vt.NumVenta, vt.CodComprobante, vt.CodModulo, vt.NumSucursal });
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -76,6 +79,12 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMVentas_D> VMVentas_D { get; set; }
 
         public DbSet<MVCVentas.Models.VMVentas_I> VMVentas_I { get; set; }
+
+        public DbSet<MVCVentas.Models.VMVentas_TipoTransaccion> VMVentas_TipoTransaccion { get; set; }
+
+        public DbSet<MVCVentas.Models.VMTipoTransaccion> VMTipoTransaccion { get; set; }
+
+        public DbSet<MVCVentas.Models.VMTipoTarjeta> VMTipoTarjeta { get; set; }
 
         public DbSet<MVCVentas.Models.VMConfig> VMConfig { get; set; }
 
