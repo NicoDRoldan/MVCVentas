@@ -108,3 +108,9 @@
     margin-left: 28px;
     width: 100px;
 }
+
+#listaTarjetas-modal {
+    right: 20px;
+    margin: 10px;
+    width: 200px;
+}

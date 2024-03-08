@@ -88,5 +88,9 @@
         public string CodTipoTran { get; set; }
 
         public string NumTransaccion { get; set; }
+
+        public string Pago { get; set; } // Monto con el que pagó el cliente.
+
+        public string Vuelto { get; set; } // Vuelto al cliente.
     }
 }

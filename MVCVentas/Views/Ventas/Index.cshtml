@@ -322,17 +322,22 @@
                                             @foreach (var formaPago in (SelectList)ViewData["ListaMedioPago"])
                                             {
                                                 <tr>
-                                                    <td>@formaPago.Text</td>
+                                                    <td id="@formaPago.Text">@formaPago.Text</td>
                                                     <td>
-                                                        <input type="checkbox" class="input-checkbox-formasPago" id="@formaPago.Value" name="FormasPagoSeleccionados" value="@formaPago.Value">
+                                                        <input type="checkbox" class="input-checkbox-formasPago" id="@($"{formaPago.Text}-checkbox")" name="FormasPagoSeleccionados" value="@formaPago.Value">
                                                     </td>
                                                     <td class="td-text-formasPago">
-                                                        <input type="number" class="form-control input-text-formasPago" id="@($"{formaPago.Value}-monto-formaPago")" value="0" min="0" disabled />
+                                                        <input type="number" class="form-control input-text-formasPago" id="@($"{formaPago.Value}-monto-formaPago")" value="0" min="0" disabled data-id="@formaPago.Value"/>
                                                     </td>
                                                 </tr>
                                             }
                                         </tbody>
                                     </table>
+                                </div>
+                                @* Lista de tarjeta *@
+                                <div class="modal-footer">
+                                    <label id="listaTarjetas-modal-label" hidden>Tarjeta:</label>
+                                    <select asp-for="Ventas_TipoTransaccion.VMTipoTransaccion.VMTipoTarjeta.CodTarjeta" class="form-control" id="listaTarjetas-modal" asp-items="ViewBag.ListaTarjetas" disabled hidden></select>
                                 </div>
                                 <div class="modal-footer">
                                     <div id="div-total-formaPago">
@@ -1089,22 +1094,36 @@
             var formaSeleccionada = $('#forma').find("option:selected").text();
 
             // Obtener las formas de pago seleccionadas
-            var formasPagoSeleccionadas = [];
+            var formaPagoSelects = [];
             $('input[name="FormasPagoSeleccionados"]:checked').each(function () {
-                formasPagoSeleccionadas.push($(this).val());
+                var id = $(this).val();
+                var monto = parseFloat($('#' + id + '-monto-formaPago').val());
+                formaPagoSelects.push({ Id: id, Monto: monto});
             });
 
-            console.log(formasPagoSeleccionadas);
+            var codTarjeta = "";
+            console.log($('#forma option:selected').text());
+            console.log($('#Tarjeta-checkbox').prop('checked'));
+            if ($('#forma option:selected').text() == "Varias" && $('#Tarjeta-checkbox').prop('checked')) {
+                console.log("ENTRE VARIOS");
+                codTarjeta = $('#listaTarjetas-modal').val();
+            } else if ($('#forma option:selected').text() == "Tarjeta") {
+                console.log("ENTRE TARJETA");
+                codTarjeta = $('#listaTarjetas').val();
+            }
 
             // Crear un objeto con los datos de la venta (Ventas_E)
             var vMVentas = {
                 CodComprobante: $("#comprobante-select").val(),
                 CodCliente: $("#cliente-select").val(),
                 Id_FormaPago: $("#forma").val(),
-                FormasPagos: formasPagoSeleccionadas,
-                CodTarjeta: $("#listaTarjetas").val(),
-                CodModulo: $("#modulo-select").val()
+                CodTarjeta: codTarjeta,
+                CodModulo: $("#modulo-select").val(),
+                Pago: $('#efectivo-monto').val(),
+                Vuelto: parseFloat($('#efectivo-monto-resto').val()).toFixed(2)
             };
+
+            console.log(vMVentas);
 
             var detallesventa = [];
 
@@ -1158,7 +1177,7 @@
             $.ajax({
                 url: '@Url.Action("CrearVenta", "Ventas")',
                 type: 'POST',
-                data: { vMVentas, detallesventa, vMVentaImporte },
+                data: { vMVentas, detallesventa, vMVentaImporte, formaPagoSelects },
                 success: function (response) {
                     if (response.success == true) {
                         console.log("Datos: " + vMVentas + " " + detallesventa + " " + response.message);
@@ -1227,7 +1246,7 @@
             var pagaCon = parseFloat($('#efectivo-monto').val());
             var totalVenta = parseFloat($('#total').val());
             var vuelto = pagaCon - totalVenta;
-            vuelto = Math.max(0, vuelto);
+            vuelto = Math.max(0, vuelto).toFixed(2);
             $('#efectivo-monto-resto').val(vuelto);
         }
 
@@ -1238,8 +1257,17 @@
                 var checkbox = $(this);
                 var inputText = checkbox.closest('tr').find('.input-text-formasPago');
 
+                var checkboxTarjeta = $('#Tarjeta-checkbox');
+                var listTarjetas = $('#listaTarjetas-modal');
+                var listTarjetasLabel = $('#listaTarjetas-modal-label');
+
                 // Habilitar o deshabilitar el campo de texto según el estado del checkbox
                 inputText.prop('disabled', !checkbox.prop('checked'));
+
+                // Habilitar o deshabilitar el campo de lista de tarjetas según el estado del checkbox de Tarjeta
+                listTarjetas.prop('disabled', !checkboxTarjeta.prop('checked'));
+                listTarjetas.prop('hidden', !checkboxTarjeta.prop('checked'));
+                listTarjetasLabel.prop('hidden', !checkboxTarjeta.prop('checked'));
 
                 if(!checkbox.prop('checked')){
                     inputText.val('0');
