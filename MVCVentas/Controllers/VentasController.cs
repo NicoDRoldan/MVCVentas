@@ -500,6 +500,7 @@ namespace MVCVentas.Controllers
             
             // Se incrementa el número de venta:
             decimal nroVentaDecimal = nroVenta + 1;
+
             // Se convierte el número de venta a string y se le agrega ceros a la izquierda:
             string nroVentaString = nroVentaDecimal.ToString();
             string nroVentaCorrelativa = nroVentaString.PadLeft(8, '0');
@@ -752,6 +753,7 @@ namespace MVCVentas.Controllers
                     // Se confirma la transacción:
                     transaction.Commit();
 
+                    // Traigo una lista de los registros de Ventas_D filtrando por claves primarias (la venta realizada)
                     var listVentaD = await _context.VMVentas_D
                         .Where(v => v.NumVenta == nroVentaCorrelativa
                                 && v.CodComprobante == vMVentas.Comprobante_E.CodComprobante
@@ -759,6 +761,7 @@ namespace MVCVentas.Controllers
                                 && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
                         .ToListAsync();
 
+                    // Traigo una lista de los registros de Ventas_I filtrando por claves primarias (la venta realizada)
                     var listVentaI = await _context.VMVentas_I
                         .Where(v => v.NumVenta == nroVentaCorrelativa
                                 && v.CodComprobante == vMVentas.Comprobante_E.CodComprobante
@@ -766,8 +769,21 @@ namespace MVCVentas.Controllers
                                 && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
                         .ToListAsync();
 
-                    GenerarReportePDF(ventaE, listVentaD, listVentaI, rutaRaizApp);
-                    ImprimirReporte(ventaE, listVentaD, listVentaI);
+                    // Traigo una lista de los nombres de tipo de transacción filtrando por la venta realizada
+                    var listVentaTipoTransaccion = await _context.VMVentas_TipoTransaccion
+                        .Join(_context.VMTipoTransaccion,
+                            vt => vt.CodTipoTran,
+                            tt => tt.CodTipoTran,
+                            (vt, tt) => new { Ventas_TipoTransaccion = vt, TipoTransaccion = tt })
+                        .Where(v => v.Ventas_TipoTransaccion.NumVenta == nroVentaCorrelativa
+                                && v.Ventas_TipoTransaccion.CodComprobante == vMVentas.Comprobante_E.CodComprobante
+                                && v.Ventas_TipoTransaccion.CodModulo == vMVentas.Modulo.CodModulo
+                                && v.Ventas_TipoTransaccion.NumSucursal == vMVentas.Sucursal.NumSucursal)
+                        .Select( v => v.TipoTransaccion.Nombre)
+                        .ToListAsync();
+
+                    GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
+                    ImprimirReporte(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion);
 
                     return Json(new { success = true, 
                         message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos."
@@ -781,7 +797,87 @@ namespace MVCVentas.Controllers
             }
         }
 
-        public Printer GenerarReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I)
+        public async Task<IActionResult> EliminarVenta(string numVenta, string codComprobante, string codModulo, string numSucursal)
+        {
+            // Verificar que los parametros no sean nulos
+            if( string.IsNullOrEmpty(numVenta) || string.IsNullOrEmpty(codComprobante) || string.IsNullOrEmpty(codModulo) || string.IsNullOrEmpty(numSucursal) )
+                return NotFound();
+
+            // Obtener las ventas:
+            var vMVentas_E = await _context.VMVentas_E.FindAsync(numVenta, codComprobante, codModulo, numSucursal);
+            if(vMVentas_E == null)
+                return NotFound("Venta no encontrada");
+
+            var vMVentas_D = await _context.VMVentas_D
+               .Where(v => v.NumVenta == numVenta
+                   && v.CodComprobante == codComprobante
+                   && v.CodModulo == codModulo
+                   && v.NumSucursal == numSucursal)
+               .ToListAsync();
+            if (vMVentas_D == null)
+                return NotFound("Venta no encontrada");
+
+            var vMVentas_I = await _context.VMVentas_I
+                .Where(v => v.NumVenta == numVenta
+                    && v.CodComprobante == codComprobante
+                    && v.CodModulo == codModulo
+                    && v.NumSucursal == numSucursal)
+               .ToListAsync();
+            if (vMVentas_I == null)
+                return NotFound("Venta no encontrada");
+
+            var vMVentas_TipoTransaccion = await _context.VMVentas_TipoTransaccion
+                .Where(v => v.NumVenta == numVenta 
+                    && v.CodComprobante == codComprobante 
+                    && v.CodModulo == codModulo 
+                    && v.NumSucursal == numSucursal)
+                .ToListAsync();
+            if (vMVentas_TipoTransaccion == null)
+                return NotFound("Venta no encontrada");
+
+            try
+            {
+                // Eliminar los registros:
+
+                foreach(var ventas_tipoTransaccion in vMVentas_TipoTransaccion)
+                {
+                    _context.VMVentas_TipoTransaccion.Remove(ventas_tipoTransaccion);
+                }
+
+                foreach(var ventas_I in vMVentas_I)
+                {
+                    _context.VMVentas_I.Remove(ventas_I);
+                }
+
+                foreach (var ventas_D in vMVentas_D)
+                {
+                    _context.VMVentas_D.Remove(ventas_D);
+                }
+
+                _context.VMVentas_E.Remove(vMVentas_E);
+
+                /////////////// Está pendiente la corrección de la numeración ///////////////
+
+                // Corregir numeración de comprobante:
+                //var comprobanteN = await _context.VMComprobante_N.FindAsync(codComprobante, codModulo, numSucursal);
+                //var numVentaEliminada = vMVentas_E.NumVenta.TrimStart('0');
+
+                //comprobanteN.NumComprobante = int.Parse(numVentaEliminada) - 1;
+                //_context.VMComprobante_N.Update(comprobanteN);
+
+                /////////////// Está pendiente la corrección de la numeración ///////////////
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Error al eliminar la venta, error:" + ex.Message);
+            }
+
+            return Ok(new { message = "Venta eliminada correctamente" });
+        }
+
+        public Printer GenerarReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion)
         {
             // Se crea una instancia de la clase Printer:
             Printer printer = new Printer();
@@ -793,7 +889,21 @@ namespace MVCVentas.Controllers
             printer.agregarLinea("Fecha: " + vMVentas_E.Fecha.ToString("dd/MM/yyyy"), 7, "Consolas");
             printer.agregarLinea("Hora: " + vMVentas_E.Hora.ToString("HH:mm:ss"), 7, "Consolas");
             printer.agregarLinea("Cliente: " + vMVentas_E.Cliente.RazonSocial, 7, "Consolas");
+
+            // Si la forma de pago es Tarjetas, imprime el nombre de la tarjeta
+            if(vMVentas_E.FormaPago.Nombre == "Tarjeta")
+                printer.agregarLinea("Forma De Pago: " + vMVentas_TipoTransaccion[0], 7, "Consolas");
+            else
             printer.agregarLinea("Forma De Pago: " + vMVentas_E.FormaPago.Nombre, 7, "Consolas");
+
+            // Si la forma de pago es "varias", se imprimirá además de "Varias", las formas de pago utilizadas.
+            if (vMVentas_E.FormaPago.Nombre == "Varias")
+            {
+                foreach (var ventaTipoTran in vMVentas_TipoTransaccion)
+                {
+                    printer.agregarLinea("---> " + ventaTipoTran, 7, "Consolas");
+                }
+            }
 
             printer.agregarLineaEnBlanco();
 
@@ -816,14 +926,14 @@ namespace MVCVentas.Controllers
             return printer;
         }
 
-        public void ImprimirReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I)
+        public void ImprimirReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion)
         {
-            Printer printer = GenerarReporte(vMVentas_E, vMVentas_D, vMVentas_I);
+            Printer printer = GenerarReporte(vMVentas_E, vMVentas_D, vMVentas_I, vMVentas_TipoTransaccion);
 
             printer.Imprimir();
         }
 
-        public void GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, string projectPath)
+        public void GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion, string projectPath)
         {
             string rutaComprobantesImpresos = Path.Combine(projectPath, "Comprobantes Impresos");
             string rutaCodComprobate = Path.Combine(rutaComprobantesImpresos, vMVentas_E.CodComprobante);
@@ -834,7 +944,7 @@ namespace MVCVentas.Controllers
             Directory.CreateDirectory(rutaCodComprobate);
             Directory.CreateDirectory(rutaNumSucursal);
 
-            Printer printer = GenerarReporte(vMVentas_E, vMVentas_D, vMVentas_I);
+            Printer printer = GenerarReporte(vMVentas_E, vMVentas_D, vMVentas_I, vMVentas_TipoTransaccion);
 
             Document document = new Document();
 

@@ -146,11 +146,24 @@ namespace MVCVentas.Controllers
                 .Include(vi => vi.Concepto)
                 .ToListAsync();
 
+            var listaVentaTipoTransaccion = await _context.VMVentas_TipoTransaccion
+                .Join(_context.VMTipoTransaccion,
+                    vt => vt.CodTipoTran,
+                    tt => tt.CodTipoTran,
+                    (vt, tt) => new { ventaTipoTransaccion = vt, tipoTransaccion = tt })
+                    .Where(v => v.ventaTipoTransaccion.NumVenta == numVenta
+                    && v.ventaTipoTransaccion.CodComprobante == codComprobante
+                    && v.ventaTipoTransaccion.CodModulo == codModulo
+                    && v.ventaTipoTransaccion.NumSucursal == numSucursal
+                    )
+                    .Select(v => v.tipoTransaccion.Nombre)
+                    .ToListAsync();
+
             try
             {
                 VentasController ventasController = new VentasController(_context);
 
-                ventasController.ImprimirReporte(vMVentas_E, vMVentas_D, vMVentas_I);
+                ventasController.ImprimirReporte(vMVentas_E, vMVentas_D, vMVentas_I, listaVentaTipoTransaccion);
 
                 return Json(new { success = true, message = "Se realizó la reimpresión! :)" });
             }
