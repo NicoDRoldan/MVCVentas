@@ -13,9 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MVCVentasContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MVCVentasContext") ?? throw new InvalidOperationException("Connection string 'MVCVentasContext' not found.")));
 
-//builder.Services.AddDbContext<MVCVentasContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("MVCVentasContext") ?? throw new InvalidOperationException("Connection string 'MVCVentasContext' not found.")));
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -24,6 +21,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         option.LoginPath = "/Access/Login";
         option.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        option.SlidingExpiration = true;
     });
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
