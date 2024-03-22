@@ -31,6 +31,10 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id_Articulo">Editar</a> |
+    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.Id_Articulo">Editar</a> <a>|</a>
+    }
+    
     <a asp-action="Index">Volver</a>
 </div>

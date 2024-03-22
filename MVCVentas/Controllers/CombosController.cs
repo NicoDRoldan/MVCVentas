@@ -22,25 +22,28 @@ namespace MVCVentas.Controllers
         // GET: Combos
         public async Task<IActionResult> Index()
         {
-            var mVCVentasContext = _context.VMCombo.Include(v => v.Articulo);
-            return View(await mVCVentasContext.ToListAsync());
+            var mVCVentasContext = await _context.VMCombo
+                .Include(v => v.Articulo)
+                .GroupBy(c => c.Articulo)
+                .Select(g => g.Key)
+                .ToListAsync();
+
+            return View(mVCVentasContext);
         }
 
         // GET: Combos/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.VMCombo == null)
+            if (id == null || _context.VMArticle == null)
             {
                 return NotFound();
             }
 
-            var vMCombo = await _context.VMCombo
-                .Include(v => v.Articulo)
-                .FirstOrDefaultAsync(m => m.Id_Combo == id);
-            if (vMCombo == null)
-            {
-                return NotFound();
-            }
+            var vMCombo = await (from c in _context.VMCombo
+                                 join a in _context.VMArticle on c.Id_ArticuloAgregado equals a.Id_Articulo
+                                 where c.Id_Articulo == id
+                                 select new Tuple<int, string>(c.Id_ArticuloAgregado, a.Nombre)
+                                  ).ToListAsync();
 
             return View(vMCombo);
         }

@@ -41,7 +41,7 @@
                 </div>
                 <div class="navegacion">
                     <button class="anterior" disabled>Anterior</button>
-                    <button class="siguiente">Siguiente</button>
+                    <button class="siguiente" disabled>Siguiente</button>
                 </div>
             </div>
             <div class="resumen-venta">
@@ -370,6 +370,8 @@
 </html>
 
 @section Scripts {
+
+    @* <script src="~/js/sessiontimeout.js"></script> *@
 
     <!-- Script para el manejo de la tabla de artículos -->
     <script>
@@ -1091,6 +1093,7 @@
         function CrearVenta() {
 
             var montoTotalVenta = parseFloat($('#total').val());
+            montoTotalVenta = montoTotalVenta.toFixed(2);
             var formaSeleccionada = $('#forma').find("option:selected").text();
 
             // Obtener las formas de pago seleccionadas
@@ -1159,6 +1162,7 @@
 
             if (formaSeleccionada == "Varias") {
                 var totalFormaPago = parseFloat($('#total-formaPago').val());
+                totalFormaPago = totalFormaPago.toFixed(2);
                 console.log(totalFormaPago + " --- Y --- " + montoTotalVenta);
 
                 if (totalFormaPago !== montoTotalVenta) {
@@ -1218,7 +1222,8 @@
                     $('#btn-formaspago-modal').hide();
                 }
 
-                var resto = parseFloat($('#total').val());
+                var restoAux = parseFloat($('#total').val());
+                var resto = restoAux.toFixed(2);
                 $('#resto-formaPago').val(resto);
             });
         });
@@ -1314,6 +1319,7 @@
             var resto = totalVenta - total;
             resto = Math.max(0, resto);
             //Actualiza el campo "resto-formaPago" con el resto calculado
+            resto = resto.toFixed(2);
             $('#resto-formaPago').val(resto);
         }
 

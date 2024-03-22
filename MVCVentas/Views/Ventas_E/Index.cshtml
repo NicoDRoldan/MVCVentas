@@ -152,6 +152,26 @@
                                         <input type="hidden" id="reporte-codModulo" name="codModulo" value="@Html.DisplayFor(modelItem => item.CodModulo)" />
                                         <input type="hidden" id="reporte-numSucursal" name="numSucursal" value="@Html.DisplayFor(modelItem => item.NumSucursal)" />
                                     </form>
+                                    <form asp-controller="Ventas_E" class="d-inline">
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <label>|</label>
+                                            <button data-num-venta="@Html.DisplayFor(modelItem => item.NumVenta)"
+                                                    data-cod-comprobante="@Html.DisplayFor(modelItem => item.CodComprobante)"
+                                                    data-cod-modulo="@Html.DisplayFor(modelItem => item.CodModulo)"
+                                                    data-num-sucursal="@Html.DisplayFor(modelItem => item.NumSucursal)"
+                                                    onclick="eliminarVenta(this)"
+                                                    class='btn btn-danger btn-sm'>
+                                                Anular Venta
+                                            </button>
+                                        }
+                                        
+                                        <input type="hidden" id="reporte-numVenta" name="numVenta" value="@Html.DisplayFor(modelItem => item.NumVenta)" />
+                                        <input type="hidden" id="reporte-codComprobante" name="codComprobante" value="@Html.DisplayFor(modelItem => item.CodComprobante)" />
+                                        <input type="hidden" id="reporte-codModulo" name="codModulo" value="@Html.DisplayFor(modelItem => item.CodModulo)" />
+                                        <input type="hidden" id="reporte-numSucursal" name="numSucursal" value="@Html.DisplayFor(modelItem => item.NumSucursal)" />
+                                    </form>
                                 </td>
                             </tr>
                         }
@@ -174,6 +194,7 @@
         });
     </script>
 
+    @* Script para llamar a la reimpresión de una venta *@
     <script>
         function llamarAReimpresion(element) {
             event.preventDefault();
@@ -201,6 +222,39 @@
                 },
                 error: function (response) {
                     console.log(response.message)
+                }
+            })
+        }
+    </script>
+
+    @* Script para llamar a la eliminación de una venta *@
+    <script>
+        function eliminarVenta(element){
+            event.preventDefault();
+
+            var _numVenta = element.dataset.numVenta;
+            var _codComprobante = element.dataset.codComprobante;
+            var _codModulo = element.dataset.codModulo;
+            var _numSucursal = element.dataset.numSucursal;
+
+            var formData = {
+                numVenta: _numVenta,
+                codComprobante: _codComprobante,
+                codModulo: _codModulo,
+                numSucursal: _numSucursal
+            };
+
+            $.ajax({
+                url: '@Url.Action("EliminarVenta", "Ventas")',
+                data: formData,
+                success: function (response) {
+                    console.log(response.message);
+                    alert(response.message);
+                    location.reload();
+                },
+                error: function (response) {
+                    console.log(response.message);
+                    alert("Error al eliminar la venta");
                 }
             })
         }

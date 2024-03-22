@@ -24,7 +24,10 @@
     <div class="card shadow mb-4 custom-card">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Rubros</h6>
-            <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Rubro</a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+            {
+                <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Rubro</a>
+            }
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -47,8 +50,12 @@
                                     @Html.DisplayFor(modelItem => item.Nombre)
                                 </td>
                                 <td class="text-center">
-                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Rubro">Editar</a>
-                                    <label>|</label>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    {
+                                        <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Rubro">Editar</a>
+                                        <label>|</label>
+                                    }
+
                                     <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Rubro">Detalles</a>
 
                                     @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))

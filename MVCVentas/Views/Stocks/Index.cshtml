@@ -32,7 +32,7 @@
                     <thead>
                         <tr>
                             <th>
-                                @Html.DisplayNameFor(model => model.Cantidad)
+                                Cant. disponible
                             </th>
                             <th>
                                 @Html.DisplayNameFor(model => model.Articulo)
@@ -51,15 +51,12 @@
                                     @Html.DisplayFor(modelItem => item.Articulo.Nombre)
                                 </td>
                                 <td class="text-center">
-                                    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Articulo">Editar</a>
-                                    <label>|</label>
-                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Articulo">Detalles</a>
-
-@*                                     @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
                                     {
+                                        <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Articulo">Editar</a>
                                         <label>|</label>
-                                        <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Articulo">Eliminar</a>
-                                    } *@
+                                    }
+                                    <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Articulo">Detalles</a>
                                 </td>
                             </tr>
                         }
