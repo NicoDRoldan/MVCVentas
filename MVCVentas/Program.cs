@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         option.LoginPath = "/Access/Login";
         option.ExpireTimeSpan = TimeSpan.FromMinutes(20);
         option.SlidingExpiration = true;
+        option.AccessDeniedPath = "/Access/AccessDenied";
     });
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

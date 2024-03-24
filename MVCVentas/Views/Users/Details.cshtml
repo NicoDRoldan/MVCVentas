@@ -49,6 +49,10 @@
     </dl>
 </div>
 <div>
-    <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@Model?.Id_Usuario">Editar</a> |
+    @if (User.IsInRole("Admin") || (User.IsInRole("Supervisor") && Model.Categoria.Nombre != "Admin") || LoginService.ObtenerNombreUsuarioActual() == Model.Usuario)
+    {
+        <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@Model?.Id_Usuario">Editar</a>
+        <a>|</a>
+    }
     <a asp-action="Index">Volver</a>
 </div>
