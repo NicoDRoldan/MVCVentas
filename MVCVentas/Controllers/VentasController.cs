@@ -225,6 +225,12 @@ namespace MVCVentas.Controllers
                 .ToListAsync();
             ViewData["ListaMedioPago"] = new SelectList(listaMedioPago, "Id_FormaPago", "Nombre");
 
+            // Lógica para obtener las formas de pago sin varios
+            var listaMedioPagoModal = await _context.VMFormaPago
+                .Where(f => f.Nombre != "Varias")
+                .ToListAsync();
+            ViewData["ListaMedioPagoModal"] = new SelectList(listaMedioPagoModal, "Id_FormaPago", "Nombre");
+
             // Lógica para obtener la lista de Módulos:
             var listaModulos = await _context.VMModulo
                 .ToListAsync();

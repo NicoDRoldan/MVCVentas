@@ -68,5 +68,10 @@ namespace MVCVentas.Controllers
             ModelState.AddModelError(string.Empty, "Por favor, corroborar los datos ingresados.");
             return View();
         }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }

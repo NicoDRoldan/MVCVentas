@@ -166,33 +166,39 @@
             </li>
 
             <!-- Sidebar Message -->
-            <!-- Divider -->
-            <hr class="sidebar-divider">
+            <!-- Sidebar Message -->
+                @if (User.IsInRole("Admin"))
+                {
+                <li class="nav-item">
+                    <!-- Divider -->
+                    <hr class="sidebar-divider">
 
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Bases Config.
-            </div>
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
-                   aria-expanded="true" aria-controls="collapseThree">
-                    <i class="fas fa-fw fa-chart-pie"></i>
-                    <span>Bases Config.</span>
-                </a>
-                <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Bases Config.:</h6>
-                        <a class="collapse-item" asp asp-area="" asp-controller="Comprobantes_E" asp-action="Index">Comprobantes_E</a>
-                        <a class="collapse-item" asp asp-area="" asp-controller="Comprobantes_N" asp-action="Index">Comprobantes_N</a>
-                        <a class="collapse-item" asp asp-area="" asp-controller="Modulos" asp-action="Index">Modulos</a>
-                        <a class="collapse-item" asp asp-area="" asp-controller="FormasPagos" asp-action="Index">Formas de Pago</a>
-                        <a class="collapse-item" asp asp-area="" asp-controller="Conceptos" asp-action="Index">Conceptos</a>
-                        <a class="collapse-item" asp asp-area="" asp-controller="TipoFacturas" asp-action="Index">Tipo de Facturas</a>
-                        <a class="collapse-item" asp asp-area="" asp-controller="Sucursales" asp-action="Index">Sucursales</a>
+                    <!-- Heading -->
+                    <div class="sidebar-heading">
+                        Bases Config.
                     </div>
-                </div>
+
+                    <!-- Nav Item - Pages Collapse Menu -->
+
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
+                       aria-expanded="true" aria-controls="collapseThree">
+                        <i class="fas fa-fw fa-chart-pie"></i>
+                        <span>Bases Config.</span>
+                    </a>
+                    <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Bases Config.:</h6>
+                            <a class="collapse-item" asp asp-area="" asp-controller="Comprobantes_E" asp-action="Index">Comprobantes_E</a>
+                            <a class="collapse-item" asp asp-area="" asp-controller="Comprobantes_N" asp-action="Index">Comprobantes_N</a>
+                            <a class="collapse-item" asp asp-area="" asp-controller="Modulos" asp-action="Index">Modulos</a>
+                            <a class="collapse-item" asp asp-area="" asp-controller="FormasPagos" asp-action="Index">Formas de Pago</a>
+                            <a class="collapse-item" asp asp-area="" asp-controller="Conceptos" asp-action="Index">Conceptos</a>
+                            <a class="collapse-item" asp asp-area="" asp-controller="TipoFacturas" asp-action="Index">Tipo de Facturas</a>
+                            <a class="collapse-item" asp asp-area="" asp-controller="Sucursales" asp-action="Index">Sucursales</a>
+                        </div>
+                    </div>
+                </li>
+                }
 
 
         </ul>

@@ -11,7 +11,7 @@ using MVCVentas.Models;
 
 namespace MVCVentas.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "SupervisorOrAdmin")]
     public class CategoriesController : Controller
     {
         private readonly MVCVentasContext _context;

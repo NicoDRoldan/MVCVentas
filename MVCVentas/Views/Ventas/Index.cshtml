@@ -319,7 +319,7 @@
                                         </thead>
                                         <tbody>
                                             <!--  Recorrer la lista de formas de pago -->
-                                            @foreach (var formaPago in (SelectList)ViewData["ListaMedioPago"])
+                                            @foreach (var formaPago in (SelectList)ViewData["ListaMedioPagoModal"])
                                             {
                                                 <tr>
                                                     <td id="@formaPago.Text">@formaPago.Text</td>
