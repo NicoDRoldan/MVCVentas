@@ -7,5 +7,7 @@
         public string CodTipoTran { get; set; }
 
         public int VentasRealizadas { get; set; }
+
+        public decimal ImporteTotal { get; set; }
     }
 }

@@ -30,6 +30,36 @@
         <div class="card-body">
             <div class="table-responsive" id="table-resposibe-index-Ventas_E">
 
+                <form id="formFiltrarVentas" method="post" action="@Url.Action("TotalTransaccionesEntreFechas", "Reportes")">
+                    <table border="0" cellspacing="5" cellpadding="5">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label>Fecha Inicio:</label>
+                                    <input type="date" id="fechaInicio" name="fechaInicio" />
+                                </td>
+                                <td>
+                                    <label>Fecha Fin:</label>
+                                    <input type="date" id="fechaFin" name="fechaFin" />
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ReporteTotalTransacciones", "Reportes")'">Restablecer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
                 <table class="table table-bordered" id="index-dataTable-ventas_e" width="100%" cellspacing="0">
                     <thead>
                         <tr id="tr-encabezado-reporte-venta">
@@ -41,6 +71,9 @@
                             </th>
                             <th>
                                 Ventas Realizadas
+                            </th>
+                            <th>
+                                Importe Total
                             </th>
                         </tr>
                     </thead>
@@ -56,6 +89,9 @@
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.VentasRealizadas)
+                                </td>
+                                <td>
+                                    $@Html.DisplayFor(modelItem => item.ImporteTotal)
                                 </td>
                             </tr>
                         }
