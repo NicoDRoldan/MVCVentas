@@ -5,18 +5,7 @@
     Layout = "~/Views/Shared/_Layout_Ventas_Report.cshtml";
 }
 
-<style>
-    #formFiltrarVentas{
-        display: flex;
-        margin-bottom: 20px;
-    }
-
-    #formFiltrarVentas td{
-            padding-left: 0;
-            padding-right: 20px;
-    }
-
-</style>
+<link href="~/css/reporteventas.css" rel="stylesheet" />
 
 <html>
 <head>
@@ -33,7 +22,7 @@
                 <form id="formFiltrarVentas" method="post" action="@Url.Action("FiltrarVentasEntreFechas", "Ventas_E")">
                     <table border="0" cellspacing="5" cellpadding="5">
                         <tbody>
-                            <tr>
+                            <tr class="filtro-todo-roto-lo-odio">
                                 <td>
                                     <label>Fecha Inicio:</label>
                                     <input type="date" id="fechaInicio" name="fechaInicio" />
@@ -42,11 +31,39 @@
                                     <label>Fecha Fin:</label>
                                     <input type="date" id="fechaFin" name="fechaFin" />
                                 </td>
-                                <td>
+                                <td class="button-filter">
                                     <button type="submit" class="btn btn-primary">Filtrar</button>
+                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("Index", "Ventas_E")'">Restablecer</button>
+                                </td>
+                            </tr>
+                            <tr class="input-filtros">
+                                <td>
+                                    <label>Número de Venta:</label>
+                                    <input id="numVenta-filtro" name="numVenta-filtro" />
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("Index", "Ventas_E")'">Restablecer</button>
+                                    <label>Sucursal:</label>
+                                    <input id="sucursal-filtro" name="sucursal-filtro" />
+                                </td>
+                                <td>
+                                    <label>Caja:</label>
+                                    <input id="caja-filtro" name="caja-filtro" />
+                                </td>
+                                <td>
+                                    <label>Forma de Pago:</label>
+                                    <input id="formaPago-filtro" name="formaPago-filtro" />
+                                </td>
+                                <td>
+                                    <label>Usuario:</label>
+                                    <input id="usuario-filtro" name="usuario-filtro" />
+                                </td>
+                                <td>
+                                    <label>Cliente:</label>
+                                    <input id="cliente-filtro" name="cliente-filtro" />
+                                </td>
+                                <td>
+                                    <label>Comprobante:</label>
+                                    <input id="comprobante-filtro" name="comprobante-filtro" />
                                 </td>
                             </tr>
                         </tbody>

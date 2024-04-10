@@ -1,20 +1,20 @@
-﻿@model IEnumerable<MVCVentas.Models.VMVentas_TipoTransaccion>
+﻿@model IEnumerable<MVCVentas.Models.VMReporte>
 
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout_Ventas_Report.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-    #formFiltrarVentas{
+    #formFiltrarVentas {
         display: flex;
         margin-bottom: 20px;
     }
 
-    #formFiltrarVentas td{
+        #formFiltrarVentas td {
             padding-left: 0;
             padding-right: 20px;
-    }
+        }
 </style>
 
 <html>
@@ -30,7 +30,7 @@
         <div class="card-body">
             <div class="table-responsive" id="table-resposibe-index-Ventas_E">
 
-                <form id="formFiltrarVentas" method="post" action="@Url.Action("TipoTransaccionEntreFechas", "Reportes")">
+                <form id="formFiltrarVentas" method="post" action="@Url.Action("FiltroVentsTotalPorDia", "Reportes")">
                     <table border="0" cellspacing="5" cellpadding="5">
                         <tbody>
                             <tr>
@@ -46,7 +46,7 @@
                                     <button type="submit" class="btn btn-primary">Filtrar</button>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ReporteTipoTransaccion", "Reportes")'">Restablecer</button>
+                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("VentaTotalPorDia", "Reportes")'">Restablecer</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -64,27 +64,11 @@
                     <thead>
                         <tr id="tr-encabezado-reporte-venta">
                             <th>
-                                Número de Venta
-                            </th>
-                            <th>
-                                Número de Transacción
-                            </th>
-                            <th>
-                                Código de Transacción
-                            </th>
-                            <th>
-                                Tipo de Transacción
-                            </th>
-                            <th>
-                                Importe
-                            </th>
-                            <th>
                                 Fecha
                             </th>
                             <th>
-                                Hora
+                                Importe Total
                             </th>
-                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,29 +76,10 @@
                         {
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.NumVenta)
+                                    @Html.DisplayFor(modelItem => item.Fecha)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.NumTransaccion)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.CodTipoTran)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.VMTipoTransaccion.Nombre)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Importe)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Ventas_E.Fecha)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Ventas_E.Hora)
-                                </td>
-                                
-                                <td class="text-center">
-                                    @* Botones *@
+                                    $@Html.DisplayFor(modelItem => item.ImporteTotal)
                                 </td>
                             </tr>
                         }

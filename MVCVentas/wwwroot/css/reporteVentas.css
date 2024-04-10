@@ -6,3 +6,27 @@
 #table-resposibe-index-Ventas_E{
     width: 100% !important;
 }
+
+.input-filtros td{
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+}
+
+.input-filtros input {
+    width: 100px;
+    height: 24px;
+}
+
+#formFiltrarVentas{
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#formFiltrarVentas td{
+    padding-left: 0;
+    padding-right: 20px;
+}
+
+.button-filter button{
+    margin-left: 20px;
+}

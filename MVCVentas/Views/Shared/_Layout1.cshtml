@@ -64,10 +64,12 @@
                 </a>
                 <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Config. Ventas:</h6>
+                        <h6 class="collapse-header">Ventas:</h6>
                         <a class="collapse-item" asp asp-area="" asp-controller="Ventas_E" asp-action="Index">Ventas Realizadas</a>
+                        <a class="collapse-item" asp asp-area="" asp-controller="Reportes" asp-action="VentaTotalPorDia">Total por día</a>
                         <a class="collapse-item" asp asp-area="" asp-controller="Reportes" asp-action="ReporteTipoTransaccion">Ventas Por Transacción</a>
                         <a class="collapse-item" asp asp-area="" asp-controller="Reportes" asp-action="ReporteTotalTransacciones">Total Por Transacción</a>
+                        <a class="collapse-item" asp asp-area="" asp-controller="Reportes" asp-action="ReportTotalByArticles">Total Por Artículos</a>
                     </div>
                 </div>
 

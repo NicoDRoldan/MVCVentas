@@ -22,8 +22,22 @@ namespace MVCVentas.Controllers
             return View();
         }
 
+        #region Reporte Tipo Transacción
+
         public async Task<IActionResult> ReporteTipoTransaccion()
         {
+            var jsonTransactionFilter = HttpContext.Session.GetString("TipoTransaccionFilter");
+
+            if (jsonTransactionFilter != null)
+            {
+                var transactionFilter = JsonConvert.DeserializeObject<List<VMVentas_TipoTransaccion>>(jsonTransactionFilter)
+                    ?? new List<VMVentas_TipoTransaccion>();
+
+                HttpContext.Session.Remove("TipoTransaccionFilter");
+
+                return View(transactionFilter);
+            }
+
             var reportTransactionContext = _context.VMVentas_TipoTransaccion
                 .Include(v => v.Ventas_E)
                 .Include(v => v.VMTipoTransaccion)
@@ -33,16 +47,55 @@ namespace MVCVentas.Controllers
             return View(await reportTransactionContext.ToListAsync());
         }
 
+        [HttpPost]
+        public async Task<IActionResult> TipoTransaccionEntreFechas(string fechaInicio, string fechaFin)
+        {
+            // Si la fecha de inicio o fin es null, vuelve a la página y muestra error.
+            if (fechaInicio is null || fechaFin is null)
+            {
+                string referrerUrl = Request.Headers["Referer"].ToString();
+
+                TempData["ErrorMessage"] = "Las fechas de inicio y fin son requeridas";
+                return Redirect(referrerUrl);
+            }
+
+            // Convertir los string de las fechas en tipos DateTime.
+            DateTime fechaInicioDate = DateTime.Parse(fechaInicio).Date;
+            DateTime fechaFinDate = DateTime.Parse(fechaFin).Date;
+
+            var tipoTransaccionEntreFechas = await _context.VMVentas_TipoTransaccion
+                .Include(v => v.Ventas_E)
+                .Include(v => v.VMTipoTransaccion)
+                .Where(ve => ve.Ventas_E.Fecha >= fechaInicioDate && ve.Ventas_E.Fecha <= fechaFinDate)
+                .OrderByDescending(ve => ve.Ventas_E.Fecha)
+                .ThenByDescending(ve => ve.Ventas_E.Hora)
+                .ToListAsync();
+
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            };
+
+            HttpContext.Session.SetString("TipoTransaccionFilter",
+                JsonConvert.SerializeObject(tipoTransaccionEntreFechas, settings));
+
+            return RedirectToAction("ReporteTipoTransaccion", "Reportes");
+        }
+
+        #endregion
+
+        #region Reporte Total Transacciones
+
         public async Task<IActionResult> ReporteTotalTransacciones()
         {
-            var jsonTotalTransactionFilter = HttpContext.Session.GetString("TransaccionEntreFechasFiltradas");
+            var jsonTotalTransactionFilter = HttpContext.Session.GetString("TotalTransactionFilter");
 
             if(jsonTotalTransactionFilter != null)
             {
                 var totalTransactionFilter = JsonConvert.DeserializeObject<List<VMReporte>>(jsonTotalTransactionFilter)
                     ?? new List<VMReporte>();
 
-                HttpContext.Session.Remove("TransaccionEntreFechasFiltradas");
+                HttpContext.Session.Remove("TotalTransactionFilter");
 
                 return View(totalTransactionFilter);
             }
@@ -108,10 +161,98 @@ namespace MVCVentas.Controllers
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             };
 
-            HttpContext.Session.SetString("TransaccionEntreFechasFiltradas",
+            HttpContext.Session.SetString("TotalTransactionFilter",
                 JsonConvert.SerializeObject(totalTransactionEntreFechas, settings));
 
             return RedirectToAction("ReporteTotalTransacciones", "Reportes");
         }
+
+        #endregion
+
+        #region Reporte Total por Artículos
+
+        public async Task<IActionResult> ReportTotalByArticles()
+        {
+            var totalBySrticles = await _context.VMVentas_D
+                .Include(v => v.Articulo)
+                .GroupBy(v => new { v.Id_Articulo, v.Articulo.Nombre })
+                .Select (g => new VMReporte
+                {
+                    Id_Articulo = g.Key.Id_Articulo,
+                    Nombre = g.Key.Nombre,
+                    TotalVendido = g.Sum(v => v.Cantidad),
+                    ImporteTotal = g.Sum(v => v.PrecioTotal)
+                })
+                .OrderByDescending(g => g.TotalVendido)
+                .ToListAsync();
+
+            return View(totalBySrticles);
+        }
+
+        #endregion
+
+        #region Venta Total por Día
+
+        public async Task<IActionResult> VentaTotalPorDia()
+        {
+            var jsonTotalPorDiaFilter = HttpContext.Session.GetString("TotalPorDiaFiltro");
+
+            if (jsonTotalPorDiaFilter != null)
+            {
+                var totalPorDiaFilter = JsonConvert.DeserializeObject<List<VMReporte>>(jsonTotalPorDiaFilter)
+                    ?? new List<VMReporte>();
+
+                HttpContext.Session.Remove("TotalPorDiaFiltro");
+
+                return View(totalPorDiaFilter);
+            }
+
+            var totalPorDia = new List<VMReporte>();
+
+            return View(totalPorDia);
+        }
+
+        public async Task<IActionResult> FiltroVentsTotalPorDia(string fechaInicio, string fechaFin)
+        {
+            // Si la fecha de inicio o fin es null, vuelve a la página y muestra error.
+            if (fechaInicio is null || fechaFin is null)
+            {
+                string referrerUrl = Request.Headers["Referer"].ToString();
+
+                TempData["ErrorMessage"] = "Las fechas de inicio y fin son requeridas";
+                return Redirect(referrerUrl);
+            }
+
+            // Convertir los string de las fechas en tipos DateTime.
+            DateTime fechaInicioDate = DateTime.Parse(fechaInicio).Date;
+            DateTime fechaFinDate = DateTime.Parse(fechaFin).Date;
+
+            var totalPorDia = await _context.VMVentas_E
+                .Join(_context.VMVentas_I,
+                    ve => new { ve.NumVenta, ve.NumSucursal, ve.CodComprobante, ve.CodModulo },
+                    vi => new { vi.NumVenta, vi.NumSucursal, vi.CodComprobante, vi.CodModulo },
+                    (ve, vi) => new { VentasE = ve, VentasI = vi })
+                .Where(vi => vi.VentasI.CodConcepto == "TOTAL" 
+                    && vi.VentasE.Fecha >= fechaInicioDate && vi.VentasE.Fecha <= fechaFinDate)
+                .GroupBy(v => new { v.VentasE.Fecha })
+                .Select(v => new VMReporte
+                {
+                    Fecha = v.Key.Fecha,
+                    ImporteTotal = v.Sum(vi => vi.VentasI.Importe)
+                })
+                .ToListAsync();
+
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            };
+
+            HttpContext.Session.SetString("TotalPorDiaFiltro",
+                JsonConvert.SerializeObject(totalPorDia, settings));
+
+            return RedirectToAction("VentaTotalPorDia", "Reportes");
+        }
+
+        #endregion
     }
 }
