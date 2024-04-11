@@ -59,7 +59,19 @@ namespace MVCVentas.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(vMFormaPago);
+
+                string codTipoTran = vMFormaPago.Nombre.Replace(" ", "").ToUpper();
+
+                var tipoTransaccion = new VMTipoTransaccion
+                {
+                    CodTipoTran = codTipoTran,
+                    Nombre = vMFormaPago.Nombre
+                };
+
+                _context.Add(tipoTransaccion);
+
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(vMFormaPago);

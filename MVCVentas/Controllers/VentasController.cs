@@ -430,7 +430,7 @@ namespace MVCVentas.Controllers
             decimal importeTotal = 0;
 
             // Traer el tipo de transacción:
-            if(vMVentas.FormaPago.Nombre == "Tarjeta")
+            if (vMVentas.FormaPago.Nombre == "Tarjeta")
             {
                 vMVentas.VMTipoTransaccion = await _context.VMTipoTransaccion
                 .Where(tt => tt.CodTipoTran == vMVentas.CodTarjeta)
