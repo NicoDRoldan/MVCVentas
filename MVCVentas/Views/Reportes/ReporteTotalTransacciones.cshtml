@@ -1,0 +1,117 @@
+﻿@model IEnumerable<MVCVentas.Models.VMReporte>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #formFiltrarVentas{
+        display: flex;
+        margin-bottom: 20px;
+    }
+
+    #formFiltrarVentas td{
+            padding-left: 0;
+            padding-right: 20px;
+    }
+</style>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Reporte de Ventas</title>
+</head>
+<body>
+    <div class="card shadow mb-4 custom-card">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Reporte de Ventas</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive" id="table-resposibe-index-Ventas_E">
+
+                <form id="formFiltrarVentas" method="post" action="@Url.Action("TotalTransaccionesEntreFechas", "Reportes")">
+                    <table border="0" cellspacing="5" cellpadding="5">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label>Fecha Inicio:</label>
+                                    <input type="date" id="fechaInicio" name="fechaInicio" />
+                                </td>
+                                <td>
+                                    <label>Fecha Fin:</label>
+                                    <input type="date" id="fechaFin" name="fechaFin" />
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='@Url.Action("ReporteTotalTransacciones", "Reportes")'">Restablecer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <table class="table table-bordered" id="index-dataTable-ventas_e" width="100%" cellspacing="0">
+                    <thead>
+                        <tr id="tr-encabezado-reporte-venta">
+                            <th>
+                                Transacción
+                            </th>
+                            <th>
+                                Codigo de Transacción
+                            </th>
+                            <th>
+                                Ventas Realizadas
+                            </th>
+                            <th>
+                                Importe Total
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Nombre)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.CodTipoTran)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.VentasRealizadas)
+                                </td>
+                                <td>
+                                    $@Html.DisplayFor(modelItem => item.ImporteTotal)
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#index-dataTable-ventas_e').DataTable({
+                "order": [], // Pasar un arreglo vacío para deshabilitar el ordenamiento inicial
+                "ordering": false // Deshabilitar la capacidad de ordenar haciendo clic en las cabeceras de las columnas
+            });
+        });
+    </script>
+
+}
