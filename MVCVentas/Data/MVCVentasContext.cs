@@ -48,6 +48,8 @@ namespace MVCVentas.Data
 
         public DbSet<MVCVentas.Models.VMComprobante_N> VMComprobante_N { get; set; }
 
+        public DbSet<MVCVentas.Models.VMPedidoActual> vMPedidosActuales { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VMPromoDescuento_D>()
@@ -70,6 +72,9 @@ namespace MVCVentas.Data
 
             modelBuilder.Entity<VMVentas_TipoTransaccion>()
                 .HasKey(vt =>new { vt.NumTransaccion, vt.NumVenta, vt.CodComprobante, vt.CodModulo, vt.NumSucursal });
+
+            modelBuilder.Entity<VMPedidoActual>()
+                .HasKey(pa => new { pa.NumVenta, pa.CodComprobante, pa.CodModulo, pa.NumSucursal, pa.Renglon });
 
             base.OnModelCreating(modelBuilder);
         }

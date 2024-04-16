@@ -463,6 +463,21 @@ namespace MVCVentas.Controllers
                 .FirstOrDefaultAsync();
             }
 
+            // Datos de PedidosActuales:
+
+            int renglonPedido = 1;
+
+            // Obtener número de pedido correlativo:
+            var ultPedido = await _context.vMPedidosActuales
+                .OrderByDescending(p => p.FechaCreacion)
+                .FirstOrDefaultAsync();
+
+            var nroPedido = 0;
+
+            if (ultPedido != null) {
+                nroPedido = ultPedido.NumPedido + 1;
+            }
+
             // Cambiar . por ,:
             string pagoEfectivo = vMVentas.Pago.Replace('.',',');
             string vueltoEfectivo = vMVentas.Vuelto.Replace('.', ',');
@@ -474,7 +489,6 @@ namespace MVCVentas.Controllers
 
             // Variables promociones:
             var promocion = new VMPromoDescuento_E();
-
 
             // Si no se pudo obtener el número de venta, se da de alta un nuevo comprobante:
             if (nroVenta == -1)
@@ -736,6 +750,29 @@ namespace MVCVentas.Controllers
                             Importe = importeTotal
                         };
                         _context.VMVentas_TipoTransaccion.Add(ventasTipoTransaccion);
+                    }
+
+                    // Se da de alta el pedido en PedidosActuales:
+                    foreach ( var detalle in detallesventa)
+                    {
+                        if (detalle.Id_Articulo is null) continue;
+
+                        var pedidoActual = new VMPedidoActual
+                        {
+                            NumPedido = nroPedido,
+                            NumVenta = nroVentaCorrelativa,
+                            CodComprobante = vMVentas.Comprobante_E.CodComprobante,
+                            CodModulo = vMVentas.Modulo.CodModulo,
+                            NumSucursal = vMVentas.Sucursal.NumSucursal,
+                            Renglon = renglonPedido,
+                            Id_Articulo = int.Parse(detalle.Id_Articulo),
+                            Cantidad = int.Parse(detalle.Cantidad),
+                            Retira = "Nombre Generico",
+                            FechaCreacion = DateTime.Now,
+                            FechaExpiracion = DateTime.Now.AddMinutes(15)
+                        };
+                        _context.vMPedidosActuales.Add(pedidoActual);
+                        renglonPedido++;
                     }
 
                     // Se guardan los cambios en la base de datos:
