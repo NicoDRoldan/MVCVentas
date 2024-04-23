@@ -478,6 +478,8 @@ namespace MVCVentas.Controllers
                 nroPedido = ultPedido.NumPedido + 1;
             }
 
+            if (vMVentas.Retira is null) vMVentas.Retira = "";
+
             // Cambiar . por ,:
             string pagoEfectivo = vMVentas.Pago.Replace('.',',');
             string vueltoEfectivo = vMVentas.Vuelto.Replace('.', ',');
@@ -767,7 +769,7 @@ namespace MVCVentas.Controllers
                             Renglon = renglonPedido,
                             Id_Articulo = int.Parse(detalle.Id_Articulo),
                             Cantidad = int.Parse(detalle.Cantidad),
-                            Retira = "Nombre Generico",
+                            Retira = vMVentas.Retira,
                             FechaCreacion = DateTime.Now,
                             FechaExpiracion = DateTime.Now.AddMinutes(15)
                         };

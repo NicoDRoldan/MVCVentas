@@ -92,5 +92,9 @@
         public string Pago { get; set; } // Monto con el que pagó el cliente.
 
         public string Vuelto { get; set; } // Vuelto al cliente.
+
+        // Varios:
+
+        public string? Retira { get; set; }
     }
 }
