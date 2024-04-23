@@ -62,13 +62,20 @@ namespace MVCVentas.Controllers
 
                 string codTipoTran = vMFormaPago.Nombre.Replace(" ", "").ToUpper();
 
-                var tipoTransaccion = new VMTipoTransaccion
-                {
-                    CodTipoTran = codTipoTran,
-                    Nombre = vMFormaPago.Nombre
-                };
+                var tipoTran = await _context.VMTipoTransaccion
+                    .Where(t => t.CodTipoTran == codTipoTran)
+                    .FirstOrDefaultAsync();
 
-                _context.Add(tipoTransaccion);
+                if(tipoTran is null)
+                {
+                    var tipoTransaccion = new VMTipoTransaccion
+                    {
+                        CodTipoTran = codTipoTran,
+                        Nombre = vMFormaPago.Nombre
+                    };
+
+                    _context.Add(tipoTransaccion);
+                }
 
                 await _context.SaveChangesAsync();
 
