@@ -1,0 +1,41 @@
+﻿#retira-Modal {
+    width: 370px !important;
+    height: 210px;
+    position: absolute;
+    left: -100px;
+    top: -200px;
+}
+
+#retira-ModalLabel {
+    padding: 10px !important;
+}
+
+#retira-Modal .modal-header {
+    width: 370px !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+#retira-Modal .modal-body {
+    width: 370px !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+}
+
+#retira-Modal .modal-footer {
+    width: 370px !important;
+    padding: 10px !important;
+}
+
+#retira-Modal .modal-dialog {
+    width: 370px !important;
+}
+
+#retira-Modal-content {
+    width: 370px !important;
+}
+
+    #retira-Modal-content .modal-body label {
+        margin-left: 20px;
+        margin-right: 20px;
+    }

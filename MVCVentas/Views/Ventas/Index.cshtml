@@ -21,6 +21,7 @@
 <link href="~/css/promosDescuentos.css" rel="stylesheet" />
 <link href="~/css/sistemaVentasCombos.css" rel="stylesheet" />
 <link href="~/css/sistemaVentasFormasPago.css" rel="stylesheet" />
+<link href="~/css/retiraPartial.css" rel="stylesheet" />
 
 <html>
 <body>
@@ -355,6 +356,32 @@
                     </div>
 
                     <!-- Fin Modals Formas de Pago -->
+
+                    <!-- Modal Cliente Retira -->
+
+                    <div class="modal fade" id="retira-Modal" tabindex="-1" role="dialog" aria-labelledby="retira-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="retira-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="retira-ModalLabel">Nombre de Cliente:</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-group row">
+                                        <label for="nombre-retira" class="col-form-label">Nombre:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="nombre-retira" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="" id="btn-aceptar-retira">Aceptar</button>
+                                    <div id="mensaje-retira" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fin Modal Cliente Retira -->
 
                     <div class="row" id="btn-vender-cancelar">
                         <dd class="">
@@ -1077,6 +1104,7 @@
             document.getElementById("descuento").value = 0;
             document.getElementById("id-descuento-input").value = "";
             $('#mensaje-descuento').removeClass().text("");
+            $('#nombre-retira').val("");
 
             formasPagoEnCero();
 
@@ -1092,7 +1120,15 @@
         });
 
         //////////////////////////////////// Lógica para realizar la venta ////////////////////////////////////
-        function CrearVenta() {
+        async function CrearVenta() {
+            
+            $('#retira-Modal').modal('show');
+
+            await new Promise((resolve, reject) => {
+                $('#btn-aceptar-retira').click(() => {
+                    resolve();
+                })
+            })
 
             var montoTotalVenta = parseFloat($('#total').val());
             montoTotalVenta = montoTotalVenta.toFixed(2);
@@ -1125,7 +1161,8 @@
                 CodTarjeta: codTarjeta,
                 CodModulo: $("#modulo-select").val(),
                 Pago: $('#efectivo-monto').val(),
-                Vuelto: parseFloat($('#efectivo-monto-resto').val()).toFixed(2)
+                Vuelto: parseFloat($('#efectivo-monto-resto').val()).toFixed(2),
+                Retira: $('#nombre-retira').val()
             };
 
             console.log(vMVentas);
