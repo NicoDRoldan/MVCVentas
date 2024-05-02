@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Dynamic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
@@ -300,8 +301,10 @@ namespace MVCVentas.Controllers
         }
 
         [HttpGet]
-        public async Task<decimal> ObtenerNumVenta(string numSucursal, string codComprobante, string codModulo)
+        public async Task<string> ObtenerNumVenta(string numSucursal, string codComprobante, string codModulo)
         {
+            decimal nroVenta = 0;
+
             var comprobante = await _context.VMComprobante_N
                 .Where(c =>
                     c.NumSucursal == numSucursal
@@ -309,12 +312,37 @@ namespace MVCVentas.Controllers
                     && c.CodModulo == codModulo)
                 .FirstOrDefaultAsync();
 
-            if(comprobante == null)
+            if (comprobante == null)
             {
-                return -1;
+                var altaComprobanteResponse = await AltaComprobanteN(new VMComprobante_N
+                {
+                    NumSucursal = numSucursal,
+                    CodComprobante = codComprobante,
+                    CodModulo = codModulo
+                }) as JsonResult;
+
+                if (altaComprobanteResponse != null)
+                {
+                    dynamic altaComprobanteData = altaComprobanteResponse.Value;
+
+                    if (altaComprobanteData.success == true)
+                    {
+                        return "00000001";
+                    }
+                }
+
             }
 
-            return comprobante.NumComprobante;
+            nroVenta = comprobante.NumComprobante;
+
+            // Se incrementa el número de venta:
+            decimal nroVentaDecimal = nroVenta + 1;
+
+            // Se convierte el número de venta a string y se le agrega ceros a la izquierda:
+            string nroVentaString = nroVentaDecimal.ToString();
+            string nroVentaCorrelativa = nroVentaString.PadLeft(8, '0');
+
+            return nroVentaCorrelativa;
         }
 
         [HttpPost]
@@ -485,47 +513,12 @@ namespace MVCVentas.Controllers
             string vueltoEfectivo = vMVentas.Vuelto.Replace('.', ',');
 
             // Obtener el número de venta:
-            decimal nroVenta = await ObtenerNumVenta(vMVentas.Sucursal.NumSucursal,
+            string nroVentaCorrelativa = await ObtenerNumVenta(vMVentas.Sucursal.NumSucursal,
                 vMVentas.Comprobante_E.CodComprobante,
                 vMVentas.Modulo.CodModulo);
 
             // Variables promociones:
             var promocion = new VMPromoDescuento_E();
-
-            // Si no se pudo obtener el número de venta, se da de alta un nuevo comprobante:
-            if (nroVenta == -1)
-            {
-                var altaComprobanteResponse = await AltaComprobanteN(new VMComprobante_N
-                {
-                    NumSucursal = vMVentas.Sucursal.NumSucursal,
-                    CodComprobante = vMVentas.Comprobante_E.CodComprobante,
-                    CodModulo = vMVentas.Modulo.CodModulo
-                }) as JsonResult;
-
-                if(altaComprobanteResponse != null)
-                {
-                    dynamic altaComprobanteData = altaComprobanteResponse.Value;
-                    if (altaComprobanteData.success == true)
-                    {
-                        nroVenta = 0;
-                    }
-                    else
-                    {
-                        return Json(new { success = false, message = "Error al obtener el número de venta." });
-                    }
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Error al obtener el número de venta." });
-                }
-            }
-            
-            // Se incrementa el número de venta:
-            decimal nroVentaDecimal = nroVenta + 1;
-
-            // Se convierte el número de venta a string y se le agrega ceros a la izquierda:
-            string nroVentaString = nroVentaDecimal.ToString();
-            string nroVentaCorrelativa = nroVentaString.PadLeft(8, '0');
 
             // Se inicia la transacción:
             using (var transaction = _context.Database.BeginTransaction())
@@ -791,7 +784,7 @@ namespace MVCVentas.Controllers
                     if (comprobanteN != null)
                     {
                         // Se actualiza el número de comprobante en Comprobantes_N:
-                        comprobanteN.NumComprobante = nroVenta + 1;
+                        comprobanteN.NumComprobante = comprobanteN.NumComprobante + 1;
                         await _context.SaveChangesAsync();
                     }
 
@@ -1011,5 +1004,6 @@ namespace MVCVentas.Controllers
         }
 
         public static decimal calcularDescuento(decimal precio, decimal porcentaje) => (precio - ((precio * porcentaje) / 100));
+
     }
 }
