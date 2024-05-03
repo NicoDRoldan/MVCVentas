@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Dynamic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -21,6 +23,7 @@ using MVCVentas.Data;
 using MVCVentas.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Font = iTextSharp.text.Font;
 
 namespace MVCVentas.Controllers
@@ -820,11 +823,32 @@ namespace MVCVentas.Controllers
                         .Select( v => v.TipoTransaccion.Nombre)
                         .ToListAsync();
 
+                    // Traigo Ventas_E
+                    var ventas_E = await _context.VMVentas_E
+                    .Include(v => v.Cliente)
+                        .ThenInclude(c => c.Provincia)
+                    .Include(v => v.Cliente)
+                        .ThenInclude(c => c.Localidad)
+                    .Include(v => v.Usuario)
+                        .ThenInclude(u => u.Categoria)
+                    .Include(v => v.Ventas_D)
+                        .ThenInclude(vd => vd.Articulo)
+                            .ThenInclude(vda => vda.Rubro)
+                    .Where(v => v.NumVenta == nroVentaCorrelativa
+                        && v.CodComprobante == vMVentas.Comprobante_E.CodComprobante
+                        && v.CodModulo == vMVentas.Modulo.CodModulo
+                        && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
+                    .FirstOrDefaultAsync();
+
                     GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
                     ImprimirReporte(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion);
 
+                    var resultEnvioVenta = EnviarVenta(ventas_E);
+
                     return Json(new { success = true, 
-                        message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " + (detallesventa.Count - 1) + " artículos."
+                        message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " +
+                        (detallesventa.Count - 1) + " artículos." + " " +
+                        resultEnvioVenta
                     });
                 }
                 catch (Exception ex)
@@ -1004,6 +1028,142 @@ namespace MVCVentas.Controllers
         }
 
         public static decimal calcularDescuento(decimal precio, decimal porcentaje) => (precio - ((precio * porcentaje) / 100));
+
+        public async Task<String> EnviarVenta(VMVentas_E ventas_E)
+        {
+            dynamic jsonData = new ExpandoObject();
+
+            // Asignar valores de VMVentas
+            jsonData.numVenta = ventas_E.NumVenta;
+            jsonData.codComprobante = ventas_E.CodComprobante;
+            jsonData.codModulo = ventas_E.CodModulo;
+            jsonData.numSucursal = ventas_E.NumSucursal;
+            jsonData.fecha = ventas_E.Fecha;
+            jsonData.hora = ventas_E.Hora;
+            jsonData.formaDePago = new
+            {
+                id_FormaPago = ventas_E.FormaPago.Id_FormaPago,
+                nombre = ventas_E.FormaPago.Nombre
+            };
+            jsonData.cliente = new
+            {
+                codCliente = ventas_E.Cliente.CodCliente,
+                cuit = ventas_E.Cliente.CUIT,
+                razonSocial = ventas_E.Cliente.RazonSocial,
+                nombre = ventas_E.Cliente.Nombre,
+                telefono = ventas_E.Cliente.Telefono,
+                email = ventas_E.Cliente.Email,
+                direccion = ventas_E.Cliente.Direccion,
+                provincia = new
+                {
+                    codProvincia = ventas_E.Cliente.Provincia.CodProvincia,
+                    nombre = ventas_E.Cliente.Provincia.Nombre
+                },
+                localdidad = new
+                {
+                    codLocalidad = ventas_E.Cliente.Localidad.CodLocalidad,
+                    nombre = ventas_E.Cliente.Localidad.Nombre
+                },
+                fechaAlta = ventas_E.Cliente.FechaAlta
+            };
+            jsonData.usuario = new
+            {
+                id_Usuario = ventas_E.Usuario.Id_Usuario,
+                categoria = new
+                {
+                    id_Categoria = ventas_E.Usuario.Categoria.Id_Categoria,
+                    nombre = ventas_E.Usuario.Categoria.Nombre
+                },
+                usuario = ventas_E.Usuario.Usuario,
+                password = ventas_E.Usuario.Password,
+                estado = ventas_E.Usuario.Estado,
+                fecha = ventas_E.Usuario.Fecha,
+                nombre = ventas_E.Usuario.Nombre,
+                apellido = ventas_E.Usuario.Apellido
+            };
+            jsonData.numcaja = ventas_E.NumCaja;
+
+            jsonData.detalleVenta = new List<dynamic>();
+            foreach(var ventas_D in ventas_E.Ventas_D)
+            {
+
+                dynamic detalleJson = new ExpandoObject();
+                detalleJson.renglon = ventas_D.Renglon;
+                detalleJson.articulo = new
+                {
+                    id_Articulo = ventas_D.Id_Articulo,
+                    nombre = ventas_D.Articulo.Nombre,
+                    rubro = new
+                    {
+                        id_Rubro = ventas_D.Articulo.Rubro.Id_Rubro,
+                        nombre = ventas_D.Articulo.Rubro.Nombre
+                    },
+                    activo = ventas_D.Articulo.Activo,
+                    descripcion = ventas_D.Articulo.Descripcion,
+                    fecha = ventas_D.Articulo.Fecha,
+                    usaStock = ventas_D.Articulo.UsaStock,
+                    usaCombo = ventas_D.Articulo.UsaCombo
+                };
+                detalleJson.cantidad = ventas_D.Cantidad;
+                detalleJson.detalle = ventas_D.Detalle;
+                detalleJson.precioUnitario = ventas_D.PrecioUnitario;
+                detalleJson.precioTotal = ventas_D.PrecioTotal;
+
+                jsonData.detalleVenta.Add(detalleJson);
+            }
+
+            jsonData.importeVenta = new List<dynamic>();
+            foreach(var ventas_I in ventas_E.Ventas_I)
+            {
+                dynamic importeJson = new ExpandoObject();
+                importeJson.concepto = new
+                {
+                    codConcepto = ventas_I.Concepto.CodConcepto,
+                    descripcion = ventas_I.Concepto.Descripcion,
+                    porcentaje = ventas_I.Concepto.Porcentaje
+                };
+                importeJson.importe = ventas_I.Importe;
+                importeJson.descuento = ventas_I.Descuento;
+
+                jsonData.importeVenta.Add(importeJson);
+            }
+
+            //string json = JsonConvert.SerializeObject(jsonData);
+
+            string responseData;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("https://localhost:7200/api");
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var json = JsonConvert.SerializeObject(jsonData);
+
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    var response = await client.PostAsync("api/ventas", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        responseData = "Venta enviada correctamente. Respuesta de la API";
+                        Console.WriteLine("Venta enviada correctamente. Respuesta de la API: " + responseData);
+                    }
+                    else
+                    {
+                        responseData = "Error al enviar la venta. Detalles";
+                        Console.WriteLine("Error al enviar la venta. Detalles: " + responseData);
+                    }
+                }
+                return responseData.ToString();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message.ToString();
+            }
+
+        }
 
     }
 }

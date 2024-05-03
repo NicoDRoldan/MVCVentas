@@ -94,5 +94,9 @@ namespace MVCVentas.Data
         public DbSet<MVCVentas.Models.VMConfig> VMConfig { get; set; }
 
         public DbSet<MVCVentas.Models.VMCombo> VMCombo { get; set; }
+
+        public DbSet<MVCVentas.Models.VMProvincia> VMProvincia { get; set; }
+
+        public DbSet<MVCVentas.Models.VMLocalidad> VMLocalidad { get; set; }
     }
 }
