@@ -1059,7 +1059,7 @@ namespace MVCVentas.Controllers
                     codProvincia = ventas_E.Cliente.Provincia.CodProvincia,
                     nombre = ventas_E.Cliente.Provincia.Nombre
                 },
-                localdidad = new
+                localidad = new
                 {
                     codLocalidad = ventas_E.Cliente.Localidad.CodLocalidad,
                     nombre = ventas_E.Cliente.Localidad.Nombre
@@ -1083,7 +1083,7 @@ namespace MVCVentas.Controllers
             };
             jsonData.numcaja = ventas_E.NumCaja;
 
-            jsonData.detalleVenta = new List<dynamic>();
+            jsonData.ventaDetalle = new List<dynamic>();
             foreach(var ventas_D in ventas_E.Ventas_D)
             {
 
@@ -1106,13 +1106,13 @@ namespace MVCVentas.Controllers
                 };
                 detalleJson.cantidad = ventas_D.Cantidad;
                 detalleJson.detalle = ventas_D.Detalle;
-                detalleJson.precioUnitario = ventas_D.PrecioUnitario;
-                detalleJson.precioTotal = ventas_D.PrecioTotal;
+                detalleJson.precioUnitario = Math.Round(ventas_D.PrecioUnitario, 2);
+                detalleJson.precioTotal = Math.Round(ventas_D.PrecioTotal, 2);
 
-                jsonData.detalleVenta.Add(detalleJson);
+                jsonData.ventaDetalle.Add(detalleJson);
             }
 
-            jsonData.importeVenta = new List<dynamic>();
+            jsonData.ventaImporte = new List<dynamic>();
             foreach(var ventas_I in ventas_E.Ventas_I)
             {
                 dynamic importeJson = new ExpandoObject();
@@ -1122,10 +1122,10 @@ namespace MVCVentas.Controllers
                     descripcion = ventas_I.Concepto.Descripcion,
                     porcentaje = ventas_I.Concepto.Porcentaje
                 };
-                importeJson.importe = ventas_I.Importe;
+                importeJson.importe = Math.Round(ventas_I.Importe, 2);
                 importeJson.descuento = ventas_I.Descuento;
 
-                jsonData.importeVenta.Add(importeJson);
+                jsonData.ventaImporte.Add(importeJson);
             }
 
             //string json = JsonConvert.SerializeObject(jsonData);
@@ -1140,6 +1140,7 @@ namespace MVCVentas.Controllers
                     client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
                     var json = JsonConvert.SerializeObject(jsonData);
+                    System.IO.File.WriteAllText(@"C:\Repositorio\archivo.json", json);
 
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -1151,7 +1152,7 @@ namespace MVCVentas.Controllers
                     }
                     else
                     {
-                        responseData = "Error al enviar la venta. Detalles: " + response.StatusCode;
+                        responseData = "Error al enviar la venta. Detalles: " + response.ReasonPhrase;
                     }
                 }
                 return responseData.ToString();
