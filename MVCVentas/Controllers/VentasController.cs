@@ -843,7 +843,7 @@ namespace MVCVentas.Controllers
                     GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
                     ImprimirReporte(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion);
 
-                    var resultEnvioVenta = EnviarVenta(ventas_E);
+                    var resultEnvioVenta = await EnviarVenta(ventas_E);
 
                     return Json(new { success = true, 
                         message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " +
@@ -1029,7 +1029,7 @@ namespace MVCVentas.Controllers
 
         public static decimal calcularDescuento(decimal precio, decimal porcentaje) => (precio - ((precio * porcentaje) / 100));
 
-        public async Task<String> EnviarVenta(VMVentas_E ventas_E)
+        public async Task<string> EnviarVenta(VMVentas_E ventas_E)
         {
             dynamic jsonData = new ExpandoObject();
 
@@ -1147,20 +1147,19 @@ namespace MVCVentas.Controllers
 
                     if (response.IsSuccessStatusCode)
                     {
-                        responseData = "Venta enviada correctamente. Respuesta de la API";
-                        Console.WriteLine("Venta enviada correctamente. Respuesta de la API: " + responseData);
+                        responseData = "Venta enviada correctamente. Respuesta de la API: " + response.StatusCode;
                     }
                     else
                     {
-                        responseData = "Error al enviar la venta. Detalles";
-                        Console.WriteLine("Error al enviar la venta. Detalles: " + responseData);
+                        responseData = "Error al enviar la venta. Detalles: " + response.StatusCode;
                     }
                 }
                 return responseData.ToString();
             }
             catch (Exception ex)
             {
-                return ex.Message.ToString();
+                responseData = ex.Message.ToString();
+                return responseData;
             }
 
         }
