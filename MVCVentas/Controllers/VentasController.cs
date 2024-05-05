@@ -509,7 +509,7 @@ namespace MVCVentas.Controllers
                 nroPedido = ultPedido.NumPedido + 1;
             }
 
-            if (vMVentas.Retira is null) vMVentas.Retira = "";
+            if (vMVentas.Retira is null) vMVentas.Retira = "Sin Nombre";
 
             // Cambiar . por ,:
             string pagoEfectivo = vMVentas.Pago.Replace('.',',');
@@ -1127,8 +1127,6 @@ namespace MVCVentas.Controllers
 
                 jsonData.ventaImporte.Add(importeJson);
             }
-
-            //string json = JsonConvert.SerializeObject(jsonData);
 
             string responseData;
             try

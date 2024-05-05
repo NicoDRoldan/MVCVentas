@@ -20,6 +20,7 @@
 <link href="~/css/sistemavendasdetalleventa.css" rel="stylesheet" />
 <link href="~/css/promosDescuentos.css" rel="stylesheet" />
 <link href="~/css/sistemaVentasCombos.css" rel="stylesheet" />
+<link href="~/css/sistemaventascupones.css" rel="stylesheet" />
 <link href="~/css/sistemaVentasFormasPago.css" rel="stylesheet" />
 <link href="~/css/retiraPartial.css" rel="stylesheet" />
 
@@ -90,6 +91,9 @@
                     </div>
                     <div>
                         <button data-toggle="modal" data-target="#descuentos-Modal">Descuentos</button>
+                    </div>
+                    <div>
+                        <button data-toggle="modal" data-target="#cupones-Modal">Cupones</button>
                     </div>
                 </div>
 
@@ -228,7 +232,7 @@
                         </div>
                     </div>
 
-                    <!-- Modals de Promociones y Descuentos -->
+                    <!-- Modals de Promociones, Descuentos y Cupones -->
 
                     <div class="modal fade" id="promos-Modal" tabindex="-1" role="dialog" aria-labelledby="promos-ModalLabel" aria-hidden="true">
                         <div class=" modal-dialog" role="document">
@@ -259,6 +263,24 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cerrarModalDescuentos()">Cerrar</button>
                                     <div id="mensaje-descuento" style="margin-top: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal fade" id="cupones-Modal" tabindex="-1" role="dialog" aria-labelledby="cupones-ModalLabel" aria-hidden="true">
+                        <div class=" modal-dialog" role="document">
+                            <div class="modal-content" id="cupones-Modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="cupones-ModalLabel">Cupones</h5>
+                                </div>
+                                <div class="modal-body">
+                                    @Html.Partial("~/Views/Ventas/_CuponesPartial.cshtml")
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="boton-cancelar-cupon" onclick="cerrarModalCupones()">Cancelar</button>
+                                    <button type="button" class="btn btn-success"  id="boton-enviar-solicitud">Aceptar</button>
+                                    <div id="mensaje-cupones" style="margin-top: 5px;"></div>
                                 </div>
                             </div>
                         </div>
@@ -404,7 +426,6 @@
 
     <!-- Script para el manejo de la tabla de artículos -->
     <script>
-
         //////////////////////////////////// Lógica para Actualizar los botones de navegación y los botones de artículos ////////////////////////////////////
         
         // Array con los datos de los artículos (ejemplo)
@@ -1490,6 +1511,59 @@
         function cerrarModalConfig() {
             $('#config-Modal').modal('hide');
             $('#mensaje-confg').text("");
+        }
+                
+        // Evento para los botones del modal de Cupones
+
+        // Le asigno a una variable el elemento del id #cupones-Modal-content
+        const cuponesModalContent = document.getElementById('cupones-Modal-content');
+
+        // Recorro los botones de dicho elemento
+        cuponesModalContent.querySelectorAll("button").forEach(boton => {
+            boton.addEventListener("click", function () {
+
+                // Si el botón presionado es Aceptar:
+                if (boton.id === 'boton-enviar-solicitud') {
+                    
+                    var input1 = $('#cuponInput1').val();
+                    var input2 = $('#cuponInput2').val();
+                    var input3 = $('#cuponInput3').val();
+
+                    // Si los input de cupones no cumplen el formato ###-###-###
+                    if (((input1.length !== 3 || input2.length !== 3 || input3.length !== 3) ||
+                        (input1.trim() === '' || input2.trim() === '' || input3.trim() === ''))) {
+
+                        // Muestra el mensaje:
+                        $('#mensaje-cupones').removeClass().
+                            addClass('text-danger').text("Los tres campos deben tener 3 dígitos y no estar vacíos.");
+
+                        return;
+                    }
+                    cerrarModalCupones();
+                }
+                // Si el botón presionado es Cancelar:
+                else if (boton.id === 'boton-cancelar-cupon') {
+                    
+                }
+            });
+        });
+
+        function cerrarModalCupones(){
+            // Cerrar Modal:
+            $('#cupones-Modal').modal('hide');
+            // Limpiar mensaje:
+            $('#mensaje-cupones').text("");
+            // Limpiar valores:
+            $('#cuponInput1').val("");
+            $('#cuponInput2').val("");
+            $('#cuponInput3').val("");
+        }
+
+        // Función para tabear automaticamente
+        function moverFoco(input, nextFieldID) {
+            if (input.value.length >= 3) {
+                document.getElementById(nextFieldID).focus();
+            }
         }
 
     </script>

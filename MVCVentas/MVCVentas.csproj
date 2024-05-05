@@ -47,4 +47,11 @@
     <None Include="Views\_ViewStart.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Views\Ventas\_CuponesPartial.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
