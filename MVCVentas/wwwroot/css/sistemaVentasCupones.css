@@ -4,7 +4,7 @@
     left: 50%; /* Centrado horizontalmente */
     transform: translate(-50%, -50%); /* Centrar el modal en pantalla */
     width: 300px;
-    height: 600px;
+    height: 255px;
 }
 
 #cupones-Modal-content .modal-header {

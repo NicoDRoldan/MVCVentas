@@ -431,7 +431,7 @@
         // Array con los datos de los artículos (ejemplo)
         const articulos = @Html.Raw(ViewData["JsonListaArticulos"]);
         const articulosConCombos = @Html.Raw(ViewData["JsonListaArticulosConCombo"]);
-
+        
         // Variables para la paginación
         let paginaActualArt = 1; // ¡Variable Global!
         let paginaActualRub = 1; // ¡Variable Global!
@@ -685,8 +685,8 @@
         //////////////////////////////////// Lógica para agregar promociones ////////////////////////////////////
 
         const promociones = @Html.Raw(ViewData["JsonListaPromociones"]);
+        
         const promocionesAgrupadas = @Html.Raw(ViewData["JsonListaPromocionesAgrupadas"]);
-
         const tablaBodyPromociones = document.getElementById('tabla-body-promociones');
         tablaBodyPromociones.innerHTML = "";
 
@@ -744,6 +744,7 @@
 
                     // Obtener el ID del descuento
                     const idDescuento = this.dataset.id;
+
                     // Buscar el descuento por el id obtenido
                     const descuento = descuentos.find(descuento => descuento.Value === idDescuento);
 
@@ -751,7 +752,6 @@
                     const subTotal = parseFloat(document.getElementById("subtotal").value);
 
                     // Calculo el descuento
-
                     let descuentoAplicado = (subTotal * descuento.Porcentaje) / 100;
 
                     if (descuentoAplicado != 0 && descuentoAplicado == subTotal) {
@@ -776,15 +776,16 @@
 
         agregarEventListenersBotonesDescuentos();
 
+        // Al hacer click sobre una promoción
         function agregarEventListenersBotonesPromociones() {
             tablaBodyPromociones.querySelectorAll("button").forEach(boton => {
                 boton.addEventListener("click", function () {
 
-                    const idPromocion = this.dataset.id;
+                    const idPromocion = this.dataset.id; // Variable con el id de la promoción seleccionada
 
-                    const promocion = promociones.find(promocion => promocion.Value === idPromocion);
+                    const promocion = promociones.find(promocion => promocion.Value === idPromocion); // Traigo una promoción filtrando por id
 
-                    agregarPromocionAlResumen(promocion);
+                    agregarPromocionAlResumen(promocion); // Llamo a la función para agregar el id y le paso por parametro la promoción
 
                     calcularVuelto();
                 });
@@ -973,22 +974,24 @@
 
             // Recorro la lista de promociones
             for (var promoIndice = 0; promoIndice < promociones.length; promoIndice++) {
-                
+                // Recorro toda la lista completa de promociones declarada anteriormente y traída del back. 
+                // Hago un equals para traer solo los artículos de los cuales el ID coincida con el de la promoción seleccionada.
                 // Si el id de la promoción es igual al id de la promoción seleccionada
                 if (promociones[promoIndice].Value === promocion.Value) {
 
                     // Creo un objeto con los datos de la promoción
                     var promoD = {
-                        Value: promociones[promoIndice].Value,
-                        Porcentaje: promociones[promoIndice].Porcentaje,
-                        ValuePromoD: promociones[promoIndice].ValuePromoD,
-                        TextPromoD: promociones[promoIndice].TextPromoD + " - " + promociones[promoIndice].Porcentaje + "%",
-                        PrecioArticulo: promociones[promoIndice].PrecioArticulo
+                        Value: promociones[promoIndice].Value, // ID de la promoción
+                        Porcentaje: promociones[promoIndice].Porcentaje, // Porcentaje de descuento
+                        ValuePromoD: promociones[promoIndice].ValuePromoD, // Id del artículo
+                        TextPromoD: promociones[promoIndice].TextPromoD + " - " + promociones[promoIndice].Porcentaje + "%", // Nombre del Artículo + Porcentaje de descuento
+                        PrecioArticulo: promociones[promoIndice].PrecioArticulo // Precio del artículo con el descuento aplicado
                     };
                     artPromos.push(promoD);
                 }
             }
 
+            // En este paso se empiza con la inserción de los datos en el resumen de la venta:
             for (var promo in artPromos) {
                 
                 const idArtExistente = document.querySelector(`#table-resumen-venta tr[data-id="${artPromos[promo].Value}"]`);
@@ -1539,7 +1542,43 @@
 
                         return;
                     }
-                    cerrarModalCupones();
+
+                    const vMCupon = {
+                        id_Cupon: 1,
+                        porcentajeDto: 20.00,
+                        detalle: [
+                            {
+                                id_Cupon: 1,
+                                id_ArticuloAsociado: 3036
+                            },
+                            {
+                                id_Cupon: 1,
+                                id_ArticuloAsociado: 3036
+                            },
+                            {
+                                id_Cupon: 1,
+                                id_ArticuloAsociado: 4037
+                            },
+                            {
+                                id_Cupon: 1,
+                                id_ArticuloAsociado: 3037
+                            }
+                        ]
+                    };
+
+                    $.ajax({
+                        url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
+                        type: 'POST',
+                        data: { vMCupon },
+                        success: function (articulosCupon) {
+                            console.log(articulosCupon);
+                            agregarCuponAlResumen(articulosCupon)
+                        },
+                        error: function (articulosCupon) {
+
+                        }
+                    });
+                    
                 }
                 // Si el botón presionado es Cancelar:
                 else if (boton.id === 'boton-cancelar-cupon') {
@@ -1547,6 +1586,42 @@
                 }
             });
         });
+
+        function agregarCuponAlResumen(articulosCupon) {
+
+            for(var art in articulosCupon){
+
+                const idArtExistente = document.querySelector(`#table-resumen-venta tr[data-id="${articulosCupon[art].id_Articulo}"]`);
+                const fila = document.createElement("tr");
+                fila.dataset.id = articulosCupon[art].id_Articulo;
+
+                fila.innerHTML = `
+                    <td asp-for="Id_Articulo" id="id_Articulo">${articulosCupon[art].id_Articulo}</td>
+                    <td asp-for="Descripcion" id="nombre">${articulosCupon[art].nombreArt}</td>
+                    <td asp-for="PrecioUnitario" id="precio">${articulosCupon[art].precio}</td>
+                    <td asp-for="Cantidad" id="cantidad" class="cantidad">${articulosCupon[art].cantidad}</td>
+                    <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${articulosCupon[art].total}</td>
+                    <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                    <td id="AplicaPromo" hidden>1</td>
+                    `;
+                document.querySelector("#table-resumen-venta tbody").appendChild(fila);
+            }
+            $('#cupones-Modal').modal('hide');
+
+            const idDescuento = document.getElementById("id-descuento-input").value;
+
+            calcularSubTotal();
+
+            if(idDescuento != 0){
+                recalcularDescuento(idDescuento);
+            }
+
+            calcularTotal();
+
+            actualizarEventListenersEliminarArticuloCalcularTotal();
+
+            calcularVuelto();
+        }
 
         function cerrarModalCupones(){
             // Cerrar Modal:
