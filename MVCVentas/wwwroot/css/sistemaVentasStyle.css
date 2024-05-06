@@ -113,9 +113,9 @@ td {
         }
 
 #botones-promo-desc {
-    width: 109px;
     position: absolute;
-    bottom: 150px;
+    width: 109px;
+    bottom: 98px;
     left: 639px;
 }
 

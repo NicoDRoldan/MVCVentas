@@ -40,6 +40,8 @@ namespace MVCVentas.Controllers
 
         string rutaRaizApp = AppDomain.CurrentDomain.BaseDirectory;
 
+        #region Traer datos al Sistema de Ventas (Index):
+
         public async Task<IActionResult> Index()
         {
             // Lógica para obtener la lista de artículos:
@@ -262,6 +264,10 @@ namespace MVCVentas.Controllers
             return View();
         }
 
+        #endregion
+
+        #region Metodo: CrearCliente
+
         [HttpPost]
         public async Task<IActionResult> CrearCliente([Bind("CodCliente,CUIT,RazonSocial,Nombre,Telefono,Email,Direccion,CodProvincia,CodLocalidad,FechaAlta")] 
                                                                                                                                                 VMCliente vMCliente)
@@ -288,6 +294,10 @@ namespace MVCVentas.Controllers
             ViewData["CodProvincia"] = new SelectList(_context.Set<VMProvincia>(), "CodProvincia", "CodProvincia", vMCliente.CodProvincia);
             return View(vMCliente);
         }
+
+        #endregion
+
+        #region ComprobantesN y Número de Venta
 
         [HttpPost]
         public async Task<IActionResult> AltaComprobanteN([Bind("NumSucursal,CodComprobante,CodModulo,NumComprobante")] 
@@ -348,6 +358,10 @@ namespace MVCVentas.Controllers
             return nroVentaCorrelativa;
         }
 
+        #endregion
+
+        #region Stock
+
         [HttpPost]
         public void ReducirStock(int idArticulo, int cantidad)
         {
@@ -368,6 +382,10 @@ namespace MVCVentas.Controllers
                 _context.SaveChanges();
             }
         }
+
+        #endregion
+
+        #region Alta de Venta
 
         [HttpPost]
         public async Task<IActionResult> CrearVenta(VMVentas vMVentas, 
@@ -509,7 +527,7 @@ namespace MVCVentas.Controllers
                 nroPedido = ultPedido.NumPedido + 1;
             }
 
-            if (vMVentas.Retira is null) vMVentas.Retira = "";
+            if (vMVentas.Retira is null) vMVentas.Retira = "Sin Nombre";
 
             // Cambiar . por ,:
             string pagoEfectivo = vMVentas.Pago.Replace('.',',');
@@ -859,6 +877,10 @@ namespace MVCVentas.Controllers
             }
         }
 
+        #endregion
+
+        #region Eliminar Venta
+
         public async Task<IActionResult> EliminarVenta(string numVenta, string codComprobante, string codModulo, string numSucursal)
         {
             // Verificar que los parametros no sean nulos
@@ -938,6 +960,10 @@ namespace MVCVentas.Controllers
 
             return Ok(new { message = "Venta eliminada correctamente" });
         }
+
+        #endregion
+
+        #region Generar Reporte
 
         public Printer GenerarReporte(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion)
         {
@@ -1027,7 +1053,15 @@ namespace MVCVentas.Controllers
             document.Close();
         }
 
+        #endregion
+
+        #region Descuento
+
         public static decimal calcularDescuento(decimal precio, decimal porcentaje) => (precio - ((precio * porcentaje) / 100));
+
+        #endregion
+
+        #region Enviar Venta a API
 
         public async Task<string> EnviarVenta(VMVentas_E ventas_E)
         {
@@ -1128,8 +1162,6 @@ namespace MVCVentas.Controllers
                 jsonData.ventaImporte.Add(importeJson);
             }
 
-            //string json = JsonConvert.SerializeObject(jsonData);
-
             string responseData;
             try
             {
@@ -1164,6 +1196,43 @@ namespace MVCVentas.Controllers
             }
 
         }
+
+        #endregion
+
+        #region Cupones
+
+        [HttpPost]
+        public async Task<IActionResult> ObtenerArticulosDeCupon(VMCupon vMCupon)
+        {
+            // Traer el id de los artículos de los cupones:
+            List<int> idsArticulosAsociados = vMCupon.Detalle.Select(d => d.Id_ArticuloAsociado).ToList();
+
+            var idsAgrupados = vMCupon.Detalle
+                .GroupBy(d => d.Id_ArticuloAsociado)
+                .Select(g => new { Id_Articulo = g.Key, Cantidad = (decimal)g.Count() })
+                .ToList();
+
+            var cantidadesPorId = idsAgrupados.ToDictionary(id => id.Id_Articulo, id => id.Cantidad);
+
+            // Traer los artículos por id y seleccionar campos
+            var articulos = await _context.VMArticle
+                .Include(a => a.Precio)
+                .Where(a => idsArticulosAsociados.Any(id => id == a.Id_Articulo))
+                .Select(ap => new
+                {
+                    Id_Articulo = ap.Id_Articulo,
+                    NombreArt = ap.Nombre,
+                    Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
+                    Precio = Math.Round(calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto), 2),
+                    Total = Math.Round((cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0) * (calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto)),2)
+                })
+                .ToListAsync();
+
+            // Retornar JSON:
+            return Json(articulos);
+        }
+
+        #endregion
 
     }
 }

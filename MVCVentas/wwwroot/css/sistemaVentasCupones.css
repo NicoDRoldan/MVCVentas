@@ -1,0 +1,66 @@
+﻿#cupones-Modal {
+    position: fixed; /* Cambiado a fixed */
+    top: 50%; /* Centrado verticalmente */
+    left: 50%; /* Centrado horizontalmente */
+    transform: translate(-50%, -50%); /* Centrar el modal en pantalla */
+    width: 300px;
+    height: 255px;
+}
+
+#cupones-Modal-content .modal-header {
+    width: 297px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+#cupones-Modal  .modal-dialog{
+    width: 297px;
+}
+
+#cupones-Modal-content .modal-content{
+    width: 297px;
+}
+
+#cupones-Modal-content .modal-body {
+    width: 297px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    text-align: center;
+}
+#cupones-Modal-content .modal-footer {
+    width: 297px;
+    padding: 10px;
+    display: flex;
+}
+
+#cupones-Modal .modal-dialog .modal-content {
+    width: 300px;
+    display: flex;
+    justify-content: center;
+}
+
+#cupones-Modal-content .modal-body button {
+    width: 150px;
+    padding: 20px;
+    border: none;
+    background-color: lightgray;
+    border-radius: 3px;
+    justify-content: center;
+    text-align: center;
+}
+
+.contenedor-cupones input {
+    width: 50px; /* Ancho suficiente para 3 dígitos */
+    text-align: center; /* Centra los dígitos */
+    margin: 0 5px; /* Margen entre los inputs */
+}
+
+.contenedor-cupones span {
+    line-height: 32px; /* Alinea verticalmente los guiones con los inputs */
+}
