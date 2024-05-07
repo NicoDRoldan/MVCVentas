@@ -19,5 +19,9 @@
         public string? Id_Combo { get; set; }
 
         public string? AplicaCombo { get; set; }
+
+        public string? EsCupon { get; set; }
+
+        public string? PorcentajeDescuentoCupon { get; set; }
     }
 }

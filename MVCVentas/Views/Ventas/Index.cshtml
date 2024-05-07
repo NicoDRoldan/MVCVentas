@@ -1204,7 +1204,9 @@
                     Id_Promo: $(this).find("#Id_Promo").text(),
                     AplicaPromo: $(this).find("#AplicaPromo").text(),
                     Id_Combo: $(this).find("#id_Combo").text(),
-                    EsCombo: $(this).find("#EsCombo").text()
+                    EsCombo: $(this).find("#EsCombo").text(),
+                    EsCupon: $(this).find("#EsCupon").text(),
+                    PorcentajeDescuentoCupon: $(this).find("#PorcentajeDescuentoCupon").text(),
                 };
                 detallesventa.push(detalle);
             });
@@ -1515,11 +1517,19 @@
             $('#config-Modal').modal('hide');
             $('#mensaje-confg').text("");
         }
-                
+
+    </script>
+
+    <!-- //////////////////////////////////// Script para el manejo de los cupones //////////////////////////////////// -->
+
+    <script>
+
         // Evento para los botones del modal de Cupones
 
         // Le asigno a una variable el elemento del id #cupones-Modal-content
         const cuponesModalContent = document.getElementById('cupones-Modal-content');
+
+        var cuponesIngresados = [];
 
         // Recorro los botones de dicho elemento
         cuponesModalContent.querySelectorAll("button").forEach(boton => {
@@ -1527,7 +1537,7 @@
 
                 // Si el botón presionado es Aceptar:
                 if (boton.id === 'boton-enviar-solicitud') {
-                    
+
                     var input1 = $('#cuponInput1').val();
                     var input2 = $('#cuponInput2').val();
                     var input3 = $('#cuponInput3').val();
@@ -1543,67 +1553,78 @@
                         return;
                     }
 
-                    const vMCupon = {
-                        id_Cupon: 1,
-                        porcentajeDto: 20.00,
-                        detalle: [
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 3036
-                            },
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 3036
-                            },
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 4037
-                            },
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 3037
-                            }
-                        ]
-                    };
+
+                    for (var cuponIngresado in cuponesIngresados) {
+
+                        if (input1.trim() + "-" + input2.trim() + "-" + input3.trim() === cuponesIngresados[cuponIngresado]) {
+
+                            $('#mensaje-cupones').removeClass().
+                                addClass('text-danger').text("El cupón ya fue ingresado.");
+
+                            return;
+                        }
+                    }
+
+                    const nroCupon = input1.trim() + "-" + input2.trim() + "-" + input3.trim();
+
+                    var vMCupon = [];
 
                     $.ajax({
-                        url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
-                        type: 'POST',
-                        data: { vMCupon },
-                        success: function (articulosCupon) {
-                            console.log(articulosCupon);
-                            agregarCuponAlResumen(articulosCupon)
-                        },
-                        error: function (articulosCupon) {
+                        url: "https://localhost:7159/api/Cupones/Cupon/" + nroCupon,
+                        type: "GET",
+                        success: function (cuponJson) {
+                            vMCupon = cuponJson;
 
+                            $.ajax({
+                                url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
+                                type: 'POST',
+                                data: { vMCupon },
+                                success: function (articulosCupon) {
+                                    // Se llama a función para agregar los artículos del cupon en el resumen de venta.
+                                    agregarCuponAlResumen(articulosCupon);
+                                    // Se agrega el número de cupon en la lista de cupones ingresados.
+                                    cuponesIngresados.push(nroCupon);
+                                },
+                                error: function (articulosCupon) {
+
+                                }
+                            });
+
+                        },
+                        error: function (response) {
+                            $('#mensaje-cupones').text("");
+                            console.log(response.responseText);
+                            $('#mensaje-cupones').removeClass().
+                                addClass('text-danger').text(response.responseText);
                         }
                     });
-                    
+
                 }
                 // Si el botón presionado es Cancelar:
                 else if (boton.id === 'boton-cancelar-cupon') {
-                    
+
                 }
             });
         });
 
         function agregarCuponAlResumen(articulosCupon) {
 
-            for(var art in articulosCupon){
+            for (var art in articulosCupon) {
 
                 const idArtExistente = document.querySelector(`#table-resumen-venta tr[data-id="${articulosCupon[art].id_Articulo}"]`);
                 const fila = document.createElement("tr");
                 fila.dataset.id = articulosCupon[art].id_Articulo;
 
                 fila.innerHTML = `
-                    <td asp-for="Id_Articulo" id="id_Articulo">${articulosCupon[art].id_Articulo}</td>
-                    <td asp-for="Descripcion" id="nombre">${articulosCupon[art].nombreArt}</td>
-                    <td asp-for="PrecioUnitario" id="precio">${articulosCupon[art].precio}</td>
-                    <td asp-for="Cantidad" id="cantidad" class="cantidad">${articulosCupon[art].cantidad}</td>
-                    <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${articulosCupon[art].total}</td>
-                    <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
-                    <td id="AplicaPromo" hidden>1</td>
-                    `;
+                            <td asp-for="Id_Articulo" id="id_Articulo">${articulosCupon[art].id_Articulo}</td>
+                            <td asp-for="Descripcion" id="nombre">${articulosCupon[art].nombreArt}</td>
+                            <td asp-for="PrecioUnitario" id="precio">${articulosCupon[art].precio}</td>
+                            <td asp-for="Cantidad" id="cantidad" class="cantidad">${articulosCupon[art].cantidad}</td>
+                            <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${articulosCupon[art].total}</td>
+                            <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
+                            <td id="EsCupon" hidden>1</td>
+                                    <td id="PorcentajeDescuentoCupon" hidden>${articulosCupon[art].porcentajeDescuentoCupon}</td>
+                        `;
                 document.querySelector("#table-resumen-venta tbody").appendChild(fila);
             }
             $('#cupones-Modal').modal('hide');
@@ -1612,7 +1633,7 @@
 
             calcularSubTotal();
 
-            if(idDescuento != 0){
+            if (idDescuento != 0) {
                 recalcularDescuento(idDescuento);
             }
 
@@ -1621,9 +1642,11 @@
             actualizarEventListenersEliminarArticuloCalcularTotal();
 
             calcularVuelto();
+
+            cerrarModalCupones();
         }
 
-        function cerrarModalCupones(){
+        function cerrarModalCupones() {
             // Cerrar Modal:
             $('#cupones-Modal').modal('hide');
             // Limpiar mensaje:
