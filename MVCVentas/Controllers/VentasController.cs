@@ -584,6 +584,10 @@ namespace MVCVentas.Controllers
 
                             precioU = calcularDescuento(articulo.Precio.Precio, promocion.Porcentaje);
                         }
+                        else if (detalle.EsCupon == "1")
+                        {
+                            precioU = calcularDescuento(articulo.Precio.Precio, decimal.Parse(detalle.PorcentajeDescuentoCupon));
+                        }
                         else
                         {
                             precioU = articulo.Precio.Precio;
@@ -1224,6 +1228,7 @@ namespace MVCVentas.Controllers
                     NombreArt = ap.Nombre,
                     Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
                     Precio = Math.Round(calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto), 2),
+                    PorcentajeDescuentoCupon = vMCupon.PorcentajeDto,
                     Total = Math.Round((cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0) * (calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto)),2)
                 })
                 .ToListAsync();

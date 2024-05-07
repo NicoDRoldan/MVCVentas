@@ -1543,41 +1543,40 @@
                         return;
                     }
 
-                    const vMCupon = {
-                        id_Cupon: 1,
-                        porcentajeDto: 20.00,
-                        detalle: [
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 3036
-                            },
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 3036
-                            },
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 4037
-                            },
-                            {
-                                id_Cupon: 1,
-                                id_ArticuloAsociado: 3037
-                            }
-                        ]
-                    };
+                    const nroCupon = input1.trim() + "-" + input2.trim() + "-" + input3.trim();
+
+                    console.log("Número de Cupon: ", nroCupon);
+
+                    var vMCupon = [];
 
                     $.ajax({
-                        url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
-                        type: 'POST',
-                        data: { vMCupon },
-                        success: function (articulosCupon) {
-                            console.log(articulosCupon);
-                            agregarCuponAlResumen(articulosCupon)
-                        },
-                        error: function (articulosCupon) {
+                        url: "https://localhost:7159/api/Cupones/Cupon/" + nroCupon,
+                        type: "GET",
+                        success: function (cuponJson) {
+                            vMCupon = cuponJson;
+                            console.log("Entré acá :D");
+                            console.log("VMCUPON: ", vMCupon);
 
+                            $.ajax({
+                                url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
+                                type: 'POST',
+                                data: { vMCupon },
+                                success: function (articulosCupon) {
+                                    console.log(articulosCupon);
+                                    agregarCuponAlResumen(articulosCupon)
+                                },
+                                error: function (articulosCupon) {
+
+                                }
+                            });
+
+                        },
+                        error: function(){
+                            console.log("Error al obtener los datos")
                         }
                     });
+
+                    console.log("VMCUPON FUERA DEL AJAX: ", vMCupon);
                     
                 }
                 // Si el botón presionado es Cancelar:
