@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Azure;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
@@ -543,6 +544,9 @@ namespace MVCVentas.Controllers
             // Variables promociones:
             var promocion = new VMPromoDescuento_E();
 
+            // Lista única para cupones:
+            HashSet<string> cuponesUnicos = new HashSet<string>();
+
             // Se inicia la transacción:
             using (var transaction = _context.Database.BeginTransaction())
             {
@@ -589,6 +593,8 @@ namespace MVCVentas.Controllers
                         else if (detalle.EsCupon == "1")
                         {
                             precioU = calcularDescuento(articulo.Precio.Precio, decimal.Parse(detalle.PorcentajeDescuentoCupon));
+
+                            cuponesUnicos.Add(detalle.NroCupon);
                         }
                         else
                         {
@@ -619,7 +625,7 @@ namespace MVCVentas.Controllers
                         renglon++;
 
                         // Se calcula el importe subtotal:
-                        impSubTotal += ventaD.PrecioTotal; // El importa 
+                        impSubTotal += ventaD.PrecioTotal; // El importe 
                     }
 
                     // Se da de alta el importe de la venta:
@@ -817,6 +823,14 @@ namespace MVCVentas.Controllers
 
                     // Se confirma la transacción:
                     transaction.Commit();
+
+                    // Proceso de quemado de Cupones
+                    // QuemarCupon(string nroCupon)
+                    foreach(var cupon in cuponesUnicos)
+                    {
+                        var json = QuemarCupon(cupon);
+
+                    }
 
                     // Traigo una lista de los registros de Ventas_D filtrando por claves primarias (la venta realizada)
                     var listVentaD = await _context.VMVentas_D
@@ -1207,7 +1221,7 @@ namespace MVCVentas.Controllers
         #region Cupones
 
         [HttpPost]
-        public async Task<IActionResult> ObtenerArticulosDeCupon(VMCupon vMCupon)
+        public async Task<IActionResult> ObtenerArticulosDeCupon(VMCupon vMCupon, string nroCupon)
         {
             // Traer el id de los artículos de los cupones:
             List<int> idsArticulosAsociados = vMCupon.Detalle.Select(d => d.Id_ArticuloAsociado).ToList();
@@ -1225,6 +1239,7 @@ namespace MVCVentas.Controllers
                 .Where(a => idsArticulosAsociados.Any(id => id == a.Id_Articulo))
                 .Select(ap => new
                 {
+                    NroCupon = nroCupon,
                     Id_Articulo = ap.Id_Articulo,
                     NombreArt = ap.Nombre,
                     Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
@@ -1238,13 +1253,33 @@ namespace MVCVentas.Controllers
             return Json(articulos);
         }
 
-        //public async Task<IActionResult> QuemarCupon(string nroCupon)
-        //{
-        //    try
-        //    {
+        public async Task<IActionResult> QuemarCupon(string nroCupon)
+        {
+            try
+            {
+                var wsCuponesClient = _httpClientFactory.CreateClient("WSCuponesClient");
+                wsCuponesClient.DefaultRequestHeaders.Accept.Clear();
+                wsCuponesClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers
+                    .MediaTypeWithQualityHeaderValue("application/json"));
 
-        //    }
-        //}
+                var response = await wsCuponesClient.GetAsync($"api/Cupones/Cupon/{nroCupon}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var cuponJson = await response.Content.ReadAsStringAsync();
+
+                    return Ok(cuponJson);
+                }
+                else
+                {
+                    return BadRequest("Error al quemar el cupón. Detalles: " + response.ReasonPhrase);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(5000, "Error interno del servidor: " + ex.Message);
+            }
+        }
 
         #endregion
 

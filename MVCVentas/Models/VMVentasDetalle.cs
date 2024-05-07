@@ -23,5 +23,7 @@
         public string? EsCupon { get; set; }
 
         public string? PorcentajeDescuentoCupon { get; set; }
+
+        public string? NroCupon { get; set; }
     }
 }

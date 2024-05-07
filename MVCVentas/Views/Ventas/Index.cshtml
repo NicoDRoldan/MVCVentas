@@ -1210,6 +1210,7 @@
                     EsCombo: $(this).find("#EsCombo").text(),
                     EsCupon: $(this).find("#EsCupon").text(),
                     PorcentajeDescuentoCupon: $(this).find("#PorcentajeDescuentoCupon").text(),
+                    NroCupon: $(this).find("#NroCupon").text()
                 };
                 detallesventa.push(detalle);
             });
@@ -1581,7 +1582,7 @@
                             $.ajax({
                                 url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
                                 type: 'POST',
-                                data: { vMCupon },
+                                data: { vMCupon, nroCupon },
                                 success: function (articulosCupon) {
                                     // Se llama a función para agregar los artículos del cupon en el resumen de venta.
                                     agregarCuponAlResumen(articulosCupon);
@@ -1619,7 +1620,6 @@
         });
 
         function agregarCuponAlResumen(articulosCupon) {
-
             for (var art in articulosCupon) {
 
                 const idArtExistente = document.querySelector(`#table-resumen-venta tr[data-id="${articulosCupon[art].id_Articulo}"]`);
@@ -1627,6 +1627,7 @@
                 fila.dataset.id = articulosCupon[art].id_Articulo;
 
                 fila.innerHTML = `
+                            <td id="NroCupon" hidden>${articulosCupon[art].nroCupon}</td>
                             <td asp-for="Id_Articulo" id="id_Articulo">${articulosCupon[art].id_Articulo}</td>
                             <td asp-for="Descripcion" id="nombre">${articulosCupon[art].nombreArt}</td>
                             <td asp-for="PrecioUnitario" id="precio">${articulosCupon[art].precio}</td>
