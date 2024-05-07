@@ -32,10 +32,12 @@ namespace MVCVentas.Controllers
     public class VentasController : Controller
     {
         private readonly MVCVentasContext _context;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public VentasController(MVCVentasContext context)
+        public VentasController(MVCVentasContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
+            _httpClientFactory = httpClientFactory;
         }
 
         string rutaRaizApp = AppDomain.CurrentDomain.BaseDirectory;
@@ -1169,28 +1171,27 @@ namespace MVCVentas.Controllers
             string responseData;
             try
             {
-                using (var client = new HttpClient())
+                var ventasApiClient = _httpClientFactory.CreateClient("VentasApiClient");
+
+                ventasApiClient.DefaultRequestHeaders.Accept.Clear();
+                ventasApiClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                var json = JsonConvert.SerializeObject(jsonData);
+                System.IO.File.WriteAllText(@"C:\Repositorio\archivo.json", json);
+
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await ventasApiClient.PostAsync("api/ventas", content);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    client.BaseAddress = new Uri("https://localhost:7200/api");
-                    client.DefaultRequestHeaders.Accept.Clear();
-                    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-                    var json = JsonConvert.SerializeObject(jsonData);
-                    System.IO.File.WriteAllText(@"C:\Repositorio\archivo.json", json);
-
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                    var response = await client.PostAsync("api/ventas", content);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        responseData = "Venta enviada correctamente. Respuesta de la API: " + response.StatusCode;
-                    }
-                    else
-                    {
-                        responseData = "Error al enviar la venta. Detalles: " + response.ReasonPhrase;
-                    }
+                    responseData = "Venta enviada correctamente. Respuesta de la API: " + response.StatusCode;
                 }
+                else
+                {
+                    responseData = "Error al enviar la venta. Detalles: " + response.ReasonPhrase;
+                }
+
                 return responseData.ToString();
             }
             catch (Exception ex)
@@ -1236,6 +1237,14 @@ namespace MVCVentas.Controllers
             // Retornar JSON:
             return Json(articulos);
         }
+
+        //public async Task<IActionResult> QuemarCupon(string nroCupon)
+        //{
+        //    try
+        //    {
+
+        //    }
+        //}
 
         #endregion
 

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MVCVentas.Data;
+using MVCVentas.Interfaces;
 using MVCVentas.Models;
 using Newtonsoft.Json;
 
@@ -16,10 +17,12 @@ namespace MVCVentas.Controllers
     public class Ventas_EController : Controller
     {
         private readonly MVCVentasContext _context;
+        private readonly IVentasControllerFactory _ventasControllerFactory;
 
-        public Ventas_EController(MVCVentasContext context)
+        public Ventas_EController(MVCVentasContext context, IVentasControllerFactory ventasControllerFactory)
         {
             _context = context;
+            _ventasControllerFactory = ventasControllerFactory;
         }
 
         // GET: Ventas_E
@@ -163,7 +166,7 @@ namespace MVCVentas.Controllers
 
             try
             {
-                VentasController ventasController = new VentasController(_context);
+                VentasController ventasController = _ventasControllerFactory.Create();
 
                 ventasController.ImprimirReporte(vMVentas_E, vMVentas_D, vMVentas_I, listaVentaTipoTransaccion);
 

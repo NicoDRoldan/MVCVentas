@@ -6,6 +6,7 @@ using MVCVentas.Services;
 using MVCVentas.Controllers;
 using Microsoft.AspNetCore.Http;
 using System.Net;
+using MVCVentas.Interfaces;
 
 //using MVCVentas.Data;
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<AccessController>();
+builder.Services.AddScoped<IVentasControllerFactory, VentasControllerFactory>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -38,6 +40,16 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(20);
+});
+
+builder.Services.AddHttpClient("VentasApiClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7200/api");
+});
+
+builder.Services.AddHttpClient("WSCuponesClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7159/api");
 });
 
 var app = builder.Build();
