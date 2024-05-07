@@ -1116,6 +1116,9 @@
         //////////////////////////////////// Lógica para cancelar la venta ////////////////////////////////////
         function varciarTablaResumen() {
 
+            // Limpiar cupones ingresados
+            cuponesIngresados.splice(0, cuponesIngresados.length);
+
             // Limpiar la tabla de resumen de venta
             const tablaResumen = document.getElementById("table-resumen-venta").querySelector("tbody");
             tablaResumen.querySelectorAll("tr").forEach(function (fila, index) {
@@ -1623,7 +1626,7 @@
                             <td asp-for="PrecioTotal" id="precio-Total" class="precio-total">${articulosCupon[art].total}</td>
                             <td id="Accion" class='btn btn-danger btn-sm'><button class="eliminar">X</button></td>
                             <td id="EsCupon" hidden>1</td>
-                                    <td id="PorcentajeDescuentoCupon" hidden>${articulosCupon[art].porcentajeDescuentoCupon}</td>
+                            <td id="PorcentajeDescuentoCupon" hidden>${articulosCupon[art].porcentajeDescuentoCupon}</td>
                         `;
                 document.querySelector("#table-resumen-venta tbody").appendChild(fila);
             }
