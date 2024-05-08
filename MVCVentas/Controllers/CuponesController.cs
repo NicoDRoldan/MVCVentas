@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MVCVentas.Models;
 using Newtonsoft.Json;
 
 namespace MVCVentas.Controllers
 {
+    [Authorize]
     public class CuponesController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
