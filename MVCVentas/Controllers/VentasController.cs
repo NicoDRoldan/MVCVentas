@@ -1251,7 +1251,7 @@ namespace MVCVentas.Controllers
         [HttpPost]
         public async Task<IActionResult> ValidarCupon(string nroCupon)
         {
-            var errorMessage = "";
+            string errorMessage;
             try
             {
                 var wsCuponesClient = _httpClientFactory.CreateClient("WSCuponesClient");
