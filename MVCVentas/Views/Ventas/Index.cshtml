@@ -1574,40 +1574,28 @@
                     var vMCupon = [];
 
                     $.ajax({
-                        url: "https://localhost:7159/api/Cupones/Cupon/" + nroCupon,
-                        type: "GET",
-                        success: function (cuponJson) {
-                            vMCupon = cuponJson;
-
-                            $.ajax({
-                                url: '@Url.Action("ObtenerArticulosDeCupon", "Ventas")',
-                                type: 'POST',
-                                data: { vMCupon, nroCupon },
-                                success: function (articulosCupon) {
-                                    // Se llama a función para agregar los artículos del cupon en el resumen de venta.
-                                    agregarCuponAlResumen(articulosCupon);
-                                    // Se agrega el número de cupon en la lista de cupones ingresados.
-                                    cuponesIngresados.push(nroCupon);
-                                },
-                                error: function (articulosCupon) {
-                                }
-                            });
-
+                        url: '@Url.Action("ValidarCupon", "Ventas")',
+                        type: 'POST',
+                        data: { nroCupon },
+                        success: function (response) {
+                            
+                            if (response.success) {
+                                // Se llama a función para agregar los artículos del cupon en el resumen de venta.
+                                agregarCuponAlResumen(response.articulosCupon);
+                                // Se agrega el número de cupon en la lista de cupones ingresados.
+                                cuponesIngresados.push(nroCupon);
+                            }
+                            else if (!response.success) {
+                                console.log(response.message);
+                                $('#mensaje-cupones').removeClass().
+                                    addClass('text-danger').text(response.message);
+                            }
                         },
                         error: function (response) {
-
-                            if (response.responseText != undefined) {
-                                $('#mensaje-cupones').text("");
-                                console.log(response.responseText);
-                                $('#mensaje-cupones').removeClass().
-                                    addClass('text-danger').text(response.responseText);
-                            }
-                            else {
-                                $('#mensaje-cupones').text("");
-                                console.log("No se logró la comunicación con el WSCupones");
-                                $('#mensaje-cupones').removeClass().
-                                    addClass('text-danger').text("Error, no se pudieron obtener datos");
-                            }
+                            $('#mensaje-cupones').text("");
+                            console.log("No se logró la comunicación con el servidor");
+                            $('#mensaje-cupones').removeClass().
+                                addClass('text-danger').text("Error, no se logró la comunicación con el servidor.");
                         }
                     });
 

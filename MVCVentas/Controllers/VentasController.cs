@@ -1220,39 +1220,6 @@ namespace MVCVentas.Controllers
 
         #region Cupones
 
-        [HttpPost]
-        public async Task<IActionResult> ObtenerArticulosDeCupon(VMCupon vMCupon, string nroCupon)
-        {
-            // Traer el id de los artículos de los cupones:
-            List<int> idsArticulosAsociados = vMCupon.Detalle.Select(d => d.Id_ArticuloAsociado).ToList();
-
-            var idsAgrupados = vMCupon.Detalle
-                .GroupBy(d => d.Id_ArticuloAsociado)
-                .Select(g => new { Id_Articulo = g.Key, Cantidad = (decimal)g.Count() })
-                .ToList();
-
-            var cantidadesPorId = idsAgrupados.ToDictionary(id => id.Id_Articulo, id => id.Cantidad);
-
-            // Traer los artículos por id y seleccionar campos
-            var articulos = await _context.VMArticle
-                .Include(a => a.Precio)
-                .Where(a => idsArticulosAsociados.Any(id => id == a.Id_Articulo))
-                .Select(ap => new
-                {
-                    NroCupon = nroCupon,
-                    Id_Articulo = ap.Id_Articulo,
-                    NombreArt = ap.Nombre,
-                    Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
-                    Precio = Math.Round(calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto), 2),
-                    PorcentajeDescuentoCupon = vMCupon.PorcentajeDto,
-                    Total = Math.Round((cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0) * (calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto)),2)
-                })
-                .ToListAsync();
-
-            // Retornar JSON:
-            return Json(articulos);
-        }
-
         public async Task<IActionResult> QuemarCupon(string nroCupon)
         {
             try
@@ -1279,6 +1246,80 @@ namespace MVCVentas.Controllers
             {
                 return StatusCode(5000, "Error interno del servidor: " + ex.Message);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ValidarCupon(string nroCupon)
+        {
+            var errorMessage = "";
+            try
+            {
+                var wsCuponesClient = _httpClientFactory.CreateClient("WSCuponesClient");
+                wsCuponesClient.DefaultRequestHeaders.Accept.Clear();
+                wsCuponesClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers
+                    .MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await wsCuponesClient.GetAsync($"api/Cupones/Cupon/{nroCupon}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var cuponJson = await response.Content.ReadAsStringAsync();
+
+                    //Deserializar Json:
+                    var vMCupon = JsonConvert.DeserializeObject<VMCupon>(cuponJson);
+
+                    var articulosCuponResponse = await ObtenerArticulosDeCupon(vMCupon, nroCupon);
+                    var articulosCuponResult = articulosCuponResponse as OkObjectResult;
+                    var articulosCupon = articulosCuponResult.Value;
+
+                    return Json(new {success = true, articulosCupon});
+                }
+                else
+                {
+                    errorMessage = await response.Content.ReadAsStringAsync();
+                    errorMessage = errorMessage.Replace("\"", "");
+                    return Json(new {success = false, message = errorMessage});
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = "Error, no se logró obtener los datos.";
+                errorMessage = errorMessage.Replace("\"", "");
+                return Json(new { success = false, message = errorMessage });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ObtenerArticulosDeCupon(VMCupon vMCupon, string nroCupon)
+        {
+            // Traer el id de los artículos de los cupones:
+            List<int> idsArticulosAsociados = vMCupon.Detalle.Select(d => d.Id_ArticuloAsociado).ToList();
+
+            var idsAgrupados = vMCupon.Detalle
+                .GroupBy(d => d.Id_ArticuloAsociado)
+                .Select(g => new { Id_Articulo = g.Key, Cantidad = (decimal)g.Count() })
+                .ToList();
+
+            var cantidadesPorId = idsAgrupados.ToDictionary(id => id.Id_Articulo, id => id.Cantidad);
+
+            // Traer los artículos por id y seleccionar campos
+            var articulos = await _context.VMArticle
+                .Include(a => a.Precio)
+                .Where(a => idsArticulosAsociados.Any(id => id == a.Id_Articulo))
+                .Select(ap => new
+                {
+                    NroCupon = nroCupon,
+                    Id_Articulo = ap.Id_Articulo,
+                    NombreArt = ap.Nombre,
+                    Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
+                    Precio = Math.Round(calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto), 2),
+                    PorcentajeDescuentoCupon = vMCupon.PorcentajeDto,
+                    Total = Math.Round((cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0) * (calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto)), 2)
+                })
+                .ToListAsync();
+
+            // Retornar JSON:
+            return Ok(articulos);
         }
 
         #endregion
