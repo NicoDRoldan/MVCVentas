@@ -1077,14 +1077,14 @@
                     const cantidad = fila.querySelector(".cantidad");
                     let cantidadActual = Number(cantidad.textContent);
 
-                    if (cantidadActual > 1) {
-                        console.log(cantidadActual)
-                        cantidad.textContent = cantidadActual - 1;
-                        return;
-                    } else {
+                    // if (cantidadActual > 1) {
+                    //     console.log(cantidadActual)
+                    //     cantidad.textContent = cantidadActual - 1;
+                    //     return;
+                    // } else {
                         console.log(cantidadActual)
                         fila.remove();
-                    }
+                    // }
 
                     calcularSubTotal();
 

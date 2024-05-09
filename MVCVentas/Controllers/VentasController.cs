@@ -1295,12 +1295,11 @@ namespace MVCVentas.Controllers
             // Traer el id de los artículos de los cupones:
             List<int> idsArticulosAsociados = vMCupon.Detalle.Select(d => d.Id_ArticuloAsociado).ToList();
 
-            var idsAgrupados = vMCupon.Detalle
-                .GroupBy(d => d.Id_ArticuloAsociado)
-                .Select(g => new { Id_Articulo = g.Key, Cantidad = (decimal)g.Count() })
+            // Guardo los artículos y cantidad en una nueva lista y luego lo guardo en un diccionario.
+            var ArticulosYCant = vMCupon.Detalle
+                .Select(g => new { id_Articulo = g.Id_ArticuloAsociado, Cantidad = g.Cantidad })
                 .ToList();
-
-            var cantidadesPorId = idsAgrupados.ToDictionary(id => id.Id_Articulo, id => id.Cantidad);
+            var cantidadesPorId = ArticulosYCant.ToDictionary(id => id.id_Articulo, id => id.Cantidad);
 
             // Traer los artículos por id y seleccionar campos
             var articulos = await _context.VMArticle
@@ -1311,12 +1310,14 @@ namespace MVCVentas.Controllers
                     NroCupon = nroCupon,
                     Id_Articulo = ap.Id_Articulo,
                     NombreArt = ap.Nombre,
-                    Cantidad = 1,
+                    Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
                     Precio = Math.Round(calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto), 2),
                     PorcentajeDescuentoCupon = vMCupon.PorcentajeDto,
                     Total = Math.Round((cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0) * (calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto)), 2)
                 })
                 .ToListAsync();
+
+            Console.WriteLine(articulos);
 
             // Retornar JSON:
             return Ok(articulos);
