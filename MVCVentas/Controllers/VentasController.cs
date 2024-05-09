@@ -1311,7 +1311,7 @@ namespace MVCVentas.Controllers
                     NroCupon = nroCupon,
                     Id_Articulo = ap.Id_Articulo,
                     NombreArt = ap.Nombre,
-                    Cantidad = cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0,
+                    Cantidad = 1,
                     Precio = Math.Round(calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto), 2),
                     PorcentajeDescuentoCupon = vMCupon.PorcentajeDto,
                     Total = Math.Round((cantidadesPorId.ContainsKey(ap.Id_Articulo) ? cantidadesPorId[ap.Id_Articulo] : 0) * (calcularDescuento(ap.Precio.Precio, vMCupon.PorcentajeDto)), 2)
