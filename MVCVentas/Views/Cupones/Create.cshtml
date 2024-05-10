@@ -1,0 +1,210 @@
+﻿@model MVCVentas.Models.VMCupon
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .boton-add-articulos {
+        margin-top: 10px;
+        margin-bottom:10px
+    }
+</style>
+
+<br>
+<h2>Nuevo Cupón</h2>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form id="cuponForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label class="control-label">Descripción</label>
+                <input asp-for="Descripcion" class="form-control" />
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Porcentaje de Descuento</label>
+                <input asp-for="PorcentajeDto" class="form-control" data-val="false" />
+                <span asp-validation-for="PorcentajeDto" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Inicio de Vigencia</label>
+                <input asp-for="FechaInicio" class="form-control" type="date" />
+                <span asp-validation-for="FechaInicio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Fin de Vigencia</label>
+                <input asp-for="FechaFin" class="form-control" type="date" />
+                <span asp-validation-for="FechaFin" class="text-danger"></span>
+            </div>
+
+        </form>
+
+            <!-- Botón para abrir la ventana emergente -->
+            <div class="form-group">
+                <button type="button" class="btn btn-primary boton-add-articulos" data-toggle="modal" data-target="#articulosModal">
+                    Agregar Artículos
+                </button>
+            </div>
+
+            <!-- Código para la ventana emergente -->
+            <div class="modal fade" id="articulosModal" tabindex="-1" role="dialog" aria-labelledby="articulosModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="articulosModalLabel">Seleccionar Artículos</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table" id="articulosTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Artículo</th>
+                                        <th>Cantidad</th>
+                                        <th>Seleccionar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!--  Recorrer la lista de artículos -->
+                                    @foreach (var articulo in Model.ListaArticulos)
+                                    {
+                                        <tr>
+                                            <td>@articulo.Value</td>
+                                            <td>@articulo.Text</td>
+                                            <td>
+                                                <input type="number" class="form-control" name="Detalle[@articulo.Value].Cantidad" value="1">
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" id="@articulo.Value" name="Detalle[@articulo.Value].Id_ArticuloAsociado" value="@articulo.Value">
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                            <button type="button" class="btn btn-primary" id="agregarDetalles" onclick="agregarDetallesCupon()">Agregar Detalles</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+            <button class="btn btn-primary" id="btn-venta" onclick="altaCupon()">Crear</button>
+            </div>
+
+        <div id="error-message" style="margin-top: 5px;"></div>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Volver</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script src="~/theme/vendor/datatables/jquery.datatables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Inicializar la tabla con DataTables
+            $('#articulosTable').DataTable({
+                "paging": false,          // Desactivar paginación
+                "scrollY": "400px",       // Altura fija con barra de desplazamiento si es necesario
+                "scrollCollapse": true,   // Colapsar la tabla si la altura es menor que el contenido
+                "searching": true,        // Habilitar la función de búsqueda
+                "ordering": true,         // Deshabilitar la ordenación
+                "info": false,            // Deshabilitar la información de la tabla
+            });
+        });
+
+        var detalles = [];
+
+
+        function agregarDetallesCupon() {
+            // Limpiar el filtro de búsqueda
+            $('#articulosTable').DataTable().search('').draw();
+
+            detalles = [];
+
+            $('#articulosTable input[type=checkbox]:checked').each(function () {
+
+                var idArticulo = $(this).attr('id');
+                var cantidad = $(this).closest('tr').find('input[type=number]').val();
+                detalles.push({
+                    Id_ArticuloAsociado: parseInt(idArticulo),
+                    Cantidad: parseInt(cantidad)
+                });
+            });
+            $('#articulosModal').modal('hide');
+        }
+
+
+        function altaCupon() {
+
+            $('#error-message').text("");
+
+            var vMCupon = {
+                Descripcion: $('#Descripcion').val(),
+                PorcentajeDto: parseFloat($('#PorcentajeDto').val()),
+                FechaInicio: $('#FechaInicio').val(),
+                FechaFin: $('#FechaFin').val(),
+                Detalle: detalles
+            };
+
+            if (vMCupon.Descripcion == '' ||  vMCupon.FechaInicio == ''
+                || vMCupon.FechaFin == '' || vMCupon.PorcentajeDto == 0) {
+
+                $('#error-message').removeClass().
+                    addClass('text-danger').text("Completar todos los campos.");
+                return;
+                }
+
+            $.ajax({
+                url: '@Url.Action("AltaCupon", "Cupones")',
+                type: 'POST',
+                data: { vMCupon },
+                success: function (response) {
+                    
+                    if(response.success){
+
+                        // Redirigir vista
+                        window.location.href = '/Cupones/Index';
+                        sessionStorage.setItem('successMessage', response.message);
+
+                        $('#success-message').removeClass().
+                            addClass('text-danger').text(response.message);
+
+                    }else if(!response.success){
+
+                        $('#error-message').removeClass().
+                            addClass('text-danger').text(response.error);
+                    }
+                    
+                },
+                error: function (response) {
+
+                    if (response.responseJSON && response.responseJSON.error) {
+                        
+                        $('#error-message').removeClass().
+                            addClass('text-danger').text("Error al crear el cupón.");
+                    } else {
+                        
+                        $('#error-message').removeClass().
+                            addClass('text-danger').text("Error al crear el cupón ERROR FALSE 2.");
+                    }
+                }
+            });
+        }        
+
+    </script>
+}

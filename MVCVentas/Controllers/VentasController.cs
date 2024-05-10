@@ -826,9 +826,9 @@ namespace MVCVentas.Controllers
 
                     // Proceso de quemado de Cupones
                     // QuemarCupon(string nroCupon)
-                    foreach(var cupon in cuponesUnicos)
+                    foreach(var numeroCupon in cuponesUnicos)
                     {
-                        var json = QuemarCupon(cupon);
+                        _ = QuemarCupon(numeroCupon);
 
                     }
 
@@ -881,12 +881,11 @@ namespace MVCVentas.Controllers
                     GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
                     ImprimirReporte(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion);
 
-                    var resultEnvioVenta = await EnviarVenta(ventas_E);
+                    //var resultEnvioVenta = await EnviarVenta(ventas_E);
 
                     return Json(new { success = true, 
                         message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " +
-                        (detallesventa.Count - 1) + " artículos." + " " +
-                        resultEnvioVenta
+                        (detallesventa.Count - 1) + " artículos."
                     });
                 }
                 catch (Exception ex)
@@ -1210,7 +1209,7 @@ namespace MVCVentas.Controllers
             }
             catch (Exception ex)
             {
-                responseData = ex.Message.ToString();
+                responseData = "Error al enviar la venta. Detalles: " + ex.Message.ToString();
                 return responseData;
             }
 
@@ -1229,13 +1228,17 @@ namespace MVCVentas.Controllers
                 wsCuponesClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers
                     .MediaTypeWithQualityHeaderValue("application/json"));
 
-                var response = await wsCuponesClient.GetAsync($"api/Cupones/Cupon/{nroCupon}");
+                var nroCuponJson = JsonConvert.SerializeObject(nroCupon);
+
+                var content = new StringContent(nroCuponJson, Encoding.UTF8, "application/json");
+
+                var response = await wsCuponesClient.PostAsync($"api/Cupones/QuemarCupon", content);
 
                 if (response.IsSuccessStatusCode)
                 {
                     var cuponJson = await response.Content.ReadAsStringAsync();
 
-                    return Ok(cuponJson);
+                    return Json(new { success = true, message = $"Cupón {nroCupon} utilizado." });
                 }
                 else
                 {
