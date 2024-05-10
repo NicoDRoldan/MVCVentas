@@ -1612,7 +1612,7 @@
 
                 const idArtExistente = document.querySelector(`#table-resumen-venta tr[data-id="${articulosCupon[art].id_Articulo}"]`);
                 const fila = document.createElement("tr");
-                fila.dataset.id = articulosCupon[art].id_Articulo;
+                fila.dataset.id = articulosCupon[art].nroCupon;
 
                 fila.innerHTML = `
                             <td id="NroCupon" hidden>${articulosCupon[art].nroCupon}</td>

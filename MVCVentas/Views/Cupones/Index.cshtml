@@ -28,10 +28,11 @@
         <div class="card shadow mb-4 custom-card">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">Cupones</h6>
-                @* @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
-            {
-            <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Cupón</a>
-            } *@
+                <div id="success-message" style="margin-top: 5px;"></div>
+                @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                {
+                    <a class='btn btn-primary btn-sm' asp-action="Create">Nuevo Cupón</a>
+                }
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -102,3 +103,18 @@
     }
 </body>
 </html>
+
+@section Scripts{
+    <script>
+
+        var successMessage = sessionStorage.getItem('successMessage');
+
+        if(successMessage) {
+
+            $('#success-message').removeClass().
+                addClass('text-success').text(successMessage);
+
+            sessionStorage.removeItem('successMessage');
+        }
+    </script>
+}
