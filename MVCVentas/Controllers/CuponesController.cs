@@ -8,6 +8,8 @@ using System.Text;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Azure;
 using System.Drawing;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using Microsoft.EntityFrameworkCore;
 
 namespace MVCVentas.Controllers
 {
@@ -105,6 +107,47 @@ namespace MVCVentas.Controllers
                 var reason = ex.Message;
                 TempData["Error"] = reason;
                 return Json(new { success = false, error = reason });
+            }
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            if (id == null) return Json(new { success = false, message = "No existe el ID." });
+
+            try
+            {
+                var wsCuponesClient = _httpClientFactory.CreateClient("WSCuponesClient");
+                wsCuponesClient.DefaultRequestHeaders.Accept.Clear();
+                wsCuponesClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers
+                    .MediaTypeWithQualityHeaderValue("application/json"));
+
+                var response = await wsCuponesClient.GetAsync($"api/Cupones/{id}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var cuponJson = await response.Content.ReadAsStringAsync();
+                    var vmCupon = JsonConvert.DeserializeObject<VMCupon>(cuponJson);
+
+                    foreach(var detalle in vmCupon.Detalle)
+                    {
+                        detalle.Articulo = await _context.VMArticle
+                            .FirstOrDefaultAsync(a => a.Id_Articulo == detalle.Id_ArticuloAsociado);
+                    }
+
+                    return View(vmCupon);
+                }
+                else
+                {
+                    var reason = response.ReasonPhrase;
+                    TempData["Error"] = reason;
+                    return Json(new { success = false, message = reason });
+                }
+            }
+            catch (Exception ex)
+            {
+                var reason = ex.Message;
+                TempData["Error"] = reason;
+                return Json(new { success = false, message = reason });
             }
         }
     }

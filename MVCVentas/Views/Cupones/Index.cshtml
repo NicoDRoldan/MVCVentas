@@ -2,15 +2,16 @@
 
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout_Ventas_Report.cshtml";
 }
 
-<style>
+@* <link href="~/css/reporteventas.css" rel="stylesheet" /> *@
+@* <style>
     .custom-card {
         width: 110%;
         margin: 10px auto;
     }
-</style>
+</style> *@
 
 <html>
 <head>
@@ -54,9 +55,9 @@
                                 <th>
                                     Fin de vigencia
                                 </th>
-                                @* <th class="custom-column">
-                            Acción
-                            </th> *@
+                                <th class="custom-column">
+                                    Acción
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -78,21 +79,21 @@
                                     <td>
                                         @Html.DisplayFor(modelItem => item.FechaFin)
                                     </td>
-                                    @* <td class="text-center">
-                            @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
-                            {
-                            <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Rubro">Editar</a>
-                            <label>|</label>
-                            }
+                                    <td class="text-center">
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                        {
+                                            <a class='btn btn-primary btn-sm' asp-action="Edit" asp-route-id="@item.Id_Cupon">Editar</a>
+                                            <label>|</label>
+                                        }
 
-                            <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Rubro">Detalles</a>
+                                        <a class='btn btn-primary btn-sm' asp-action="Details" asp-route-id="@item.Id_Cupon">Detalles</a>
 
-                            @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
-                            {
-                            <label>|</label>
-                            <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Rubro">Eliminar</a>
-                            }
-                            </td> *@
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Supervisor"))
+                                        {
+                                            <label>|</label>
+                                            <a class='btn btn-danger btn-sm' asp-action="Delete" asp-route-id="@item.Id_Cupon">Eliminar</a>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>
