@@ -411,6 +411,7 @@
                             <button class="btn btn-success" id="btn-venta" onclick="CrearVenta()">Vender</button>
                         </dd>
                     </div>
+                    <div id="mensaje-ventas" style="margin-top: 5px;"></div>
 
                 </dl>
             </div>
@@ -1257,7 +1258,15 @@
                         varciarTablaResumen();
                     }
                     else {
-                        console.log("Error al realizar la venta.");
+                        console.log("Error al realizar la venta. Error: ", response.message);
+                        
+                        switch(true){
+                            case response.message.includes("QuemarCupon"):
+                                alert("Error al realizar la venta, no es posible usar el cupón.");
+                                break;
+                            default:
+                                alert("Error al realizar la venta, volver a intentar.");
+                        }
                     }
                 },
                 error: function (response) {

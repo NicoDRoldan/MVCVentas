@@ -821,16 +821,15 @@ namespace MVCVentas.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    // Se confirma la transacción:
-                    transaction.Commit();
-
                     // Proceso de quemado de Cupones
                     // QuemarCupon(string nroCupon)
-                    foreach(var numeroCupon in cuponesUnicos)
+                    foreach (var numeroCupon in cuponesUnicos)
                     {
-                        _ = QuemarCupon(numeroCupon);
-
+                        await QuemarCupon(numeroCupon);
                     }
+
+                    // Se confirma la transacción:
+                    transaction.Commit();
 
                     // Traigo una lista de los registros de Ventas_D filtrando por claves primarias (la venta realizada)
                     var listVentaD = await _context.VMVentas_D
@@ -1242,12 +1241,12 @@ namespace MVCVentas.Controllers
                 }
                 else
                 {
-                    return BadRequest("Error al quemar el cupón. Detalles: " + response.ReasonPhrase);
+                    throw new Exception("Error al quemar el cupón. Detalles: " + response.ReasonPhrase + "\nMetodo: QuemarCupon()");
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(5000, "Error interno del servidor: " + ex.Message);
+                throw new Exception("Error interno del servidor: " + ex.Message + "\nMetodo: QuemarCupon()");
             }
         }
 
