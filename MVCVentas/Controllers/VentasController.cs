@@ -1039,7 +1039,7 @@ namespace MVCVentas.Controllers
             printer.Imprimir();
         }
 
-        public void GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion, string projectPath)
+        public async void GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion, string projectPath)
         {
             string rutaComprobantesImpresos = Path.Combine(projectPath, "Comprobantes Impresos");
             string rutaCodComprobate = Path.Combine(rutaComprobantesImpresos, vMVentas_E.CodComprobante);
@@ -1069,6 +1069,51 @@ namespace MVCVentas.Controllers
             }
 
             document.Close();
+
+            await EnviarEmailConFactura(vMVentas_E.Cliente.Email, vMVentas_E.Cliente.RazonSocial, "Se adjunta factura. Gracias por su compra.", rutaReporte);
+        }
+
+        public async Task<IActionResult> EnviarEmailConFactura(string emailTo, string client, string emailBody, string projectPath)
+        {
+            byte[] pdfBytes = System.IO.File.ReadAllBytes(projectPath);
+            string responseData;
+
+            try
+            {
+                var ventasApiClient = _httpClientFactory.CreateClient("VentasApiClient");
+                ventasApiClient.DefaultRequestHeaders.Accept.Clear();
+                ventasApiClient.DefaultRequestHeaders.Accept
+                    .Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                using (var formData = new MultipartFormDataContent())
+                {
+                    // Adjuntar archivo PDF.
+                    formData.Add(new ByteArrayContent(pdfBytes, 0, pdfBytes.Length), "file", "factura.pdf");
+
+                    // Datos para el correo.
+                    formData.Add(new StringContent(emailTo), "EmailTo");
+                    formData.Add(new StringContent(client), "client");
+                    formData.Add(new StringContent(emailBody), "emailBody");
+
+                    var response = await ventasApiClient.PostAsync("/mail/sendmail", formData);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        responseData = "Factura envíada correctamente";
+                        return Json(new { success = true, message = responseData });
+                    }
+
+                    else
+                    {
+                        responseData = "Error al enviar la factura: " + response.ReasonPhrase;
+                        throw new Exception(responseData);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al enviar la factura: " + ex.Message);
+            }
         }
 
         #endregion
