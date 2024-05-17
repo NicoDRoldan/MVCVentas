@@ -26,6 +26,7 @@ using MVCVentas.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Serilog;
 using Font = iTextSharp.text.Font;
 
 namespace MVCVentas.Controllers
@@ -1084,6 +1085,9 @@ namespace MVCVentas.Controllers
             byte[] pdfBytes = System.IO.File.ReadAllBytes(projectPath);
             string responseData;
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             try
             {
                 var ventasApiClient = _httpClientFactory.CreateClient("VentasApiClient");
@@ -1117,6 +1121,11 @@ namespace MVCVentas.Controllers
             catch (Exception ex)
             {
                 return "Error al enviar email con la factura: " + ex.Message;
+            }
+            finally
+            {
+                stopwatch.Stop();
+                Log.Information($"EnviarEmailConFactura(...)\nTiempo de ejecución: {stopwatch.ElapsedMilliseconds} ms, {(decimal)stopwatch.ElapsedMilliseconds / 1000} segs");
             }
         }
 
@@ -1269,6 +1278,9 @@ namespace MVCVentas.Controllers
 
         public async Task<IActionResult> QuemarCupon(string nroCupon)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             try
             {
                 var wsCuponesClient = _httpClientFactory.CreateClient("WSCuponesClient");
@@ -1297,12 +1309,20 @@ namespace MVCVentas.Controllers
             {
                 throw new Exception("Error interno del servidor: " + ex.Message + "\nMetodo: QuemarCupon()");
             }
+            finally
+            {
+                stopwatch.Stop();
+                Log.Information($"QuemarCupon(...)\nTiempo de ejecución: {stopwatch.ElapsedMilliseconds} ms, {(decimal)stopwatch.ElapsedMilliseconds / 1000} segs");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> ValidarCupon(string nroCupon)
         {
             string errorMessage;
+
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             try
             {
@@ -1338,6 +1358,11 @@ namespace MVCVentas.Controllers
                 errorMessage = "Error, no se logró obtener los datos.";
                 errorMessage = errorMessage.Replace("\"", "");
                 return Json(new { success = false, message = errorMessage });
+            }
+            finally
+            {
+                stopwatch.Stop();
+                Log.Information($"ValidarCupon(...)\nTiempo de ejecución: {stopwatch.ElapsedMilliseconds} ms, {(decimal)stopwatch.ElapsedMilliseconds / 1000} segs");
             }
         }
 
