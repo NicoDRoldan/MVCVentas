@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
@@ -877,14 +878,17 @@ namespace MVCVentas.Controllers
                         && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
                     .FirstOrDefaultAsync();
 
-                    GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
+                    var responseGenerarReporte = await GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
                     ImprimirReporte(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion);
 
                     //var resultEnvioVenta = await EnviarVenta(ventas_E);
 
-                    return Json(new { success = true, 
+                    return Json(new
+                    {
+                        success = true,
                         message = "\nSe insertó la venta nro: " + nroVentaCorrelativa + " correctamente. \nDetalle de la venta: " +
-                        (detallesventa.Count - 1) + " artículos."
+                        (detallesventa.Count - 1) + " artículos.",
+                        messageGenerarReporte = responseGenerarReporte
                     });
                 }
                 catch (Exception ex)
@@ -1039,7 +1043,7 @@ namespace MVCVentas.Controllers
             printer.Imprimir();
         }
 
-        public async void GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion, string projectPath)
+        public async Task<string> GenerarReportePDF(VMVentas_E vMVentas_E, List<VMVentas_D> vMVentas_D, List<VMVentas_I> vMVentas_I, List<string> vMVentas_TipoTransaccion, string projectPath)
         {
             string rutaComprobantesImpresos = Path.Combine(projectPath, "Comprobantes Impresos");
             string rutaCodComprobate = Path.Combine(rutaComprobantesImpresos, vMVentas_E.CodComprobante);
@@ -1070,10 +1074,12 @@ namespace MVCVentas.Controllers
 
             document.Close();
 
-            await EnviarEmailConFactura(vMVentas_E.Cliente.Email, vMVentas_E.Cliente.RazonSocial, "Se adjunta factura. Gracias por su compra.", rutaReporte);
+            var response = await EnviarEmailConFactura(vMVentas_E.Cliente.Email, vMVentas_E.Cliente.RazonSocial, "Se adjunta factura. Gracias por su compra.", rutaReporte);
+
+            return response;
         }
 
-        public async Task<IActionResult> EnviarEmailConFactura(string emailTo, string client, string emailBody, string projectPath)
+        public async Task<string> EnviarEmailConFactura(string emailTo, string client, string emailBody, string projectPath)
         {
             byte[] pdfBytes = System.IO.File.ReadAllBytes(projectPath);
             string responseData;
@@ -1099,20 +1105,18 @@ namespace MVCVentas.Controllers
 
                     if (response.IsSuccessStatusCode)
                     {
-                        responseData = "Factura envíada correctamente";
-                        return Json(new { success = true, message = responseData });
+                        return "Email con factura envíada correctamente";
                     }
 
                     else
                     {
-                        responseData = "Error al enviar la factura: " + response.ReasonPhrase;
-                        throw new Exception(responseData);
+                        return "Error al enviar email con la factura: " + response.ReasonPhrase;
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al enviar la factura: " + ex.Message);
+                return "Error al enviar email con la factura: " + ex.Message;
             }
         }
 
@@ -1299,6 +1303,7 @@ namespace MVCVentas.Controllers
         public async Task<IActionResult> ValidarCupon(string nroCupon)
         {
             string errorMessage;
+
             try
             {
                 var wsCuponesClient = _httpClientFactory.CreateClient("WSCuponesClient");

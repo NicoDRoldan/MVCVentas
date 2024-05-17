@@ -412,6 +412,7 @@
                         </dd>
                     </div>
                     <div id="mensaje-ventas" style="margin-top: 5px;"></div>
+                    <div id="mensaje-email-factura" style="margin-top: 5px;"></div>
 
                 </dl>
             </div>
@@ -1135,7 +1136,7 @@
             $('#nombre-retira').val("");
 
             formasPagoEnCero();
-
+            
             // Llamar a las funciones para recalcular subtotal y total
             calcularSubTotal();
             calcularTotal();
@@ -1144,6 +1145,9 @@
         // Evento para el botón de cancelar venta
         document.getElementById("btn-cancel-venta").addEventListener("click", function () {
             varciarTablaResumen();
+            // Mensajes varios:
+            $('#mensaje-ventas').removeClass().text("");
+            $('#mensaje-email-factura').removeClass().text("");
             tablaBody.innerHTML = "";
         });
 
@@ -1254,15 +1258,35 @@
                 data: { vMVentas, detallesventa, vMVentaImporte, formaPagoSelects },
                 success: function (response) {
                     if (response.success == true) {
-                        console.log("Datos: " + vMVentas + " " + detallesventa + " " + response.message);
+
+                        $('#mensaje-ventas').removeClass().addClass('text-success').text("Venta realizada correctamente.");
+                        
+                        console.log("Datos: " + vMVentas + " " + detallesventa + " " + response.message + " " + response.messageGenerarReporte);
+
+                        switch (true) {
+                            case response.messageGenerarReporte.includes("correctamente"):
+                                $('#mensaje-email-factura').removeClass().addClass('text-success').text("La factura fue envíada correctamente.");
+                                break;
+                            case response.messageGenerarReporte.includes("Error"):
+                                $('#mensaje-email-factura').removeClass().addClass('text-danger').text("Error al enviar el email con la factura.");
+                                break;
+                            default:
+                                console.log("nada por aquí");
+                        }
                         varciarTablaResumen();
                     }
                     else {
+
+                        $('#mensaje-ventas').removeClass().addClass('text-danger').text("Error al realizar la venta, volver a intentar.");
+
                         console.log("Error al realizar la venta. Error: ", response.message);
                         
                         switch(true){
                             case response.message.includes("QuemarCupon"):
                                 alert("Error al realizar la venta, no es posible usar el cupón.");
+                                break;
+                            case response.messageGenerarReporte:
+                                alert("Error al realizar la venta.", response.messageGenerarReporte);
                                 break;
                             default:
                                 alert("Error al realizar la venta, volver a intentar.");
