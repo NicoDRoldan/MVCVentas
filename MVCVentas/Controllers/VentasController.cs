@@ -879,10 +879,15 @@ namespace MVCVentas.Controllers
                         && v.NumSucursal == vMVentas.Sucursal.NumSucursal)
                     .FirstOrDefaultAsync();
 
-                    var responseGenerarReporte = await GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
+                    var rutaReporte = await GenerarReportePDF(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion, rutaRaizApp);
                     ImprimirReporte(ventaE, listVentaD, listVentaI, listVentaTipoTransaccion);
 
-                    //var resultEnvioVenta = await EnviarVenta(ventas_E);
+                    string responseGenerarReporte = "";
+
+                    if (ventas_E.Cliente.CodCliente != "00-00000000-0")
+                    {
+                        responseGenerarReporte = await EnviarEmailConFactura(ventas_E.Cliente.Email, ventas_E.Cliente.RazonSocial, "Se adjunta factura. Gracias por su compra.", rutaReporte);
+                    }
 
                     return Json(new
                     {
@@ -1075,9 +1080,7 @@ namespace MVCVentas.Controllers
 
             document.Close();
 
-            var response = await EnviarEmailConFactura(vMVentas_E.Cliente.Email, vMVentas_E.Cliente.RazonSocial, "Se adjunta factura. Gracias por su compra.", rutaReporte);
-
-            return response;
+            return rutaReporte;
         }
 
         public async Task<string> EnviarEmailConFactura(string emailTo, string client, string emailBody, string projectPath)

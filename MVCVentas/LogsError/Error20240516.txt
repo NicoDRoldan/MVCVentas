@@ -1,8 +1,0 @@
-2024-05-16 22:01:16.823 -03:00 [ERR] ValidarCupon(...)
-Tiempo de ejecución: 693234 ms
-2024-05-16 22:03:56.282 -03:00 [ERR] ValidarCupon(...)
-Tiempo de ejecución: 278302 ms, 0 segs
-2024-05-16 22:05:23.840 -03:00 [ERR] ValidarCupon(...)
-Tiempo de ejecución: 180231 ms, 0 segs
-2024-05-16 22:07:36.164 -03:00 [ERR] ValidarCupon(...)
-Tiempo de ejecución: 231985 ms, 0,023 segs
