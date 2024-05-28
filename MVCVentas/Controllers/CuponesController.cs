@@ -68,12 +68,14 @@ namespace MVCVentas.Controllers
         [HttpPost]
         public async Task<IActionResult> AltaCupon(VMCupon vMCupon)
         {
-            if (vMCupon.Detalle is null)
+            if (vMCupon.Detalle is null && vMCupon.TipoCupon == "PROMOCION")
             {
                 var reason = "Por favor cargar artículos";
-                TempData["Error"] = reason;
+                TempData["ErrorAlta"] = reason;
                 return Json(new { success = false, error = reason });
             }
+
+            if(vMCupon.Detalle.Any() && vMCupon.TipoCupon == "DESCUENTO") vMCupon.Detalle.Clear();
 
             try
             {
@@ -90,14 +92,14 @@ namespace MVCVentas.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var reason = "Cupón creado correctamente.";
+                    var reason = $"Cupón de {vMCupon.TipoCupon.ToLower()} creado correctamente.";
                     TempData["SuccessMsg"] = reason;
                     return Json(new { success = true, message = reason });
                 }
                 else
                 {
                     var reason = response.ReasonPhrase;
-                    TempData["Error"] = reason;
+                    TempData["ErrorAlta"] = reason;
                     return Json(new { success = false, error = reason });
                 }
 
@@ -105,7 +107,7 @@ namespace MVCVentas.Controllers
             catch (Exception ex)
             {
                 var reason = ex.Message;
-                TempData["Error"] = reason;
+                TempData["ErrorAlta"] = reason;
                 return Json(new { success = false, error = reason });
             }
         }

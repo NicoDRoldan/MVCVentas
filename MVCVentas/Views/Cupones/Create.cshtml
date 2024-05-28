@@ -40,12 +40,20 @@
                 <input asp-for="FechaFin" class="form-control" type="date" />
                 <span asp-validation-for="FechaFin" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label class="control-label">Tipo de Cupón</label>
+                <select asp-for="TipoCupon" class="form-control" id="tipoCuponSelect">
+                    <option value="DESCUENTO">Descuento</option>
+                    <option value="PROMO">Promoción</option>
+                </select>
+                <span asp-validation-for="TipoCupon" class="text-danger"></span>
+            </div>
 
         </form>
 
             <!-- Botón para abrir la ventana emergente -->
             <div class="form-group">
-                <button type="button" class="btn btn-primary boton-add-articulos" data-toggle="modal" data-target="#articulosModal">
+                <button type="button" class="btn btn-primary boton-add-articulos" data-toggle="modal" data-target="#articulosModal" id="agregarArticulosBtn">
                     Agregar Artículos
                 </button>
             </div>
@@ -127,8 +135,26 @@
             });
         });
 
-        var detalles = [];
+        document.addEventListener('DOMContentLoaded', function () {
+            var tipoCuponSelect = document.getElementById('tipoCuponSelect');
+            var agregarArticulosBtn = document.getElementById('agregarArticulosBtn');
 
+            // Función para mostrar o esconder el botón
+            function checkTipoBoton() {
+                if (tipoCuponSelect.value === 'DESCUENTO') {
+                    agregarArticulosBtn.style.display = 'none';
+                } else {
+                    agregarArticulosBtn.style.display = 'block';
+                }
+            }
+
+            // Iniciar check al cargar la página
+            checkTipoBoton();
+
+            tipoCuponSelect.addEventListener('change', checkTipoBoton);
+        });
+
+        var detalles = [];
 
         function agregarDetallesCupon() {
             // Limpiar el filtro de búsqueda
@@ -158,6 +184,7 @@
                 PorcentajeDto: parseFloat($('#PorcentajeDto').val()),
                 FechaInicio: $('#FechaInicio').val(),
                 FechaFin: $('#FechaFin').val(),
+                TipoCupon: document.getElementById('tipoCuponSelect').value,
                 Detalle: detalles
             };
 

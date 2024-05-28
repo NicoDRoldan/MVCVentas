@@ -20,6 +20,9 @@ namespace MVCVentas.Models
         [Required]
         public DateTime? FechaFin { get; set; }
 
+        [Required]
+        public string TipoCupon { get; set; }
+
         public virtual ICollection<VMCDetalle> Detalle { get; set; }
 
         [NotMapped]
